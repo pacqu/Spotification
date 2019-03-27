@@ -1,0 +1,11 @@
+:root {
+  --main-color: #1db954;
+}
+
+.App {
+  width: 100vw;
+  height: 100vh;
+  text-align: center;
+  position: relative;
+  background-color: #c5c5c5;
+}
