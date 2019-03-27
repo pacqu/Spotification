@@ -1,0 +1,71 @@
+.Hero {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.top {
+  display: flex;
+}
+
+.top img {
+  margin: 0 10px 0 0;
+  max-width: 10%;
+}
+
+.title {
+  margin: 1em 0 0 1em;
+  letter-spacing: 2px;
+  font-weight: 800;
+  font-size: 70px;
+  text-transform: uppercase;
+  color: white;
+  z-index: 4;
+}
+.title:after {
+  display: block;
+  transform: translateY(-10px) translateX(20px);
+  font-style: italic;
+  font-size: 30px;
+  content: "Visualize your listening";
+}
+
+.picture-container {
+  position: absolute;
+  bottom: 0;
+  left: 26%;
+  height: 550px;
+  width: 600px;
+  background-image: url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231c8030' fill-opacity='0.4'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  z-index: 2;
+}
+
+.picture {
+  transform: translateY(25px);
+  z-index: 3;
+  width: 40%;
+}
+
+.sideways {
+  -webkit-text-fill-color: transparent; /* Will override color (regardless of order) */
+  -webkit-text-stroke-width: 2px;
+  -webkit-text-stroke-color: white;
+  left: 22%;
+  bottom: 40%;
+  position: absolute;
+  writing-mode: vertical-lr;
+  text-orientation: sideways-right;
+  transform: rotate(180deg);
+  font-size: 5rem;
+  font-weight: bold;
+  z-index: 10;
+}
+
+.left {
+  left: 63%;
+  bottom: 20%;
+  transform: rotate(0);
+}
