@@ -10,8 +10,8 @@ var spotifyApi = new SpotifyWebApi(configSpotify);
 
 
 const jwt = require('jsonwebtoken');
-var jwtFunctions = require('./jwt');
 var jwtSecret = require('./config-jwt');
+var middlewares = require('./middlewares');
 
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
@@ -31,50 +31,71 @@ client.connect(function(err) {
   db.collection('users').drop();
 });
 
-const findDocuments = function(db, collectionName, filter, callback) {
+const findDocuments = function(db, collectionName, filter, options, callback) {
   // Get the documents collection
   const collection = db.collection(collectionName);
   // Find some documents
-  collection.find(filter).toArray(function(err, docs) {
+  collection.find(filter, options).toArray(function(err, docs) {
     console.log("Found the following records");
     console.log(docs);
-    callback(docs);
+    callback(err, docs);
   });
 };
 
-const insertDocument = function(db, collectionName, doc, callback ){
+const insertDocument = function(db, collectionName, doc, options, callback ){
   // Get the documents collection
   const collection = db.collection(collectionName);
   // Find some documents
-  collection.insertOne(doc, (err, results) => {
+  collection.insertOne(doc, options, (err, results) => {
     console.log("Inserted the following document");
     console.log(results);
-    callback(results);
+    callback(err, results);
   });
 };
 
 
-/* Register User */
+/* POST user/ - Creates new User
+EXPECTS:
+  HEADERS:
+    - N/A
+  BODY:
+    - username: username of new user (must be unique/not exist already in database)
+    - password: password of new user (will be hashed upon reciept)
+    - fullName: fullname of new user
+*/
 //TODO:
 // - Hash Password
 // - Add rest of user data into user documents
-// -- Generate spotify url for auth
 router.post('/', function(req, res, next) {
   var username = req.body.username;
   var password = req.body.password;
-  findDocuments(db, 'users', {'username': username}, (results) => {
+  findDocuments(db, 'users', {'username': username}, {}, (err, results) => {
     if ( results.length == 0  || !(results) ) {
       let userDoc = {
         'username': username,
         'password': password,
-        'full_name': req.body.fullName,
-        'spotify_auth_url': spotifyApi.createAuthorizeURL(scopes, state)
+        'fullName': req.body.fullName,
+        'spotifyAuthUrl': spotifyApi.createAuthorizeURL(scopes, state),
+        'spotifyAuth': false
       }
-      insertDocument(db, 'users', userDoc, (results) => {
-        jwt.sign({'username': username}, jwtSecret , { expiresIn: '1d' },(err, token) => {
-          if(err) { console.log(err) }
-          res.send(token);
-        });
+      insertDocument(db, 'users', userDoc, {}, (err, results) => {
+        if(err) {
+          console.log(err);
+          res.json(err);
+        } else {
+          jwt.sign({'username': username}, jwtSecret , { expiresIn: '1d' }, (err, token) => {
+            if(err) {
+              console.log(err);
+              res.json(err);
+            }
+            user = results['ops'][0];
+            delete user.password
+            res.json({
+              'token': token,
+              'user': user
+            });
+          });
+        }
       })
     }
     else {
@@ -83,23 +104,103 @@ router.post('/', function(req, res, next) {
   })
 });
 
+/* GET user/ - Gets Logged-In User
+EXPECTS:
+  HEADERS:
+    - 'Authroization': 'Bearer <token>'
+*/
+router.get('/', middlewares.checkToken, (req, res) => {
+  jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
+    if(err){
+      //If error send Forbidden (403)
+      console.log('ERROR: Could not connect to the protected route');
+      res.sendStatus(403);
+    } else {
+      //If token is successfully verified, we can send the autorized data
+      findDocuments(db, 'users', {'username': authorizedData['username']}, {'projection': {'password': 0}}, (err, results) => {
+        if(err) {
+          console.log(err);
+          res.json(err);
+        }
+        res.json(results);
+      })
+      //res.json({ authorizedData });
+    }
+  });
+});
 
-/* Login User */
-//TODO:
+/* POST user/login/ - Log-In to Existing User
+EXPECTS:
+  HEADERS:
+    - N/A
+  BODY:
+    - username: username of new user (must be exist already in database)
+    - password: password of new user (will be hashed upon reciept/match with given user)
+*/
 router.post('/login', function(req, res, next) {
   var username = req.body.username;
   //console.log(username);
   var password = req.body.password;
   //console.log(password);
-  findDocuments(db, 'users', {'username': username, 'password': password}, (results) => {
+  findDocuments(db, 'users', {'username': username, 'password': password}, {'projection': {'password': 0}}, (err, results) => {
     if ( results.length == 0  || !(results) ) {
       res.send("User doesn't Exists");
     }
     else {
       jwt.sign({'username': username}, jwtSecret , { expiresIn: '1d' },(err, token) => {
         if(err) { console.log(err) }
-        res.send(token);
+        res.json({
+          'token': token,
+          'user': results[0]
+        });
       });
+    }
+  })
+});
+
+/* POST user/spotifyauth/ - get access tokens from spotify web api after auth
+EXPECTS:
+  HEADERS:
+    - 'Authroization': 'Bearer <token>'
+  BODY:
+    - 'code': code returned from spotify auth process
+*/
+router.post('/spotifyauth', middlewares.checkToken, (req, res) => {
+  var code = req.query.code;
+  if (req.body.code) code = req.body.code;
+  jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
+    if(err){
+      //If error send Forbidden (403)
+      console.log('ERROR: Could not connect to the protected route');
+      res.sendStatus(403);
+    } else {
+      spotifyApi.authorizationCodeGrant(code).then((data) => {
+        spotifyAuthTokens = {
+          'access': data.body['access_token'],
+          'refresh': data.body['refresh_token'],
+          'expires': data.body['expires_in']
+        }
+        const users = db.collection('users');
+        users.updateOne({'username': authorizedData['username']},
+        {$set : {'spotifyAuthTokens': spotifyAuthTokens, 'spotifyAuth': true} },
+        {}, (err, results) => {
+          if(err) {
+            console.log(err);
+            res.json(err);
+          }
+          findDocuments(db, 'users', {'username': authorizedData['username']}, {'projection': {'password': 0}}, (err, results) => {
+            if(err) {
+              console.log(err);
+              res.json(err);
+            }
+            res.json(results);
+          })
+        });
+      })
+      .catch( (err) => {
+        console.log(err);
+        res.json(err);
+      })
     }
   })
 });
