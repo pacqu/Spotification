@@ -5,12 +5,13 @@ var SpotifyWebApi = require('spotify-web-api-node');
 var scopes = ['user-read-private', 'user-read-email', 'user-read-birthdate', 'user-top-read', 'user-library-read',
 'playlist-modify-private', 'playlist-read-private', 'playlist-modify-public','user-read-recently-played'],
   state = 'spotification-state';
-var configSpotify = require('./config-spotify');
+var configSpotify = require('../config-spotify');
 var spotifyApi = new SpotifyWebApi(configSpotify);
 
 
 const jwt = require('jsonwebtoken');
-var jwtSecret = require('./config-jwt');
+// var jwtSecret = require('../config-jwt');
+var jwtSecret = 'keepitasecret';
 var middlewares = require('./middlewares');
 
 const MongoClient = require('mongodb').MongoClient;
@@ -28,7 +29,7 @@ client.connect(function(err) {
   console.log("Connected successfully to server");
   db = client.db(dbName);
   //Uncomment if you want to drop user client
-  db.collection('users').drop();
+  // db.collection('users').drop();
 });
 
 const findDocuments = function(db, collectionName, filter, options, callback) {
