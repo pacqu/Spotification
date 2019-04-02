@@ -1,5 +1,5 @@
 const clientId = encodeURIComponent('536061589cf34fe9ab2db5c316d69fa3');
-const redirectUri = encodeURIComponent('http://localhost:3000/');
+const redirectUri = 'http://localhost:3000/';
 let accessToken = '';
 
 const Spotify = {
@@ -15,15 +15,18 @@ const Spotify = {
       const expiresIn = Number(tokenExpiresInMatch[1]);
       window.setTimeout(() => { accessToken = ''; }, expiresIn * 1000);
       window.history.pushState('Access Token', null, '/');
-      return accessToken.substring(1)
-        .split('&')
-        .reduce(function (initial, item) {
-          if (item) {
-            var parts = item.split('=');
-            initial[parts[0]] = decodeURIComponent(parts[1]);
-          }
-          return initial;
-        }, {});;
+      //this returns an object with the access token
+      const token = accessToken.substring(1)
+      .split('&')
+      .reduce(function (initial, item) {
+        if (item) {
+          var parts = item.split('=');
+          initial[parts[0]] = decodeURIComponent(parts[1]);
+        }
+        return initial;
+      }, {});
+      localStorage.setItem('_token', token);
+      return token;
       }
       const authorize = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&scope=playlist-modify-public&redirect_uri=${redirectUri}`;
       window.location = authorize;

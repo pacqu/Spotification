@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import '../styles/LandingPage.css';
 import Button from '../components/Button';
 import lmfao from '../static/kaizenworld.jpg';
@@ -13,13 +12,10 @@ export default function() {
         <img src={Logo} alt='Spotify Logo' />
         <h1 className="title"> Spotification </h1>
       </div>
-      <img className="picture" src={lmfao} />
-      <div className="picture-container" />
+      <img src={lmfao} />
       <p className="sideways"> KAIZEN </p>
       <p className="sideways left"> WORLD </p>
-      <Link to="/home">
-        <Button>Connect to Spotify</Button>
-      </Link>
+      <Button to="/login">Connect to Spotify</Button>
       {isError  ? (<h2 className="error"> Please Log In! </h2>) : "" }
     </div>
   )
