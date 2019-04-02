@@ -13,12 +13,8 @@ export default function() {
         <img src={Logo} alt='Spotify Logo' />
         <h1 className="title"> Spotification </h1>
       </div>
-      <img className="picture" src={lmfao} />
-      <div className="picture-container" />
-      <p className="sideways"> KAIZEN </p>
-      <p className="sideways left"> WORLD </p>
-      <Link to="/home">
-        <Button>Connect to Spotify</Button>
+      <Link to="/register">
+        <Button>Sign in</Button>
       </Link>
       {isError  ? (<h2 className="error"> Please Log In! </h2>) : "" }
     </div>

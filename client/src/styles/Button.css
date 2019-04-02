@@ -7,7 +7,6 @@
   text-transform: uppercase;
   text-decoration: none;
   letter-spacing: 0.025em;
-  display: inline-block;
   height: 40px;
   line-height: 40px;
   padding: 0 14px;
@@ -43,3 +42,4 @@
   position: relative;
   z-index: 2;
 }
+

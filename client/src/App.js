@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import LandingPage from './pages/LandingPage';
 import Home from './pages/Home';
+import Register from './pages/Register'
 import './styles/App.css';
 
 class App extends Component {
@@ -13,6 +14,7 @@ class App extends Component {
           <Switch>
             <Route exact path="/" component={LandingPage} />
             <Route path="/home" component={Home} />
+            <Route path="/register" component={Register} />
           </Switch>
         </Router>
       </main>
