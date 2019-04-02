@@ -6,14 +6,6 @@ import Home from './pages/Home';
 import './styles/App.css';
 
 class App extends Component {
-  componentDidMount() {
-    useEffect(() => {
-      const token = localStorage.getItem('_token');
-      if (!token) {
-
-      }
-    }, [])
-  }
   render() {
     return (
       <main className="App">
