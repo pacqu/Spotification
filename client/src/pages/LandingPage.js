@@ -12,6 +12,7 @@ export default function() {
         <img src={Logo} alt='Spotify Logo' />
         <h1 className="title"> Spotification </h1>
       </div>
+      <img src={lmfao} />
       <p className="sideways"> KAIZEN </p>
       <p className="sideways left"> WORLD </p>
       <Button to="/login">Connect to Spotify</Button>
