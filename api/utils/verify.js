@@ -44,14 +44,4 @@ var verifyPass = function(password, salt, checkPass){
     return comparePass === checkPass;
 }
 
-var verifyUser = function(username){
-    // figure out what conditions we want for username verification
-    if (username === null) {
-        return false;
-    } else if (false) {
-        return false;
-    }
-    return true;
-}
-
 module.exports = {saltHashPassword, verifyPass, verifyUser};
