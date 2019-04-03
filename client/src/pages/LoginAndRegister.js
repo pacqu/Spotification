@@ -79,21 +79,37 @@ class Register extends Component {
   };
 
   componentDidMount() {
-    axios
-      .get("/user/", {
-        headers: {
-          Authorization: `Bearer ${Cookies.get("cookie")}`
-        }
-      })
+    if (window.location.href.indexOf("code=") != -1){
+      var authCode = window.location.href.split("code=")[1];
+      if (authCode.indexOf("&")) authCode = authCode.split("&")[0];
+      console.log(authCode);
+      axios.post('/user/spotifyauth',
+      { code: authCode},
+      { headers: { Authorization: `Bearer ${Cookies.get("cookie")}`}})
       .then(res => {
+        console.log(Cookies.get('token'));
         console.log(res);
-        if (res.status === 200) {
-          this.setState({ LnR: false, email: res.data[0].username });
-        }
+        this.setState({ LnR: false, email: res.data[0].username, spotifyAuth: res.data[0].spotifyAuth});
       })
       .catch(err => {
-        console.log(err);
-      });
+        console.log(err)
+      })
+    }
+    axios
+    .get("/user/", {
+      headers: {
+        Authorization: `Bearer ${Cookies.get("cookie")}`
+      }
+    })
+    .then(res => {
+      console.log(res);
+      if (res.status === 200) {
+        this.setState({ LnR: false, email: res.data[0].username, spotifyAuthUrl: res.data[0].spotifyAuthUrl, spotifyAuth: res.data[0].spotifyAuth});
+      }
+    })
+    .catch(err => {
+      console.log(err);
+    });
   }
 
   render() {
@@ -132,6 +148,9 @@ class Register extends Component {
     let welcome = this.state.isSignup
       ? "Sign Up Successful!"
       : "Sign in Successful!";
+    if (this.state.spotifyAuth){
+      return <Redirect to='/home' />;
+    }
     return (
       <div>
         {this.state.LnR ? (
