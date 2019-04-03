@@ -7,13 +7,15 @@ import Cookies from 'js-cookie';
 
 const classNames = require('classnames');
 
+
 class Register extends Component {
     state ={
         isSignup: false,
         email: '',
         pass: '',
         LnR: true,
-        notice: ''
+        notice: '',
+        spotifyAuthUrl: ''
     }
 
     makeState = name => ({ target }) =>
@@ -23,19 +25,20 @@ class Register extends Component {
         this.setState({
             isSignup: !this.state.isSignup
         })
-        console.log(this.state.isSignup)
     }
 
     handleSignup = () =>{
         if(!this.state.isSignup){
-            axios.post('/user',{username: this.state.email}, {password: this.state.pass})
+            axios.post('/user/login',{username: this.state.email}, {password: this.state.pass})
             .then(res=>{
                 console.log(res)
                 console.log(res.data)
                 console.log(res.data.token)
                 Cookies.set('cookie',res.data.token)
                 this.setState({
-                    LnR: false
+                    LnR: false,
+                    spotifyAuthUrl: res.data.user.spotifyAuthUrl,
+                    notice: ''
                 })
             })
             .catch(err =>{
@@ -47,10 +50,14 @@ class Register extends Component {
         else{
             axios.post('/user',{username: this.state.email}, {password: this.state.pass})
             .then(res=>{
+                console.log(res)
+                console.log(res.data)
                 console.log(res.data.token)
                 Cookies.set('cookie',res.data.token)
                 this.setState({
-                    LnR: false
+                    LnR: false,
+                    spotifyAuthUrl: res.data.user.spotifyAuthUrl,
+                    notice: ''
                 })
             })
             .catch(err =>{
@@ -94,9 +101,7 @@ class Register extends Component {
       
         const text = this.state.isSignup ? "Sign Up" : "Sign in";
         const text2 = this.state.isSignup ? "Sign In" : "Sign up";
-        
-        const welcome = this.state.isSignup? "Sign Up Successful!" : "Sign in Successful!";
-        this.email = React.createRef();
+        let welcome = this.state.isSignup? "Sign Up Successful!" : "Sign in Successful!";
         return (
             <div>
                 {this.state.LnR ?(
@@ -106,6 +111,7 @@ class Register extends Component {
                             <h2> Welcome to Spotification!</h2>
                             <form className="information" >
                                 <h1>{text}</h1>
+                                <h1>{this.state.notice}</h1>
                                 <Input type="text" placeholder="Email" onChange={this.makeState('email')} fullWidth/>
                                 <Input type="text" placeholder="Password" onChange={this.makeState('pass')} fullWidth/>
                                 <a className="subText" href="#">Forgot your password?</a>
@@ -143,7 +149,9 @@ class Register extends Component {
                         <div className={containerClass2}>
                             <h2> {welcome} </h2>
                             <h2> Welcome {this.state.email}!</h2>
-                                <Button>Connect to Spotify</Button>
+                            <a href={this.state.spotifyAuthUrl}>
+                                <Button >Connect to Spotify</Button>
+                            </a>
                         </div>
                     </div>
                 ):<div></div>}
