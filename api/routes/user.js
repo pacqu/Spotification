@@ -122,6 +122,7 @@ router.get('/', middlewares.checkToken, (req, res) => {
           console.log(err);
           res.json(err);
         }
+        console.log(results)
         res.json(results);
       })
       //res.json({ authorizedData });
