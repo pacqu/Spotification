@@ -7,6 +7,7 @@ var scopes = ['user-read-private', 'user-read-email', 'user-read-birthdate', 'us
   state = 'spotification-state';
 var configSpotify = require('./config-spotify');
 var spotifyApi = new SpotifyWebApi(configSpotify);
+var verify = require('../utils/verify');
 
 
 const jwt = require('jsonwebtoken');
@@ -71,9 +72,11 @@ router.post('/', function(req, res, next) {
   var password = req.body.password;
   findDocuments(db, 'users', {'username': username}, {}, (err, results) => {
     if ( results.length == 0  || !(results) ) {
+      let {salt, passHash} = verify.saltHashPassword(password);
       let userDoc = {
         'username': username,
-        'password': password,
+        'password': passHash,
+        'salt': salt,
         'fullName': req.body.fullName,
         'spotifyAuthUrl': spotifyApi.createAuthorizeURL(scopes, state),
         'spotifyAuth': false
@@ -89,7 +92,8 @@ router.post('/', function(req, res, next) {
               res.json(err);
             }
             user = results['ops'][0];
-            delete user.password
+            delete user.password;
+            delete user.salt;
             res.json({
               'token': token,
               'user': user
@@ -139,22 +143,27 @@ EXPECTS:
 */
 router.post('/login', function(req, res, next) {
   var username = req.body.username;
-  //console.log(username);
+  console.log(username);
   var password = req.body.password;
-  //console.log(password);
-  findDocuments(db, 'users', {'username': username, 'password': password}, {'projection': {'password': 0}}, (err, results) => {
-    if ( results.length == 0  || !(results) ) {
-      res.send("User doesn't Exists");
-    }
-    else {
-      jwt.sign({'username': username}, jwtSecret , { expiresIn: '1d' },(err, token) => {
-        if(err) { console.log(err) }
-        res.json({
-          'token': token,
-          'user': results[0]
-        });
+  console.log(password);
+  findDocuments(db, 'users', {'username': username}, {}, (err, results) => {
+    jwt.sign({'username': username}, jwtSecret, { expiresIn: '1d' }, (err, token) => {
+      if(err) { console.log(err) }
+      console.log('what up bitch');
+      var hashedPass = results[0]['password'];
+      var salt = results[0]['salt'];
+      if (!verify.verifyPass(password, salt, hashedPass)){
+        res.send("Password incorrect");
+        return;
+      }
+      user = results[0];
+      delete user.password;
+      delete user.salt;
+      res.json({
+        'token': token,
+        'user': results[0]
       });
-    }
+    });
   })
 });
 
