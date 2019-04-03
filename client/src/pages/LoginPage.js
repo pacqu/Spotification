@@ -29,6 +29,7 @@ async function login(username, password) {
 
 export default function() {
   const [isSignup, setSignup] = useState(false);
+  const [email, setEmail] = useState('');
   var containerClass = classNames({
     'container' : true,
     'right-panel-active': isSignup
@@ -53,7 +54,7 @@ export default function() {
 
   const text = isSignup ? "Sign Up" : "Sign in";
   const text2 = isSignup ? "Sign In" : "Sign up";
-
+  const testemail = emailRef;
 
   const emailRef = React.createRef();
   const passRef = React.createRef();
@@ -62,17 +63,22 @@ export default function() {
       <div className={containerClass}>
         <div className={formClass}>
           <h2> Welcome to Spotification!</h2>
-          <form className="information">
+          <form className="information" onSubmit={()=>{console.log(emailRef)}}>
             <h1>{text}</h1>
-            <Input type="email" placeholder="Email" ref={emailRef} fullWidth/>
-            <Input type="password" placeholder="Password" ref={passRef} fullWidth/>
+            <Input type="text" placeholder="Email" ref={emailRef} fullWidth/>
+            <Input type="text" placeholder="Password" ref={passRef} fullWidth/>
             <a className="subText" href="#">Forgot your password?</a>
-            <Button onClick={() => {
+            <button>click</button>
+            <Button type = 'submit'/*onClick={() => {
                   setSignup(!isSignup);
-                  console.log(this.emailRef)
-                  axios.post('/user',{username: emailRef.current.focus()}, {password: passRef.current})
+                  setEmail(emailRef)  
+                  console.log(isSignup)
+                  console.log(testemail)
+                  axios.post('/user',{username: testemail}, {password: passRef.current})
                 }}
-                to="/home">{text}</Button>
+                */
+              //  to="/home"
+                >{text}</Button>
           </form>
         </div>
 
@@ -87,6 +93,9 @@ export default function() {
               )}
               <Button
                 className="ghost"
+                onClick={() => 
+                  setSignup(!isSignup)
+                }
               >{text2}
               </Button>
             </div>

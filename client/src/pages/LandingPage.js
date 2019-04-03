@@ -13,7 +13,7 @@ export default function() {
         <img src={Logo} alt='Spotify Logo' />
         <h1 className="title"> Spotification </h1>
       </div>
-      <Link to="/login">
+      <Link to="/register">
         <Button>Sign in</Button>
       </Link>
       {isError  ? (<h2 className="error"> Please Log In! </h2>) : "" }

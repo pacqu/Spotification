@@ -13,6 +13,7 @@ export default React.forwardRef((props,ref) => {
             className={inputClass}
             type={props.type}
             placeholder={props.placeholder}
+            onChange={props.onChange}
         >{props.children}
         </input>
     )
