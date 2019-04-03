@@ -89,27 +89,29 @@ class Register extends Component {
       .then(res => {
         console.log(Cookies.get('token'));
         console.log(res);
-        this.setState({ LnR: false, email: res.data[0].username, spotifyAuth: res.data[0].spotifyAuth});
+        this.setState({ LnR: false, email: res.data[0].username, spotifyAuth: res.data[0].spotifyAuth, spotifyAuthUrl: res.data[0].spotifyAuthUrl,});
       })
       .catch(err => {
         console.log(err)
       })
     }
-    axios
-    .get("/user/", {
-      headers: {
-        Authorization: `Bearer ${Cookies.get("cookie")}`
-      }
-    })
-    .then(res => {
-      console.log(res);
-      if (res.status === 200) {
-        this.setState({ LnR: false, email: res.data[0].username, spotifyAuthUrl: res.data[0].spotifyAuthUrl, spotifyAuth: res.data[0].spotifyAuth});
-      }
-    })
-    .catch(err => {
-      console.log(err);
-    });
+    else{
+      axios
+      .get("/user/", {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("cookie")}`
+        }
+      })
+      .then(res => {
+        console.log(res);
+        if (res.status === 200) {
+          this.setState({ LnR: false, email: res.data[0].username, spotifyAuthUrl: res.data[0].spotifyAuthUrl, spotifyAuth: res.data[0].spotifyAuth});
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
+    }
   }
 
   render() {
