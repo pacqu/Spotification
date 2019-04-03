@@ -12,6 +12,7 @@
     "http-errors": "~1.6.2",
     "jade": "~1.11.0",
     "jsonwebtoken": "^8.5.1",
+    "moment": "^2.24.0",
     "mongodb": "^3.2.2",
     "morgan": "~1.9.0",
     "spotify-web-api-node": "^4.0.0"
