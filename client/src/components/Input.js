@@ -3,22 +3,27 @@ import '../styles/Input.css';
 
 const classNames = require('classnames');
 
-export default function({
-    children,
-    type,
-    placeholder,
-    fullWidth
-    }) {
+export default React.forwardRef((props,ref) => {
     const inputClass = classNames({
         'defaultInput': true,
-        'fullWidth': fullWidth ? fullWidth : false
+        'fullWidth': props.fullWidth ? props.fullWidth : false
     })
     return (
         <input
             className={inputClass}
-            type={type}
-            placeholder={placeholder}
-        >{children}
+            type={props.type}
+            placeholder={props.placeholder}
+            onChange={props.onChange}
+        >{props.children}
         </input>
     )
-}
+})
+/*
+function({
+    children,
+    type,
+    placeholder,
+    fullWidth,
+    ref
+    }) {
+*/

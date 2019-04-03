@@ -126,6 +126,7 @@ router.get('/', middlewares.checkToken, (req, res) => {
           console.log(err);
           res.json(err);
         }
+        console.log(results)
         res.json(results);
       })
       //res.json({ authorizedData });
@@ -189,6 +190,7 @@ router.post('/spotifyauth', middlewares.checkToken, (req, res) => {
           'refresh': data.body['refresh_token'],
           'expires': data.body['expires_in']
         }
+        console.log(authorizedData['username'])
         const users = db.collection('users');
         users.updateOne({'username': authorizedData['username']},
         {$set : {'spotifyAuthTokens': spotifyAuthTokens, 'spotifyAuth': true} },
@@ -202,6 +204,7 @@ router.post('/spotifyauth', middlewares.checkToken, (req, res) => {
               console.log(err);
               res.json(err);
             }
+            console.log(results)
             res.json(results);
           })
         });
