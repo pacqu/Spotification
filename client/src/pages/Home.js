@@ -14,12 +14,10 @@ class Home extends Component {
   }
   componentDidMount(){
     if (Cookies.get('cookie')){
-      //console.log(Cookies.get());
       axios.get('/user/', { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
       .then(res => {
         console.log(!(res.data[0].spotifyAuth))
         if(!(res.data[0].spotifyAuth)){
-          console.log("why");
           this.setState({loadingDone: true, redirect: "/login"})
         }
         else{

@@ -8,13 +8,16 @@ import { Link } from 'react-router-dom';
 export default function() {
   const isError = window.location.href.includes('access_denied');
   return (
-    <div className="Hero">
+    <div className="wrap">
       <div className="top">
-        <img src={Logo} alt='Spotify Logo' />
+        {/* <img src={Logo} alt='Spotify Logo' /> */}
+        <div className="picture-container" />
         <h1 className="title"> Spotification </h1>
       </div>
       <Link to="/login">
-        <Button>Sign in</Button>
+        <Button>
+          Sign in
+        </Button>
       </Link>
       {isError  ? (<h2 className="error"> Please Log In! </h2>) : "" }
     </div>
