@@ -176,8 +176,8 @@ router.post('/login', function(req, res, next) {
           'token': token,
           'user': results[0]
         });
-    });
-  }
+      });
+    }
   })
 });
 
