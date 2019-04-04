@@ -1,6 +1,7 @@
 /* find a green gradient here */
 :root {
   --main-color: #1db954;
+  --white: #ffffff;
 }
 
 .App {

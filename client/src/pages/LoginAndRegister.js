@@ -4,6 +4,7 @@ import Button from "../components/Button";
 import Input from "../components/Input";
 import axios from "axios";
 import Cookies from "js-cookie";
+import '../styles/LoginPage.css';
 
 const classNames = require("classnames");
 
@@ -141,10 +142,6 @@ class Register extends Component {
       container: !this.state.LnR
     });
 
-    var formClass2 = classNames({
-      "form-container": !this.state.LnR
-    });
-
     const text = this.state.isSignup ? "Sign Up" : "Sign in";
     const text2 = this.state.isSignup ? "Sign In" : "Sign up";
     let welcome = this.state.isSignup
@@ -160,7 +157,7 @@ class Register extends Component {
             <div className={containerClass}>
               <div className={formClass}>
                 <h2> Welcome to Spotification!</h2>
-                <form className="information">
+                <form onSubmit={() => this.handleSignup()} className="information">
                   <h1>{text}</h1>
                   <h1>{this.state.notice}</h1>
                   <Input
@@ -179,8 +176,8 @@ class Register extends Component {
                     Forgot your password?
                   </a>
                   <Button
-                    onClick={() => this.handleSignup()}
-                    //  to="/home"
+                    inverted
+                    type="submit"
                   >
                     {text}
                   </Button>
@@ -197,7 +194,6 @@ class Register extends Component {
                       <p> Maybe you want to Sign up?</p>
                     )}
                     <Button
-                      className="ghost"
                       onClick={() => this.handleChange()}
                     >
                       {text2}
