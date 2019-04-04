@@ -89,7 +89,7 @@ router.post('/', function(req, res, next) {
           jwt.sign({'username': username}, jwtSecret , { expiresIn: '1d' }, (err, token) => {
             if(err) {
               console.log(err);
-              res.json(err);
+              res.sendStatus(500);
             }
             user = results['ops'][0];
             delete user.password;
@@ -103,7 +103,7 @@ router.post('/', function(req, res, next) {
       })
     }
     else {
-      res.send('User Already Exists');
+      res.sendStatus(403);
     }
   })
 });
@@ -124,7 +124,11 @@ router.get('/', middlewares.checkToken, (req, res) => {
       findDocuments(db, 'users', {'username': authorizedData['username']}, {'projection': {'password': 0}}, (err, results) => {
         if(err) {
           console.log(err);
-          res.json(err);
+          res.sendStatus(500);
+        }
+        if ( results.length == 0  || !(results) ) {
+          console.log('ERROR: User could not be found');
+          res.sendStatus(404);
         }
         console.log(results)
         res.json(results);
@@ -148,23 +152,29 @@ router.post('/login', function(req, res, next) {
   var password = req.body.password;
   console.log(password);
   findDocuments(db, 'users', {'username': username}, {}, (err, results) => {
-    jwt.sign({'username': username}, jwtSecret, { expiresIn: '1d' }, (err, token) => {
-      if(err) { console.log(err) }
-      console.log('what up bitch');
-      var hashedPass = results[0]['password'];
-      var salt = results[0]['salt'];
-      if (!verify.verifyPass(password, salt, hashedPass)){
-        res.send("Password incorrect");
-        return;
-      }
-      user = results[0];
-      delete user.password;
-      delete user.salt;
-      res.json({
-        'token': token,
-        'user': results[0]
-      });
+    if ( results.length == 0  || !(results) ) {
+      console.log('ERROR: User could not be found');
+      res.sendStatus(404);
+    }
+    else {
+      jwt.sign({'username': username}, jwtSecret, { expiresIn: '1d' }, (err, token) => {
+        if(err) { console.log(err) }
+        console.log('what up bitch');
+        var hashedPass = results[0]['password'];
+        var salt = results[0]['salt'];
+        if (!verify.verifyPass(password, salt, hashedPass)){
+          res.send("Password incorrect");
+          return;
+        }
+        user = results[0];
+        delete user.password;
+        delete user.salt;
+        res.json({
+          'token': token,
+          'user': results[0]
+        });
     });
+  }
   })
 });
 
@@ -197,12 +207,12 @@ router.post('/spotifyauth', middlewares.checkToken, (req, res) => {
         {}, (err, results) => {
           if(err) {
             console.log(err);
-            res.json(err);
+            res.sendStatus(500);
           }
           findDocuments(db, 'users', {'username': authorizedData['username']}, {'projection': {'password': 0}}, (err, results) => {
             if(err) {
               console.log(err);
-              res.json(err);
+              res.sendStatus(500);
             }
             console.log(results)
             res.json(results);
@@ -211,7 +221,7 @@ router.post('/spotifyauth', middlewares.checkToken, (req, res) => {
       })
       .catch( (err) => {
         console.log(err);
-        res.json(err);
+        res.sendStatus(500);
       })
     }
   })
