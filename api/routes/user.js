@@ -6,19 +6,12 @@ var SpotifyWebApi = require('spotify-web-api-node');
 var scopes = ['user-read-private', 'user-read-email', 'user-read-birthdate', 'user-top-read', 'user-library-read',
 'playlist-modify-private', 'playlist-read-private', 'playlist-modify-public','user-read-recently-played'],
   state = 'spotification-state';
-<<<<<<< HEAD
 var configSpotify = require('../configs/config-spotify');
 //TO-DO: NOT USE WebApi --> Use Axios instead
 var spotifyApi = new SpotifyWebApi(configSpotify);
 var spotifyData = require('../utils/spotifyData');
 var verify = require('../utils/verify');
 var spotifyData = require('../utils/spotifyData');
-=======
-var configSpotify = require('./config-spotify');
-//TO-DO: NOT USE WebApi --> Use Axios instead
-var spotifyApi = new SpotifyWebApi(configSpotify);
-var spotifyData = require('./spotifyData');
->>>>>>> 6b01415... starting to implement get top tracks
 
 //JWT Setup
 const jwt = require('jsonwebtoken');
@@ -231,14 +224,9 @@ router.post('/spotifyauth', middlewares.checkToken, (req, res) => {
               res.status(500);
               res.json(err);
             }
-<<<<<<< HEAD
             console.log(results)
             res.json(results);
           })
-=======
-            res.json(results[0]);
-          });
->>>>>>> 6b01415... starting to implement get top tracks
         });
       })
       .catch( (err) => {
@@ -263,17 +251,12 @@ router.get('/listening-data', middlewares.checkToken, (req, res) => {
       res.sendStatus(403);
     } else {
       const users = db.collection('users');
-<<<<<<< HEAD
       users.find({'username': authorizedData['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
-=======
-      users.find({'username': authorizedData['username']}, {'projection': {'password': 0}}).toArray( (err, results) => {
->>>>>>> 6b01415... starting to implement get top tracks
         if(err) {
           console.log(err);
           res.json(err);
         }
         user = results[0];
-<<<<<<< HEAD
         spotifyData.checkRefresh(user, db, spotifyApi, (err, checkedUser) => {
           if(err){
             console.log(err);
@@ -320,36 +303,6 @@ router.get('/listening-data', middlewares.checkToken, (req, res) => {
               res.status(500);
               res.json(err);
             }
-=======
-        spotifyData.checkRefresh(user, db, spotifyApi, (err, results) => {
-          if(err) {
-            console.log(err);
-            res.json(err);
-          }
-          //TO-DO: Ability to change time_range
-          spotifyApi.getMyTopTracks({limit:50, time_range:"long_term"})
-          .then((data) => {
-            var tracks = data.body.items;
-            users.updateOne({'username': authorizedData['username']},
-              {$set : {'listeningData': tracks} },
-              {}, (err, results) => {
-                if(err) {
-                  console.log(err);
-                  res.json(err);
-                }
-                users.find({'username': authorizedData['username']}, {'projection': {'password': 0}}).toArray( (err, results) => {
-                  if(err) {
-                    console.log(err);
-                    res.json(err);
-                  }
-                  res.json(results[0]);
-                });
-              })
-          },
-          (err) => {
-            console.log(err);
-            res.json(err);
->>>>>>> 6b01415... starting to implement get top tracks
           })
         })
       });
