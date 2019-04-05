@@ -29,7 +29,7 @@ client.connect(function(err) {
   console.log("Connected successfully to server");
   db = client.db(dbName);
   //Uncomment if you want to drop user client
-  db.collection('users').drop();
+  //db.collection('users').drop();
 });
 
 const findDocuments = function(db, collectionName, filter, options, callback) {
@@ -89,6 +89,7 @@ router.post('/', function(req, res, next) {
           jwt.sign({'username': username}, jwtSecret , { expiresIn: '1d' }, (err, token) => {
             if(err) {
               console.log(err);
+              res.status(500);
               res.json(err);
             }
             user = results['ops'][0];
@@ -103,7 +104,8 @@ router.post('/', function(req, res, next) {
       })
     }
     else {
-      res.send('User Already Exists');
+      res.status(403);
+      res.send("User already exists");
     }
   })
 });
@@ -116,15 +118,21 @@ EXPECTS:
 router.get('/', middlewares.checkToken, (req, res) => {
   jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
     if(err){
-      //If error send Forbidden (403)
       console.log('ERROR: Could not connect to the protected route');
-      res.sendStatus(403);
+      res.status(401);
+      res.send('Error with given token');
     } else {
       //If token is successfully verified, we can send the autorized data
       findDocuments(db, 'users', {'username': authorizedData['username']}, {'projection': {'password': 0}}, (err, results) => {
         if(err) {
           console.log(err);
+          res.status(500);
           res.json(err);
+        }
+        if ( results.length == 0  || !(results) ) {
+          console.log('ERROR: User could not be found');
+          res.status(404);
+          res.send("Given user does not exist");
         }
         console.log(results)
         res.json(results);
@@ -148,23 +156,35 @@ router.post('/login', function(req, res, next) {
   var password = req.body.password;
   console.log(password);
   findDocuments(db, 'users', {'username': username}, {}, (err, results) => {
-    jwt.sign({'username': username}, jwtSecret, { expiresIn: '1d' }, (err, token) => {
-      if(err) { console.log(err) }
-      console.log('what up bitch');
-      var hashedPass = results[0]['password'];
-      var salt = results[0]['salt'];
-      if (!verify.verifyPass(password, salt, hashedPass)){
-        res.send("Password incorrect");
-        return;
-      }
-      user = results[0];
-      delete user.password;
-      delete user.salt;
-      res.json({
-        'token': token,
-        'user': results[0]
-      });
+    if ( results.length == 0  || !(results) ) {
+      console.log('ERROR: User could not be found');
+      res.status(404);
+      res.send('User could not be found');
+    }
+    else {
+      jwt.sign({'username': username}, jwtSecret, { expiresIn: '1d' }, (err, token) => {
+        if(err) {
+          console.log(err);
+          res.status(500);
+          res.json(err);
+        }
+        console.log('what up bitch');
+        var hashedPass = results[0]['password'];
+        var salt = results[0]['salt'];
+        if (!verify.verifyPass(password, salt, hashedPass)){
+          res.status(403);
+          res.send("Password incorrect");
+          return;
+        }
+        user = results[0];
+        delete user.password;
+        delete user.salt;
+        res.json({
+          'token': token,
+          'user': results[0]
+        });
     });
+  }
   })
 });
 
@@ -180,9 +200,9 @@ router.post('/spotifyauth', middlewares.checkToken, (req, res) => {
   if (req.body.code) code = req.body.code;
   jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
     if(err){
-      //If error send Forbidden (403)
       console.log('ERROR: Could not connect to the protected route');
-      res.sendStatus(403);
+      res.status(401);
+      res.send('Error with given token');
     } else {
       spotifyApi.authorizationCodeGrant(code).then((data) => {
         spotifyAuthTokens = {
@@ -197,11 +217,13 @@ router.post('/spotifyauth', middlewares.checkToken, (req, res) => {
         {}, (err, results) => {
           if(err) {
             console.log(err);
+            res.status(500);
             res.json(err);
           }
           findDocuments(db, 'users', {'username': authorizedData['username']}, {'projection': {'password': 0}}, (err, results) => {
             if(err) {
               console.log(err);
+              res.status(500);
               res.json(err);
             }
             console.log(results)
@@ -211,6 +233,7 @@ router.post('/spotifyauth', middlewares.checkToken, (req, res) => {
       })
       .catch( (err) => {
         console.log(err);
+        res.status(500);
         res.json(err);
       })
     }
