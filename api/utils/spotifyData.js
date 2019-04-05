@@ -92,6 +92,12 @@ const getAvgFeats = (user, db, songs, next) => {
     delete song["disc_number"];
     delete song["external_ids"];
     delete song["is_local"];
+    delete song["explicit"];
+    delete song["track_number"];
+    delete song["external_urls"];
+    delete song["preview_url"];
+    delete song["type"];
+    delete song["href"];
     idQueries += `${song['id']},`;
     data['songs'].push(song);
     data['avgFeatures']['popularity'] += song['popularity'];
