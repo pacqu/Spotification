@@ -110,21 +110,7 @@ const getAvgFeats = (user, db, songs, next) => {
     for (let feature of Object.keys(data['avgFeatures'])){
       data['avgFeatures'][feature] /= data['songs'].length;
     }
-    const users = db.collection('users');
-    users.updateOne({'username': user['username']},
-    {$set : {'listeningData': data} },
-    {}, (err, results) => {
-      if(err) {
-        next(err, user)
-      }
-      users.find({'username': user['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
-        if(err) {
-          next(err, user)
-        }
-        user = results[0]
-        next(null,user)
-      });
-    });
+    next(null, data);
   })
   .catch(err => {
     next(err,data);

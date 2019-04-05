@@ -250,7 +250,7 @@ router.get('/listening-data', middlewares.checkToken, (req, res) => {
       res.sendStatus(403);
     } else {
       const users = db.collection('users');
-      users.find({'username': authorizedData['username']}, {'projection': {'password': 0}}).toArray( (err, results) => {
+      users.find({'username': authorizedData['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
         if(err) {
           console.log(err);
           res.json(err);
@@ -287,19 +287,49 @@ router.get('/listening-data', middlewares.checkToken, (req, res) => {
             res.json(err);
 =======
         spotifyData.checkRefresh(user, db, spotifyApi, (err, checkedUser) => {
+          if(err){
+            console.log(err);
+            res.status(500);
+            res.json(err);
+          }
           spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
           axios.get('https://api.spotify.com/v1/me/top/tracks?limit=50',
           {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
           .then(results => {
             //console.log(results['data']);
             spotifyData.getAvgFeats(checkedUser, db, results['data'], (err, data) => {
-              if(err) res.json(err);
-              else res.json(data);
+              if(err){
+                console.log(err);
+                res.status(500);
+                res.json(err);
+              }
+              else {
+                const users = db.collection('users');
+                users.updateOne({'username': user['username']},
+                {$set : {'listeningData': data} },
+                {}, (err, results) => {
+                  if(err) {
+                    console.log(err);
+                    res.status(500);
+                    res.json(err);
+                  }
+                  users.find({'username': user['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
+                    if(err) {
+                      console.log(err);
+                      res.status(500);
+                      res.json(err);
+                    }
+                    user = results[0]
+                    res.json(results);
+                  });
+                });
+              }
             });
           })
           .catch(err => {
             if(err) {
               console.log(err);
+              res.status(500);
               res.json(err);
             }
 >>>>>>> 48a3156... listening data for users up and running
