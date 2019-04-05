@@ -1,5 +1,3 @@
-var configSpotify = require('./config-spotify');
-
 //Moment Setup
 var moment = require('moment');
 

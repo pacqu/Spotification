@@ -6,16 +6,20 @@ var SpotifyWebApi = require('spotify-web-api-node');
 var scopes = ['user-read-private', 'user-read-email', 'user-read-birthdate', 'user-top-read', 'user-library-read',
 'playlist-modify-private', 'playlist-read-private', 'playlist-modify-public','user-read-recently-played'],
   state = 'spotification-state';
-var configSpotify = require('./config-spotify');
+var configSpotify = require('../configs/config-spotify');
 //TO-DO: NOT USE WebApi --> Use Axios instead
 var spotifyApi = new SpotifyWebApi(configSpotify);
+<<<<<<< HEAD
+=======
+var spotifyData = require('../utils/spotifyData');
+>>>>>>> 7ec989f... moved middlewares and spotifyData out of routes into utils, configs should go into config directory
 var verify = require('../utils/verify');
 var spotifyData = require('./spotifyData');
 
 //JWT Setup
 const jwt = require('jsonwebtoken');
-var jwtSecret = require('./config-jwt');
-var middlewares = require('./middlewares');
+var jwtSecret = require('../configs/config-jwt');
+var middlewares = require('../utils/middlewares');
 
 //MongoDB Setup
 const MongoClient = require('mongodb').MongoClient;
@@ -256,36 +260,6 @@ router.get('/listening-data', middlewares.checkToken, (req, res) => {
           res.json(err);
         }
         user = results[0];
-<<<<<<< HEAD
-        spotifyData.checkRefresh(user, db, spotifyApi, (err, results) => {
-          if(err) {
-            console.log(err);
-            res.json(err);
-          }
-          //TO-DO: Ability to change time_range
-          spotifyApi.getMyTopTracks({limit:50, time_range:"long_term"})
-          .then((data) => {
-            var tracks = data.body.items;
-            users.updateOne({'username': authorizedData['username']},
-              {$set : {'listeningData': tracks} },
-              {}, (err, results) => {
-                if(err) {
-                  console.log(err);
-                  res.json(err);
-                }
-                users.find({'username': authorizedData['username']}, {'projection': {'password': 0}}).toArray( (err, results) => {
-                  if(err) {
-                    console.log(err);
-                    res.json(err);
-                  }
-                  res.json(results[0]);
-                });
-              })
-          },
-          (err) => {
-            console.log(err);
-            res.json(err);
-=======
         spotifyData.checkRefresh(user, db, spotifyApi, (err, checkedUser) => {
           if(err){
             console.log(err);
@@ -332,7 +306,6 @@ router.get('/listening-data', middlewares.checkToken, (req, res) => {
               res.status(500);
               res.json(err);
             }
->>>>>>> 48a3156... listening data for users up and running
           })
         })
       });
