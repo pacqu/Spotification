@@ -9,12 +9,9 @@ var scopes = ['user-read-private', 'user-read-email', 'user-read-birthdate', 'us
 var configSpotify = require('../configs/config-spotify');
 //TO-DO: NOT USE WebApi --> Use Axios instead
 var spotifyApi = new SpotifyWebApi(configSpotify);
-<<<<<<< HEAD
-=======
 var spotifyData = require('../utils/spotifyData');
->>>>>>> 7ec989f... moved middlewares and spotifyData out of routes into utils, configs should go into config directory
 var verify = require('../utils/verify');
-var spotifyData = require('./spotifyData');
+var spotifyData = require('../utils/spotifyData');
 
 //JWT Setup
 const jwt = require('jsonwebtoken');
