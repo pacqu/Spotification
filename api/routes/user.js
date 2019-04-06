@@ -39,6 +39,9 @@ client.connect(function(err) {
 //Moment Setup
 var moment = require('moment');
 
+//Axios for Spotify Web API calls
+const axios = require('axios');
+
 /* POST user/ - Creates new User
 EXPECTS:
   HEADERS:
