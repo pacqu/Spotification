@@ -1,19 +1,24 @@
 var express = require('express');
 var router = express.Router();
 
+//Node Wrapper for Spotify Web API Setup
 var SpotifyWebApi = require('spotify-web-api-node');
 var scopes = ['user-read-private', 'user-read-email', 'user-read-birthdate', 'user-top-read', 'user-library-read',
 'playlist-modify-private', 'playlist-read-private', 'playlist-modify-public','user-read-recently-played'],
   state = 'spotification-state';
-var configSpotify = require('./config-spotify');
+var configSpotify = require('../configs/config-spotify');
+//TO-DO: NOT USE WebApi --> Use Axios instead
 var spotifyApi = new SpotifyWebApi(configSpotify);
+var spotifyData = require('../utils/spotifyData');
 var verify = require('../utils/verify');
+var spotifyData = require('../utils/spotifyData');
 
-
+//JWT Setup
 const jwt = require('jsonwebtoken');
-var jwtSecret = require('./config-jwt');
-var middlewares = require('./middlewares');
+var jwtSecret = require('../configs/config-jwt');
+var middlewares = require('../utils/middlewares');
 
+//MongoDB Setup
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 const test = require('assert');
@@ -23,7 +28,6 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'spotification';
 // Create a new MongoClient
 const client = new MongoClient(url);
-
 let db;
 client.connect(function(err) {
   console.log("Connected successfully to server");
@@ -32,28 +36,11 @@ client.connect(function(err) {
   //db.collection('users').drop();
 });
 
-const findDocuments = function(db, collectionName, filter, options, callback) {
-  // Get the documents collection
-  const collection = db.collection(collectionName);
-  // Find some documents
-  collection.find(filter, options).toArray(function(err, docs) {
-    console.log("Found the following records");
-    console.log(docs);
-    callback(err, docs);
-  });
-};
+//Moment Setup
+var moment = require('moment');
 
-const insertDocument = function(db, collectionName, doc, options, callback ){
-  // Get the documents collection
-  const collection = db.collection(collectionName);
-  // Find some documents
-  collection.insertOne(doc, options, (err, results) => {
-    console.log("Inserted the following document");
-    console.log(results);
-    callback(err, results);
-  });
-};
-
+//Axios for Spotify Web API calls
+const axios = require('axios');
 
 /* POST user/ - Creates new User
 EXPECTS:
@@ -70,7 +57,10 @@ EXPECTS:
 router.post('/', function(req, res, next) {
   var username = req.body.username;
   var password = req.body.password;
-  findDocuments(db, 'users', {'username': username}, {}, (err, results) => {
+  const users = db.collection('users')
+  users.find({'username': username}, {}).toArray( (err, results) => {
+    console.log("Found the following records");
+    console.log(results);
     if ( results.length == 0  || !(results) ) {
       let {salt, passHash} = verify.saltHashPassword(password);
       let userDoc = {
@@ -81,11 +71,16 @@ router.post('/', function(req, res, next) {
         'spotifyAuthUrl': spotifyApi.createAuthorizeURL(scopes, state),
         'spotifyAuth': false
       }
-      insertDocument(db, 'users', userDoc, {}, (err, results) => {
+      // Get the documents collection
+      const users = db.collection('users');
+      // Find some documents
+      users.insertOne(userDoc, {}, (err, results) => {
         if(err) {
           console.log(err);
           res.json(err);
         } else {
+          console.log("Inserted the following document");
+          console.log(results);
           jwt.sign({'username': username}, jwtSecret , { expiresIn: '1d' }, (err, token) => {
             if(err) {
               console.log(err);
@@ -101,19 +96,19 @@ router.post('/', function(req, res, next) {
             });
           });
         }
-      })
+      });
     }
     else {
       res.status(403);
       res.send("User already exists");
     }
-  })
+  });
 });
 
 /* GET user/ - Gets Logged-In User
 EXPECTS:
   HEADERS:
-    - 'Authroization': 'Bearer <token>'
+    - 'Authorization': 'Bearer <token>'
 */
 router.get('/', middlewares.checkToken, (req, res) => {
   jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
@@ -123,7 +118,8 @@ router.get('/', middlewares.checkToken, (req, res) => {
       res.send('Error with given token');
     } else {
       //If token is successfully verified, we can send the autorized data
-      findDocuments(db, 'users', {'username': authorizedData['username']}, {'projection': {'password': 0}}, (err, results) => {
+      const users = db.collection('users');
+      users.find({'username': authorizedData['username']}, {'projection': {'password': 0}}).toArray( (err, results) => {
         if(err) {
           console.log(err);
           res.status(500);
@@ -136,7 +132,7 @@ router.get('/', middlewares.checkToken, (req, res) => {
         }
         console.log(results)
         res.json(results);
-      })
+      });
       //res.json({ authorizedData });
     }
   });
@@ -154,8 +150,9 @@ router.post('/login', function(req, res, next) {
   var username = req.body.username;
   console.log(username);
   var password = req.body.password;
-  console.log(password);
-  findDocuments(db, 'users', {'username': username}, {}, (err, results) => {
+  //console.log(password);
+  const users = db.collection('users');
+  users.find({'username': username, 'password': password}, {'projection': {'password': 0}}).toArray( (err, results) => {
     if ( results.length == 0  || !(results) ) {
       console.log('ERROR: User could not be found');
       res.status(404);
@@ -183,15 +180,15 @@ router.post('/login', function(req, res, next) {
           'token': token,
           'user': results[0]
         });
-    });
-  }
-  })
+      });
+    }
+  });
 });
 
 /* POST user/spotifyauth/ - get access tokens from spotify web api after auth
 EXPECTS:
   HEADERS:
-    - 'Authroization': 'Bearer <token>'
+    - 'Authorization': 'Bearer <token>'
   BODY:
     - 'code': code returned from spotify auth process
 */
@@ -205,10 +202,12 @@ router.post('/spotifyauth', middlewares.checkToken, (req, res) => {
       res.send('Error with given token');
     } else {
       spotifyApi.authorizationCodeGrant(code).then((data) => {
+        var timeTokenExpires = moment().add(data.body['expires_in'],'s').format();
+        console.log(timeTokenExpires);
         spotifyAuthTokens = {
           'access': data.body['access_token'],
           'refresh': data.body['refresh_token'],
-          'expires': data.body['expires_in']
+          'expires': timeTokenExpires
         }
         console.log(authorizedData['username'])
         const users = db.collection('users');
@@ -220,7 +219,9 @@ router.post('/spotifyauth', middlewares.checkToken, (req, res) => {
             res.status(500);
             res.json(err);
           }
-          findDocuments(db, 'users', {'username': authorizedData['username']}, {'projection': {'password': 0}}, (err, results) => {
+          spotifyApi.setAccessToken(data.body['access_token']);
+          spotifyApi.setRefreshToken(data.body['refresh_token']);
+          users.find({'username': authorizedData['username']}, {'projection': {'password': 0}}).toArray( (err, results) => {
             if(err) {
               console.log(err);
               res.status(500);
@@ -238,6 +239,78 @@ router.post('/spotifyauth', middlewares.checkToken, (req, res) => {
       })
     }
   })
+});
+
+/* GET user/listening-data - Updates Listening Data of Logged-In User from Spotify
+EXPECTS:
+  HEADERS:
+    - 'Authorization': 'Bearer <token>'
+*/
+router.get('/listening-data', middlewares.checkToken, (req, res) => {
+  jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
+    if(err){
+      //If error send Forbidden (403)
+      console.log('ERROR: Could not connect to the protected route');
+      res.sendStatus(403);
+    } else {
+      const users = db.collection('users');
+      users.find({'username': authorizedData['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
+        if(err) {
+          console.log(err);
+          res.json(err);
+        }
+        user = results[0];
+        spotifyData.checkRefresh(user, db, spotifyApi, (err, checkedUser) => {
+          if(err){
+            console.log(err);
+            res.status(500);
+            res.json(err);
+          }
+          spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
+          axios.get('https://api.spotify.com/v1/me/top/tracks?limit=50',
+          {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
+          .then(results => {
+            //console.log(results['data']);
+            spotifyData.getAvgFeats(checkedUser, db, results['data'], (err, data) => {
+              if(err){
+                console.log(err);
+                res.status(500);
+                res.json(err);
+              }
+              else {
+                const users = db.collection('users');
+                users.updateOne({'username': user['username']},
+                {$set : {'listeningData': data} },
+                {}, (err, results) => {
+                  if(err) {
+                    console.log(err);
+                    res.status(500);
+                    res.json(err);
+                  }
+                  users.find({'username': user['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
+                    if(err) {
+                      console.log(err);
+                      res.status(500);
+                      res.json(err);
+                    }
+                    user = results[0]
+                    res.json(results);
+                  });
+                });
+              }
+            });
+          })
+          .catch(err => {
+            if(err) {
+              console.log(err);
+              res.status(500);
+              res.json(err);
+            }
+          })
+        })
+      });
+    }
+  });
 });
 
 module.exports = router;
