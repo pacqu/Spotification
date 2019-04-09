@@ -18,7 +18,10 @@ class Register extends Component {
     spotifyAuthUrl: ""
   };
 
-  makeState = name => ({ target }) => this.setState({ [name]: target.value });
+  makeState = name => ({ target }) => {
+    this.setState({ [name]: target.value })
+    console.log(this.state)
+  };
 
   handleChange = () => {
     this.setState({
@@ -36,8 +39,6 @@ class Register extends Component {
         )
         .then(res => {
           console.log(res);
-          console.log(res.data);
-          console.log(res.data.token);
           Cookies.set("cookie", res.data.token);
           this.setState({
             LnR: false,
@@ -47,7 +48,6 @@ class Register extends Component {
         })
         .catch(err => {
           console.log(err);
-
           this.setState({
             notice: "User Does Not Exist"
           });
@@ -60,11 +60,10 @@ class Register extends Component {
           { password: this.state.pass }
         )
         .then(res => {
-          const { token } = res.data;
+          console.log('hello')
           console.log(res);
-          console.log(res.data);
-          console.log(res.data.token);
-          Cookies.set("cookie", res.data.token);
+          const { token } = res.data;
+          Cookies.set("cookie", token);
           this.setState({
             LnR: false,
             spotifyAuthUrl: res.data.user.spotifyAuthUrl,
@@ -185,7 +184,7 @@ class Register extends Component {
               </div>
 
               <div className={overlayContainerClass}>
-                <div class="overlay">
+                <div className="overlay">
                   <div className={overlayClass}>
                     <h1>Hello, Friend!</h1>
                     {this.state.isSignup ? (
