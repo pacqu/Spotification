@@ -11,33 +11,25 @@ var configSpotify = require('../configs/config-spotify');
 var spotifyApi = new SpotifyWebApi(configSpotify);
 var spotifyData = require('../utils/spotifyData');
 var verify = require('../utils/verify');
-var spotifyData = require('../utils/spotifyData');
+var mongo = require('../utils/mongo');
 
 //JWT Setup
 const jwt = require('jsonwebtoken');
 var jwtSecret = require('../configs/config-jwt');
 var middlewares = require('../utils/middlewares');
 
-//MongoDB Setup
-const MongoClient = require('mongodb').MongoClient;
-const assert = require('assert');
-const test = require('assert');
-// Connection url
-const url = 'mongodb://localhost:27017';
-// Database Name
-const dbName = 'spotification';
 // Create a new MongoClient
-const client = new MongoClient(url);
 let db;
-client.connect(function(err) {
-  console.log("Connected successfully to server");
-  db = client.db(dbName);
-  //Uncomment if you want to drop user client
-  //db.collection('users').drop();
-});
+mongo.connect((err,result) => {
+  if (err) {
+    console.log(err);
+  } else {
+    db = result;
+  }
+})
 
 //Moment Setup
-var moment = require('moment');
+const moment = require('moment');
 
 //Axios for Spotify Web API calls
 const axios = require('axios');
@@ -52,7 +44,6 @@ EXPECTS:
     - fullName: fullname of new user
 */
 //TODO:
-// - Hash Password
 // - Add rest of user data into user documents
 router.post('/', function(req, res, next) {
   var username = req.body.username;
