@@ -42,7 +42,11 @@ class Home extends Component {
               e.preventDefault();
               Cookies.remove("cookie");
               this.setState({loadingDone: true,redirect: "/login"});
-            }}>log out</button>
+          }}>log out</button>
+          <button onClick={(e) => {
+              e.preventDefault();
+              this.setState({redirect:"/UserProfile"})
+          }}>Profile</button>
         </div>
       )
     }
