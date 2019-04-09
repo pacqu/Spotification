@@ -11,14 +11,17 @@ const classNames = require("classnames");
 class Register extends Component {
   state = {
     isSignup: false,
-    email: "",
-    pass: "",
+    username: "",
+    password: "",
     LnR: true,
     notice: "",
     spotifyAuthUrl: ""
   };
 
-  makeState = name => ({ target }) => this.setState({ [name]: target.value });
+  makeState = name => ({ target }) => {
+    this.setState({ [name]: target.value })
+    console.log(this.state)
+  };
 
   handleChange = () => {
     this.setState({
@@ -26,18 +29,14 @@ class Register extends Component {
     });
   };
 
-  handleSignup = () => {
+  handleSignup = (e) => {
+    e.preventDefault();
     if (!this.state.isSignup) {
+      const { username, password } = this.state;
       axios
-        .post(
-          "/user/login",
-          { username: this.state.email },
-          { password: this.state.pass }
-        )
+        .post("/user/login", { username, password})
         .then(res => {
           console.log(res);
-          console.log(res.data);
-          console.log(res.data.token);
           Cookies.set("cookie", res.data.token);
           this.setState({
             LnR: false,
@@ -47,24 +46,19 @@ class Register extends Component {
         })
         .catch(err => {
           console.log(err);
-
           this.setState({
             notice: "User Does Not Exist"
           });
         });
     } else {
+      const { username, password } = this.state;
       axios
-        .post(
-          "/user",
-          { username: this.state.email },
-          { password: this.state.pass }
-        )
+        .post("/user/", { username, password })
         .then(res => {
-          const { token } = res.data;
+          console.log('hello')
           console.log(res);
-          console.log(res.data);
-          console.log(res.data.token);
-          Cookies.set("cookie", res.data.token);
+          const { token } = res.data;
+          Cookies.set("cookie", token);
           this.setState({
             LnR: false,
             spotifyAuthUrl: res.data.user.spotifyAuthUrl,
@@ -90,7 +84,7 @@ class Register extends Component {
       .then(res => {
         console.log(Cookies.get('token'));
         console.log(res);
-        this.setState({ LnR: false, email: res.data[0].username, spotifyAuth: res.data[0].spotifyAuth, spotifyAuthUrl: res.data[0].spotifyAuthUrl,});
+        this.setState({ LnR: false, username: res.data[0].username, spotifyAuth: res.data[0].spotifyAuth, spotifyAuthUrl: res.data[0].spotifyAuthUrl,});
       })
       .catch(err => {
         console.log(err)
@@ -106,7 +100,7 @@ class Register extends Component {
       .then(res => {
         console.log(res);
         if (res.status === 200) {
-          this.setState({ LnR: false, email: res.data[0].username, spotifyAuthUrl: res.data[0].spotifyAuthUrl, spotifyAuth: res.data[0].spotifyAuth});
+          this.setState({ LnR: false, username: res.data[0].username, spotifyAuthUrl: res.data[0].spotifyAuthUrl, spotifyAuth: res.data[0].spotifyAuth});
         }
       })
       .catch(err => {
@@ -116,38 +110,39 @@ class Register extends Component {
   }
 
   render() {
+    const { isSignup, spotifyAuth, LnR, username, spotifyAuthUrl } = this.state;
     var containerClass = classNames({
       container: true,
-      "right-panel-active": this.state.isSignup
+      "right-panel-active": isSignup
     });
 
     var overlayClass = classNames({
       "overlay-panel": true,
-      "overlay-right": !this.state.isSignup,
-      "overlay-left": this.state.isSignup
+      "overlay-right": isSignup,
+      "overlay-left": isSignup
     });
 
     var overlayContainerClass = classNames({
       "overlay-container": true,
-      "overlay-container-right": this.state.isSignup
+      "overlay-container-right": isSignup
     });
 
     var formClass = classNames({
       "form-container": true,
-      "sign-in-container": !this.state.isSignup,
-      "sign-up-container": this.state.isSignup
+      "sign-in-container": !isSignup,
+      "sign-up-container": isSignup
     });
 
     var containerClass2 = classNames({
-      container: !this.state.LnR
+      container: !LnR
     });
 
-    const text = this.state.isSignup ? "Sign Up" : "Sign in";
-    const text2 = this.state.isSignup ? "Sign In" : "Sign up";
-    let welcome = this.state.isSignup
+    const text = isSignup ? "Sign Up" : "Sign in";
+    const text2 = isSignup ? "Sign In" : "Sign up";
+    let welcome = isSignup
       ? "Sign Up Successful!"
       : "Sign in Successful!";
-    if (this.state.spotifyAuth){
+    if (spotifyAuth){
       return <Redirect to='/home' />;
     }
     return (
@@ -157,19 +152,19 @@ class Register extends Component {
             <div className={containerClass}>
               <div className={formClass}>
                 <h2> Welcome to Spotification!</h2>
-                <form onSubmit={() => this.handleSignup()} className="information">
+                <form onSubmit={this.handleSignup} className="information">
                   <h1>{text}</h1>
                   <h1>{this.state.notice}</h1>
                   <Input
                     type="text"
-                    placeholder="Email"
-                    onChange={this.makeState("email")}
+                    placeholder="Username"
+                    onChange={this.makeState("username")}
                     fullWidth
                   />
                   <Input
-                    type="text"
+                    type="password"
                     placeholder="Password"
-                    onChange={this.makeState("pass")}
+                    onChange={this.makeState("password")}
                     fullWidth
                   />
                   <a className="subText" href="#">
@@ -185,7 +180,7 @@ class Register extends Component {
               </div>
 
               <div className={overlayContainerClass}>
-                <div class="overlay">
+                <div className="overlay">
                   <div className={overlayClass}>
                     <h1>Hello, Friend!</h1>
                     {this.state.isSignup ? (
@@ -207,12 +202,12 @@ class Register extends Component {
           <div />
         )}
 
-        {!this.state.LnR ? (
+        {!LnR ? (
           <div className="wrap">
             <div className={containerClass2}>
               <h2> {welcome} </h2>
-              <h2> Welcome {this.state.email}!</h2>
-              <a href={this.state.spotifyAuthUrl}>
+              <h2> Welcome {username}!</h2>
+              <a href={spotifyAuthUrl}>
                 <Button>Connect to Spotify</Button>
               </a>
             </div>
