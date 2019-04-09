@@ -34,7 +34,7 @@ class Register extends Component {
     if (!this.state.isSignup) {
       const { username, password } = this.state;
       axios
-        .post("/user/login", { username, password})
+        .post("/user/login", { username, password })
         .then(res => {
           console.log(res);
           Cookies.set("cookie", res.data.token);

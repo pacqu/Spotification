@@ -1,0 +1,26 @@
+.header {
+  padding: 10px;
+  background-color: #333;
+
+  color: var(--white);
+  margin-bottom: 3em;
+  /* z-index: 2; */
+}
+
+.item {
+  display: inline-block;
+}
+
+.logo {
+  text-align: left;
+  width: 50%;
+}
+
+.account {
+  text-align: right;
+  width: 50%;
+}
+
+.burger-nav {
+  /* position: absolute; */
+}
