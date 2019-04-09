@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Header from '../components/Header';
 import Search from '../components/Search';
 import MediaQuery from 'react-responsive';
-import '../styles/Layout.css';
+import Button from "../components/Button";
 import '../styles/Home.css';
 
 class Home extends Component {
@@ -12,7 +12,7 @@ class Home extends Component {
   componentDidMount() {
     console.log(this.props.data)
   }
-  
+
   render() {
     const { data, location } = this.props;
     const { username } = data;
@@ -29,6 +29,15 @@ class Home extends Component {
           <div className="content">
             <Search />
           </div>
+          { <Button onClick={(e) =>   {
+              e.preventDefault();
+              Cookies.remove("cookie");
+              this.setState({loadingDone: true,redirect: "/login"});
+            }}>log out</Button> }
+          { <Button onClick={(e) =>   {
+              e.preventDefault();
+              this.setState({loadingDone: true,redirect: "/UserProfile"});
+            }}>User Profile</Button>}
         </div>
       </main>
     )
