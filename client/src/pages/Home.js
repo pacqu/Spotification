@@ -17,24 +17,24 @@ class Home extends Component {
   }
   componentDidMount(){
     this.setState({loadingDone: true})
-    // if (Cookies.get('cookie')){
-    //   axios.get('/user/', { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
-    //   .then(res => {
-    //     console.log(!(res.data[0].spotifyAuth))
-    //     if(!(res.data[0].spotifyAuth)){
-    //       this.setState({loadingDone: true, redirect: "/login"})
-    //     }
-    //     else{
-    //       this.setState({loadingDone: true})
-    //     }
-    //   })
-    //   .catch(err => {
-    //     console.log(err);
-    //   });
-    // }
-    // else{
-    //   this.setState({loadingDone: true,redirect: "/login"})
-    // }
+    if (Cookies.get('cookie')){
+      axios.get('/user/', { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
+      .then(res => {
+        console.log(!(res.data[0].spotifyAuth))
+        if(!(res.data[0].spotifyAuth)){
+          this.setState({loadingDone: true, redirect: "/login"})
+        }
+        else{
+          this.setState({loadingDone: true})
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
+    }
+    else{
+      this.setState({loadingDone: true,redirect: "/login"})
+    }
   }
   render() {
     const { name } = this.state;
