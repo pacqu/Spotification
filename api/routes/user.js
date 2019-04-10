@@ -143,7 +143,7 @@ router.post('/login', function(req, res, next) {
   var password = req.body.password;
   //console.log(password);
   const users = db.collection('users');
-  users.find({'username': username, 'password': password}, {'projection': {'password': 0}}).toArray( (err, results) => {
+  users.find({'username': username}).toArray( (err, results) => {
     if ( results.length == 0  || !(results) ) {
       console.log('ERROR: User could not be found');
       res.status(404);
