@@ -14,6 +14,15 @@ mongo.connect((err,result) => {
 })
 
 /**
+ * Query Mock Data
+ * {
+ *   username: self-explanatory,
+ *   type: recommendations, visualizations, collablists, listening_data
+ *   data: ^^dependent on query type
+ * }
+ */
+
+/**
  * Returns all queries in the database
  * @function
  * @param res - response object to use
