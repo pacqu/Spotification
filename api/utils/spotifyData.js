@@ -107,6 +107,7 @@ const getAvgFeats = (user, db, songs, next) => {
   }
   //console.log(albums)
   genreArtists = genreArtists.filter((el,i,a) => i === a.indexOf(el));
+  genreArtists = genreArtists.slice(0,50)
   spotifyAccessToken = user['spotifyAuthTokens']['access'];
   axios.get(`https://api.spotify.com/v1/audio-features?ids=${idQueries}`,
   {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
