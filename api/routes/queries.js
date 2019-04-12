@@ -80,16 +80,67 @@ router.get('/user/:username', function(req, res, next){
 
 /* POST queries/recommend - Create new recommendation query
 EXPECTS:
-  HEADERS:
-    - N/A
-  BODY:
-    - N/A
+HEADERS:
+  - 'Authorization': 'Bearer <token>'
+BODY:
+  - 'seedTracks' - Array of Spotify Track ID's to seed recs
+  - 'seedArtists' - Array of Spotify Artist ID's to seed recs
+  - 'seedGenres' - Array of Spotify Genre ID's to seed recs
+    - Note: Spotify only allows a total of 5 seeds (i.e. the sum of seed tracks, artists, and genres cannot be more than 5)
+      - If route is given more than 5 seeds, tracks are given priority, then artists, then genres and the seeds are truncated after 5
+      - E.G: If 3 tracks, 3 artists, and 2 genres are given:
+        - All three tracks and the first two artists will be seeded
+        - The last artist and all the genres will not be seeded
 */
 //TODO:
 // - Implement this route
-router.post('/recommend', function(req, res, next){
-  res.status(501);
-  res.send('Route Not Implemented');
+router.post('/recommend', middlewares.checkToken, (req, res) => {
+  jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
+    if(err){
+      //If error send Forbidden (403)
+      console.log('ERROR: Could not connect to the protected route');
+      res.sendStatus(403);
+    } else {
+      const seedTracks = req.body.seedTracks;
+      const seedArtists = req.body.seedArtists;
+      const seedGenres = req.body.seedGenres;
+      //TODO: Improve check so seeds dont have to exist
+      if ( !(seedTracks.length + seedArtists.length + seedGenres.length)){
+        res.status(400);
+        res.send('No seeds given.');
+        return;
+      }
+      const users = db.collection('users');
+      users.find({'username': authorizedData['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
+        if(err) {
+          console.log(err);
+          res.json(err);
+        }
+        user = results[0];
+        spotifyData.checkRefresh(user, db, spotifyApi, (err, checkedUser) => {
+          if(err){
+            console.log(err);
+            res.status(500);
+            res.json(err);
+          }
+          spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
+          axios.get(`https://api.spotify.com/v1/recommendations?${seedTracks.length ? 'seed_tracks=' + seedTracks.join(',') + '&' : ""}` +
+          `${seedArtists.length ? 'seed_artists=' + seedArtists.join(',') + '&' : ""}` +
+          `${seedGenres.length ? 'seed_genres=' + seedGenres.join(',') : ""}`,
+          {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
+          .then(results => {
+            console.log(results.data)
+            res.json(results.data)
+          })
+          .catch(err => {
+            console.log(err);
+            res.status(500);
+            res.json(err);
+          })
+        })
+      })
+    }
+  })
 });
 
 /* POST queries/visual - Create new data visualization query
