@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 
-//Back-End Utils
 //Node Wrapper for Spotify Web API Setup
 var SpotifyWebApi = require('spotify-web-api-node');
 var scopes = ['user-read-private', 'user-read-email', 'user-read-birthdate', 'user-top-read', 'user-library-read',

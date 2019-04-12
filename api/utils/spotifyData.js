@@ -77,7 +77,7 @@ const getAvgFeats = (user, db, songs, next) => {
   var idQueries = "";
   let genreArtists = [];
   let genres = {};
-  for (let song of songs['items']){
+  for (let song of songs){
     song['album'] = {
       name: song['album']['name'],
       id: song['album']['id'],
