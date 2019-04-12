@@ -1,3 +1,4 @@
 api/configs/config-*
 api/node_modules/*
 api/views/*
+.vscode/*
