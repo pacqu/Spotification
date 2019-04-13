@@ -75,7 +75,9 @@ const getAvgFeats = (user, db, songs, next) => {
   "acousticness","instrumentalness","liveness",
   "valence","tempo","duration_ms","time_signature"];
   var idQueries = "";
-  for (let song of songs['items']){
+  let genreArtists = [];
+  let genres = {};
+  for (let song of songs){
     song['album'] = {
       name: song['album']['name'],
       id: song['album']['id'],
@@ -86,6 +88,7 @@ const getAvgFeats = (user, db, songs, next) => {
         name: artist['name'],
         id: artist['id'],
       })
+      genreArtists.push(artist['id']);
     }
     song['artists'] = artists;
     delete song["available_markets"];
@@ -102,6 +105,10 @@ const getAvgFeats = (user, db, songs, next) => {
     data['songs'].push(song);
     data['avgFeatures']['popularity'] += song['popularity'];
   }
+  //console.log(albums)
+  genreArtists = genreArtists.filter((el,i,a) => i === a.indexOf(el));
+  genreArtists = genreArtists.slice(0,50)
+  //TO-DO: Query and Save to Cache
   spotifyAccessToken = user['spotifyAuthTokens']['access'];
   axios.get(`https://api.spotify.com/v1/audio-features?ids=${idQueries}`,
   {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
@@ -114,7 +121,29 @@ const getAvgFeats = (user, db, songs, next) => {
     for (let feature of Object.keys(data['avgFeatures'])){
       data['avgFeatures'][feature] /= data['songs'].length;
     }
-    next(null, data);
+    //TO-DO: Query and Save to Cache
+    axios.get(`https://api.spotify.com/v1/artists?ids=${genreArtists.join(',')}`,
+    {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
+    .then(results => {
+      for (let artist of results['data']['artists']){
+        //console.log(artist)
+        for (let genre of artist['genres']){
+          //console.log(genre)
+          if (genre in genres) genres[genre] += 1;
+          else genres[genre] = 1;
+        }
+      }
+      //console.log(genres);
+      sortableGenres = Object.keys(genres).map(key => { return {genre: key, count: genres[key]} })
+      //console.log(sortableGenres)
+      sortableGenres = sortableGenres.sort((g1, g2) => g2.count - g1.count)
+      data['sortedGenres'] = sortableGenres
+      //console.log(sortableGenres)
+      next(null, data);
+    })
+    .catch(err => {
+      next(err, data);
+    })
   })
   .catch(err => {
     next(err,data);

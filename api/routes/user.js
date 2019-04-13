@@ -262,7 +262,7 @@ router.get('/listening-data', middlewares.checkToken, (req, res) => {
           {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
           .then(results => {
             //console.log(results['data']);
-            spotifyData.getAvgFeats(checkedUser, db, results['data'], (err, data) => {
+            spotifyData.getAvgFeats(checkedUser, db, results['data']['items'], (err, data) => {
               if(err){
                 console.log(err);
                 res.status(500);
