@@ -2,6 +2,8 @@
   display: flex;
   justify-content: center;
   flex-direction: column;
+  padding-top: 22px;
+  margin-top: 45px;
 }
 
 .avatar {
@@ -13,28 +15,20 @@
 @media screen and (min-width: 768px) {
   .home-container {
     display: grid;
-    grid-template-rows: [header] 1.1fr [body] auto;
     grid-template-columns: [sidebar] 3fr [content] 8fr;
   }
 
-  .header {
-    grid-row: header;
-    grid-column: sidebar / 3;
+  .dropdown {
+    list-style: none;
+    text-align: center;
   }
 
   .sidebar {
-    grid-row: body;
-    grid-column: sidebar;
-    width: 250px;
+    max-width: 300px;
+    grid-area: sidebar;
   }
 
   .content {
-    grid-row: body;
-    grid-column: content;
-  }
-
-  .grouped-content {
-    grid-row: body;
-    grid-column: sidebar / 3;
+    grid-area: content;
   }
 }

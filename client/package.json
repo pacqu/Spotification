@@ -5,9 +5,12 @@
   "private": true,
   "dependencies": {
     "axios": "^0.18.0",
+    "chart.js": "^2.8.0",
     "classnames": "^2.2.6",
     "js-cookie": "^2.2.0",
     "react": "^16.8.6",
+    "react-burger-menu": "^2.6.8",
+    "react-chartjs-2": "^2.7.6",
     "react-dom": "^16.8.5",
     "react-responsive": "^6.1.1",
     "react-router-dom": "^5.0.0",
