@@ -1,4 +1,5 @@
 api/configs/config-*
 api/node_modules/*
+client/node_modules/*
 api/views/*
 .vscode/*
