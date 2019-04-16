@@ -3,20 +3,21 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import LandingPage from './pages/LandingPage';
 import Home from './pages/Home';
 import LnR from './pages/LoginAndRegister'
-import UserProfile from './pages/UserProfile'
+import Profile from './pages/Profile'
 import './styles/App.css';
 
 class App extends Component {
   render() {
     return (
-      <main className="App">
+      <main className="App" id="App">
+        
         {/* Probably should include a nav bar here */}
         <Router>
           <Switch>
             <Route exact path="/" component={LandingPage} />
             <Route path="/home" component={Home} />
             <Route path="/login" component={LnR} />
-            <Route path="/UserProfile" component={UserProfile} />
+            <Route path="/Profile" component={Profile} />
           </Switch>
         </Router>
       </main>

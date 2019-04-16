@@ -24,6 +24,7 @@
   }
 
   .sidebar {
+    max-width: 300px;
     grid-area: sidebar;
   }
 

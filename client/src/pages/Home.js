@@ -11,8 +11,9 @@ class Home extends Component {
   constructor(props){
     super(props);
     this.state = {
+      location: "Home",
       loadingDone: true,
-      name: "Miguel"
+      username: ""
     }
   }
   componentDidMount(){
@@ -20,12 +21,12 @@ class Home extends Component {
     if (Cookies.get('cookie')){
       axios.get('/user/', { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
       .then(res => {
-        console.log(!(res.data[0].spotifyAuth))
+        const { username } = res.data[0]
         if(!(res.data[0].spotifyAuth)){
           this.setState({loadingDone: true, redirect: "/login"})
         }
         else{
-          this.setState({loadingDone: true})
+          this.setState({loadingDone: true, username})
         }
       })
       .catch(err => {
@@ -36,29 +37,27 @@ class Home extends Component {
       this.setState({loadingDone: true,redirect: "/login"})
     }
   }
+  handleLogout = (e) => {
+    e.preventDefault();
+    Cookies.remove('cookie');
+    this.setState({loadingDone: true,redirect: "/login"});
+  }
   render() {
-    const { name } = this.state;
+    const { username, location } = this.state;
     if (this.state.loadingDone){
       if (this.state.redirect) return <Redirect to={this.state.redirect} />
       return (
         <main>
-          <Header name={name} location="Home"/>
+          <Header name={username} location={location} logout={this.handleLogout}/>
           <div className="home-container">
             <div className="sidebar">
-              this is the sidebar
+              This is the sidebar
               <MediaQuery query="(min-width: 768px)">
                 <img className="avatar" src="https://i.kym-cdn.com/entries/icons/mobile/000/028/861/cover3.jpg" />
               </MediaQuery>
             </div>
             <div className="content">
               this is the content
-              <button onClick={(e) =>   {
-                  e.preventDefault();
-                  Cookies.remove("cookie");
-                  this.setState({loadingDone: true,redirect: "/login"});
-              }}>
-                log out
-              </button>
             </div>
           </div>
         </main>
