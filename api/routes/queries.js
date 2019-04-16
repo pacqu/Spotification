@@ -92,8 +92,6 @@ BODY:
         - All three tracks and the first two artists will be seeded
         - The last artist and all the genres will not be seeded
 */
-//TODO:
-// - Implement this route
 router.post('/recommend', middlewares.checkToken, (req, res) => {
   jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
     if(err){
@@ -104,8 +102,9 @@ router.post('/recommend', middlewares.checkToken, (req, res) => {
       const seedTracks = req.body.seedTracks;
       const seedArtists = req.body.seedArtists;
       const seedGenres = req.body.seedGenres;
+      const seedLength = (seedTracks ? seedTracks.length : 0) + (seedArtists ? seedArtists.length : 0) + (seedGenres ? seedGenres.length : 0)
       //TODO: Improve check so seeds dont have to exist
-      if ( !(seedTracks.length + seedArtists.length + seedGenres.length)){
+      if ( !(seedLength)){
         res.status(400);
         res.send('No seeds given.');
         return;
@@ -124,13 +123,39 @@ router.post('/recommend', middlewares.checkToken, (req, res) => {
             res.json(err);
           }
           spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
-          axios.get(`https://api.spotify.com/v1/recommendations?${seedTracks.length ? 'seed_tracks=' + seedTracks.join(',') + '&' : ""}` +
-          `${seedArtists.length ? 'seed_artists=' + seedArtists.join(',') + '&' : ""}` +
-          `${seedGenres.length ? 'seed_genres=' + seedGenres.join(',') : ""}`,
+          axios.get(`https://api.spotify.com/v1/recommendations?${seedTracks ? 'seed_tracks=' + seedTracks.join(',') + '&' : ""}` +
+          `${seedArtists ? 'seed_artists=' + seedArtists.join(',') + '&' : ""}` +
+          `${seedGenres ? 'seed_genres=' + seedGenres.join(',') : ""}`,
           {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
           .then(results => {
-            console.log(results.data)
-            res.json(results.data)
+            //console.log(results.data)
+            songs = [];
+            for (let song of results.data.tracks){
+              song['album'] = {
+                name: song['album']['name'],
+                id: song['album']['id'],
+              }
+              artists = []
+              for (let artist of song['artists']){
+                artists.push({
+                  name: artist['name'],
+                  id: artist['id'],
+                })
+              }
+              song['artists'] = artists;
+              delete song["available_markets"];
+              delete song["disc_number"];
+              delete song["external_ids"];
+              delete song["is_local"];
+              delete song["explicit"];
+              delete song["track_number"];
+              delete song["external_urls"];
+              delete song["preview_url"];
+              delete song["type"];
+              delete song["href"];
+              songs.push(song)
+            }
+            res.json(songs)
           })
           .catch(err => {
             console.log(err);
