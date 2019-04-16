@@ -1,6 +1,17 @@
 var express = require('express');
 var router = express.Router();
 
+//Node Wrapper for Spotify Web API Setup
+var SpotifyWebApi = require('spotify-web-api-node');
+var scopes = ['user-read-private', 'user-read-email', 'user-read-birthdate', 'user-top-read', 'user-library-read',
+'playlist-modify-private', 'playlist-read-private', 'playlist-modify-public','user-read-recently-played'],
+  state = 'spotification-state';
+var configSpotify = require('../configs/config-spotify');
+var spotifyApi = new SpotifyWebApi(configSpotify);
+var spotifyData = require('../utils/spotifyData');
+var verify = require('../utils/verify');
+var mongo = require('../utils/mongo');
+
 //Query Utils
 var queryUtils = require('../utils/queryUtils');
 
@@ -9,6 +20,18 @@ const jwt = require('jsonwebtoken');
 var jwtSecret = require('../configs/config-jwt');
 var middlewares = require('../utils/middlewares');
 
+// Create a new MongoClient
+let db;
+mongo.connect((err,result) => {
+  if (err) {
+    console.log(err);
+  } else {
+    db = result;
+  }
+})
+
+//Axios for Spotify Web API calls
+const axios = require('axios');
 /* GET queries/ - Return all queries across all users
 EXPECTS:
   HEADERS:
@@ -57,30 +80,194 @@ router.get('/user/:username', function(req, res, next){
 
 /* POST queries/recommend - Create new recommendation query
 EXPECTS:
-  HEADERS:
-    - N/A
-  BODY:
-    - N/A
+HEADERS:
+  - 'Authorization': 'Bearer <token>'
+BODY:
+  - 'seedTracks' - Array of Spotify Track ID's to seed recs
+  - 'seedArtists' - Array of Spotify Artist ID's to seed recs
+  - 'seedGenres' - Array of Spotify Genre ID's to seed recs
+    - Note: Spotify only allows a total of 5 seeds (i.e. the sum of seed tracks, artists, and genres cannot be more than 5)
+      - If route is given more than 5 seeds, tracks are given priority, then artists, then genres and the seeds are truncated after 5
+      - E.G: If 3 tracks, 3 artists, and 2 genres are given:
+        - All three tracks and the first two artists will be seeded
+        - The last artist and all the genres will not be seeded
 */
-//TODO:
-// - Implement this route
-router.post('/recommend', function(req, res, next){
-  res.status(501);
-  res.send('Route Not Implemented');
+router.post('/recommend', middlewares.checkToken, (req, res) => {
+  jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
+    if(err){
+      //If error send Forbidden (403)
+      console.log('ERROR: Could not connect to the protected route');
+      res.sendStatus(403);
+    } else {
+      const seedTracks = req.body.seedTracks;
+      const seedArtists = req.body.seedArtists;
+      const seedGenres = req.body.seedGenres;
+      const seedLength = (seedTracks ? seedTracks.length : 0) + (seedArtists ? seedArtists.length : 0) + (seedGenres ? seedGenres.length : 0)
+      //TODO: Improve check so seeds dont have to exist
+      if ( !(seedLength)){
+        res.status(400);
+        res.send('No seeds given.');
+        return;
+      }
+      const users = db.collection('users');
+      users.find({'username': authorizedData['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
+        if(err) {
+          console.log(err);
+          res.json(err);
+        }
+        user = results[0];
+        spotifyData.checkRefresh(user, db, spotifyApi, (err, checkedUser) => {
+          if(err){
+            console.log(err);
+            res.status(500);
+            res.json(err);
+          }
+          spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
+          axios.get(`https://api.spotify.com/v1/recommendations?${seedTracks ? 'seed_tracks=' + seedTracks.join(',') + '&' : ""}` +
+          `${seedArtists ? 'seed_artists=' + seedArtists.join(',') + '&' : ""}` +
+          `${seedGenres ? 'seed_genres=' + seedGenres.join(',') : ""}`,
+          {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
+          .then(results => {
+            //console.log(results.data)
+            songs = [];
+            for (let song of results.data.tracks){
+              song['album'] = {
+                name: song['album']['name'],
+                id: song['album']['id'],
+              }
+              artists = []
+              for (let artist of song['artists']){
+                artists.push({
+                  name: artist['name'],
+                  id: artist['id'],
+                })
+              }
+              song['artists'] = artists;
+              delete song["available_markets"];
+              delete song["disc_number"];
+              delete song["external_ids"];
+              delete song["is_local"];
+              delete song["explicit"];
+              delete song["track_number"];
+              delete song["external_urls"];
+              delete song["preview_url"];
+              delete song["type"];
+              delete song["href"];
+              songs.push(song)
+            }
+            res.json(songs)
+          })
+          .catch(err => {
+            console.log(err);
+            res.status(500);
+            res.json(err);
+          })
+        })
+      })
+    }
+  })
 });
 
 /* POST queries/visual - Create new data visualization query
 EXPECTS:
   HEADERS:
-    - N/A
+    - 'Authorization': 'Bearer <token>'
   BODY:
-    - N/A
+    - 'visualType' - type of data visualization queryUtils
+     - Two Types:
+       - 'top' - indicates want data for top spotify tracks
+       - 'selected' - indicates want for given spotify tracks
+    - 'selectedTracks' - If query is for selected Tracks
+      - Should be an array of spotify track id's
 */
 //TODO:
-// - Implement this route
-router.post('/visual', function(req, res, next){
-  res.status(501);
-  res.send('Route Not Implemented');
+// - Return Data of Tracks - DONE
+//   - If Data for Top Tracks:
+//     - Get Song Info from Global Top 50 Playlist (id: 37i9dQZEVXbMDoHDwVN2tF) - DONE
+//     - Process through getAvgFeats - DONE
+//     - Return data object - DONE
+//   - If Data for Given Tracks:
+//     - Get Song Info of given tracks - DONE
+//     - Process through getAvgFeats - DONE
+//     - Return data object- DONE
+// - Save & Query to DB - NOT DONE
+router.post('/visual', middlewares.checkToken, (req, res) => {
+  jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
+    if(err){
+      //If error send Forbidden (403)
+      console.log('ERROR: Could not connect to the protected route');
+      res.sendStatus(403);
+    } else {
+      const users = db.collection('users');
+      users.find({'username': authorizedData['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
+        if(err) {
+          console.log(err);
+          res.json(err);
+        }
+        user = results[0];
+        spotifyData.checkRefresh(user, db, spotifyApi, (err, checkedUser) => {
+          if(err){
+            console.log(err);
+            res.status(500);
+            res.json(err);
+          }
+          spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
+          if (req.body.visualType === "top"){
+            axios.get('https://api.spotify.com/v1/playlists/37i9dQZEVXbMDoHDwVN2tF/tracks',
+            {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
+            .then(results => {
+              let tracks = []
+              for (let item of results['data']['items']){
+                if (item.is_local) continue;
+                tracks.push(item.track);
+              }
+              spotifyData.getAvgFeats(checkedUser, db, tracks, (err, data) => {
+                if(err){
+                  console.log(err);
+                  res.status(500);
+                  res.json(err);
+                }
+                res.json(data);
+              })
+            })
+            .catch(err => {
+              console.log(err);
+              res.status(500);
+              res.json(err);
+              return;
+            })
+          }
+          else if (req.body.visualType === "selected"){
+            let trackIds = req.body.selectedTracks
+            axios.get(`https://api.spotify.com/v1/tracks?ids=${trackIds.join(',')}`,
+            {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
+            .then(results => {
+              console.log(results['data'])
+              spotifyData.getAvgFeats(checkedUser, db, results['data']['tracks'], (err, data) => {
+                if(err){
+                  console.log(err);
+                  res.status(500);
+                  res.json(err);
+                }
+                res.json(data);
+              })
+            })
+            .catch(err => {
+              console.log(err);
+              res.status(500);
+              res.json(err);
+              return;
+            })
+          }
+          else{
+            res.status(400);
+            res.send('Invalid data visulization type queried for.');
+            return;
+          }
+        })
+      })
+    }
+  })
 });
 
 /* POST queries/collablist - Create new collablist query

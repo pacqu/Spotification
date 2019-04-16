@@ -77,7 +77,7 @@ const getAvgFeats = (user, db, songs, next) => {
   var idQueries = "";
   let genreArtists = [];
   let genres = {};
-  for (let song of songs['items']){
+  for (let song of songs){
     song['album'] = {
       name: song['album']['name'],
       id: song['album']['id'],
@@ -108,6 +108,7 @@ const getAvgFeats = (user, db, songs, next) => {
   //console.log(albums)
   genreArtists = genreArtists.filter((el,i,a) => i === a.indexOf(el));
   genreArtists = genreArtists.slice(0,50)
+  //TO-DO: Query and Save to Cache
   spotifyAccessToken = user['spotifyAuthTokens']['access'];
   axios.get(`https://api.spotify.com/v1/audio-features?ids=${idQueries}`,
   {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
