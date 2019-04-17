@@ -41,6 +41,7 @@ class Register extends Component {
           this.setState({
             LnR: false,
             spotifyAuthUrl: res.data.user.spotifyAuthUrl,
+            spotifyAuth:res.data.user.spotifyAuth,
             notice: ""
           });
         })

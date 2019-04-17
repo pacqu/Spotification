@@ -2,6 +2,7 @@ import Cookies from "js-cookie";
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import Header from '../components/Header';
+import Search from '../components/Search';
 import MediaQuery from 'react-responsive';
 import '../styles/Home.css';
 
@@ -57,7 +58,7 @@ class Home extends Component {
               </MediaQuery>
             </div>
             <div className="content">
-              this is the content
+              <Search />
             </div>
           </div>
         </main>
