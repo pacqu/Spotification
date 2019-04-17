@@ -1,32 +1,35 @@
+import React, { Component } from "react";
+import axios from "axios";
 import Cookies from "js-cookie";
-import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import Header from '../components/Header';
 import MediaQuery from 'react-responsive';
 import '../styles/Home.css';
 
-const axios = require('axios');
-
-class Home extends Component {
-  constructor(props){
+class Recommendation extends Component {
+	constructor(props){
     super(props);
     this.state = {
-      location: "Home",
-      loadingDone: true,
-      username: ""
-    }
-  }
+      location: "Recommendation"
+		}
+	}
+
   componentDidMount(){
     this.setState({loadingDone: true})
     if (Cookies.get('cookie')){
       axios.get('/user/', { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
       .then(res => {
-        const { username } = res.data[0]
+				console.log(res)
+        console.log(!(res.data[0].spotifyAuth))
         if(!(res.data[0].spotifyAuth)){
           this.setState({loadingDone: true, redirect: "/login"})
         }
         else{
-          this.setState({loadingDone: true, username})
+					this.setState({
+						loadingDone: true,
+						name: res.data[0].username,
+					})
+					this.spotifyData();
         }
       })
       .catch(err => {
@@ -36,19 +39,15 @@ class Home extends Component {
     else{
       this.setState({loadingDone: true,redirect: "/login"})
     }
-  }
-  handleLogout = (e) => {
-    e.preventDefault();
-    Cookies.remove('cookie');
-    this.setState({loadingDone: true,redirect: "/login"});
-  }
+	}
+	
   render() {
-    const { username, location } = this.state;
+    const {location } = this.state;
     if (this.state.loadingDone){
       if (this.state.redirect) return <Redirect to={this.state.redirect} />
       return (
         <main>
-          <Header name={username} location={location} logout={this.handleLogout}/>
+          <Header location={location} logout={this.handleLogout}/>
           <div className="home-container">
             <div className="sidebar">
               This is the sidebar
@@ -57,7 +56,7 @@ class Home extends Component {
               </MediaQuery>
             </div>
             <div className="content">
-              this is the content
+							<p>Rec stuff</p>
             </div>
           </div>
         </main>
@@ -67,4 +66,5 @@ class Home extends Component {
   }
 }
 
-export default Home;
+export default Recommendation;
+
