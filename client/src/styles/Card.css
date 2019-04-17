@@ -1,0 +1,69 @@
+.Card {
+  background-color: #fff;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 4px rgba(141,149,166,0.1);
+  margin-right: 20%;
+}
+
+.CardTop {
+  color: #000;
+  font-size: 17px;
+  font-weight: 400;
+  padding: 7px 10px 4px;
+  border-bottom: 1px solid #e7e7e7;
+  overflow: auto;
+}
+
+.user {
+  float: left;
+  color: #000;
+}
+
+.user:link, .user:visited {
+  color: #000;
+  text-decoration: none;
+}
+
+.user:hover {
+  text-decoration: underline;
+}
+
+.query {
+  text-align: right;
+  margin-top: 13px;
+}
+
+.userAvatar {
+  height: 30px;
+  max-width: 30px;
+  border-radius: 50%;
+}
+
+.CardBody {
+  box-shadow: 0 2px 4px rgba(141,149,166,0.1);
+  overflow: auto;
+  padding: 5px 10px;}
+
+.CardBottom {
+  color: #000;
+  font-size: 17px;
+  font-weight: 400;
+  padding: 7px 10px 4px;
+  border-bottom: 1px solid #e7e7e7;
+  overflow: auto;
+}
+
+.left {
+  float:left;
+}
+
+.right {
+  float:right;
+}
+
+.trackImg {
+  object-fit: cover;
+  width: 250px;
+  height: 250px;
+}
