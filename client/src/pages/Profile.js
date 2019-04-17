@@ -1,21 +1,21 @@
 import React, { Component } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Redirect } from "react-router-dom";
-import Header from "../components/Header";
-import MediaQuery from "react-responsive";
-import { Bar } from "react-chartjs-2";
-import "../styles/Home.css";
+import { Redirect } from 'react-router-dom';
+import Header from '../components/Header';
+import MediaQuery from 'react-responsive';
+import '../styles/Home.css';
+import { Bar } from 'react-chartjs-2';
 
 class Profile extends Component {
-  constructor(props) {
+	constructor(props){
     super(props);
     this.state = {
       loadingDone: false,
       location: "Profile",
-      username: "",
-      features: [],
-      featuresName: [],
+			name: "",
+			features: [],
+			featuresName: [],
       featuresValue: [],
       topSongs: []
     };
@@ -64,24 +64,27 @@ class Profile extends Component {
     };
     return <Bar data={data} />;
   };
-
+  
   //maps top 3 songs, change number for more or less songs
   SongList = () => {
-    let songs = this.state.topSongs.slice(0, 3).map(item => <li>{item}</li>);
+    let songs = this.state.topSongs.slice(0,3).map((item =>
+      <li>{item}</li>
+    ))
     return (
       <ul>
         <h3>My Top Songs</h3>
         <li>{songs}</li>
       </ul>
-    );
-  };
-
-  componentDidMount() {
+    )
+  }
+	
+  componentDidMount(){
     this.setState({loadingDone: true})
     if (Cookies.get('cookie')){
       axios.get('/user/', { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
       .then(res => {
-        const { username } = res.data[0]
+				console.log(res)
+        console.log(!(res.data[0].spotifyAuth))
         if(!(res.data[0].spotifyAuth)){
           this.setState({loadingDone: true, redirect: "/login"})
         }
@@ -110,8 +113,8 @@ class Profile extends Component {
     else{
       this.setState({loadingDone: true,redirect: "/login"})
     }
-  }
-
+	}
+	
   render() {
     const { username, location } = this.state;
     if (this.state.loadingDone){
