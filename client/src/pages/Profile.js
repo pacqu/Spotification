@@ -38,7 +38,8 @@ class Profile extends Component {
         featuresValue: array.map(item => item[1]),
         topSongs: Object.entries(res.data[0].listeningData.songs).map(
           item => item[1].name
-        )
+        ),
+        loadingDone: true
       });
       console.log(this.state.topSongs);
       console.log(Object.entries(res.data));
@@ -85,7 +86,21 @@ class Profile extends Component {
           this.setState({loadingDone: true, redirect: "/login"})
         }
         else{
-          this.setState({loadingDone: true, username})
+          if (res.data[0].listeningData){
+            let array = Object.entries(
+              res.data[0].listeningData.avgFeatures
+            ).filter(item => item[0] !== "duration_ms");
+            this.setState({
+              features: array,
+              featuresName: array.map(item => item[0]),
+              featuresValue: array.map(item => item[1]),
+              topSongs: Object.entries(res.data[0].listeningData.songs).map(
+                item => item[1].name
+              ),
+              loadingDone: true
+            })
+          }
+          else this.spotifyData()
         }
       })
       .catch(err => {
