@@ -1,3 +1,6 @@
+.DS_Store
+node_modules/*
+api/.DS_Store
 api/configs/config-*
 api/node_modules/*
 client/node_modules/*

@@ -304,4 +304,79 @@ router.get('/listening-data', middlewares.checkToken, (req, res) => {
   });
 });
 
+
+/* POST user/create-playlist - To be used in conjunction with recommendations if wants to save recommendations as a playlist
+EXPECTS:
+  HEADERS:
+    - 'Authorization': 'Bearer <token>'
+    BODY:
+    - 'playlistName': Desired name of newly created playlist
+    - 'playlistTrackUris': Array of Spotify Track URI's for tracks to be added to playlist
+*/
+router.post('/create-playlist', middlewares.checkToken, (req, res) => {
+  jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
+    if(err){
+      //If error send Forbidden (403)
+      console.log('ERROR: Could not connect to the protected route');
+      res.sendStatus(403);
+    } else {
+      const users = db.collection('users');
+      users.find({'username': authorizedData['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
+        if(err) {
+          console.log(err);
+          res.json(err);
+        }
+        user = results[0];
+        spotifyData.checkRefresh(user, db, spotifyApi, (err, checkedUser) => {
+          if(err){
+            console.log(err);
+            res.status(500);
+            res.json(err);
+          }
+          spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
+          axios.get('https://api.spotify.com/v1/me/',
+          {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
+          .then(results => {
+            console.log(results['data']);
+            const userId = results['data']['id'];
+            axios.post(`https://api.spotify.com/v1/users/${userId}/playlists`,
+            {name: req.body.playlistName, description: "Made using Spotification!"},
+            {headers: { Authorization: `Bearer ${spotifyAccessToken}`, 'Content-Type': 'application/json'}})
+            .then(results => {
+              let playlistId = results['data']['id'];
+              axios.post(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+              {uris: req.body.playlistTrackUris},
+              {headers: { Authorization: `Bearer ${spotifyAccessToken}`, 'Content-Type': 'application/json'}})
+              .then(results => {
+                res.json({playlistMade: true});
+              })
+              .catch(err => {
+                if(err) {
+                  console.log(err);
+                  res.status(500);
+                  res.json(err);
+                }
+              })
+            })
+            .catch(err => {
+              if(err) {
+                console.log(err);
+                res.status(500);
+                res.json(err);
+              }
+            })
+          })
+          .catch(err => {
+            if(err) {
+              console.log(err);
+              res.status(500);
+              res.json(err);
+            }
+          })
+        })
+      });
+    }
+  });
+});
+
 module.exports = router;

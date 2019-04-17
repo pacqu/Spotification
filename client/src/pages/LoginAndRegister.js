@@ -20,7 +20,6 @@ class Register extends Component {
 
   makeState = name => ({ target }) => {
     this.setState({ [name]: target.value })
-    console.log(this.state)
   };
 
   handleChange = () => {
@@ -41,6 +40,7 @@ class Register extends Component {
           this.setState({
             LnR: false,
             spotifyAuthUrl: res.data.user.spotifyAuthUrl,
+            spotifyAuth:res.data.user.spotifyAuth,
             notice: ""
           });
         })
@@ -151,10 +151,10 @@ class Register extends Component {
           <div className="wrap">
             <div className={containerClass}>
               <div className={formClass}>
-                <h2> Welcome to Spotification!</h2>
+                <h2 className="black"> Welcome to Spotification!</h2>
                 <form onSubmit={this.handleSignup} className="information">
-                  <h1>{text}</h1>
-                  <h1>{this.state.notice}</h1>
+                  <h1 className="black">{text}</h1>
+                  <h1 className="black">{this.state.notice}</h1>
                   <Input
                     type="text"
                     placeholder="Username"
@@ -205,8 +205,8 @@ class Register extends Component {
         {!LnR ? (
           <div className="wrap">
             <div className={containerClass2}>
-              <h2> {welcome} </h2>
-              <h2> Welcome {username}!</h2>
+              <h2 className="black"> {welcome} </h2>
+              <h2 className="black"> Welcome {username}!</h2>
               <a href={spotifyAuthUrl}>
                 <Button>Connect to Spotify</Button>
               </a>

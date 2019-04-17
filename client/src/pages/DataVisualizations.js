@@ -1,18 +1,13 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 import Header from '../components/Header';
-import Search from '../components/Search';
 import MediaQuery from 'react-responsive';
-import '../styles/Layout.css';
 import '../styles/Home.css';
 
-class Home extends Component {
-  constructor(props){
+class DataVisualizations extends Component {
+	constructor(props){
     super(props);
-  }
-  componentDidMount() {
-    console.log(this.props.data)
-  }
-  
+	}
+	
   render() {
     const { data, location } = this.props;
     const { username } = data;
@@ -21,13 +16,13 @@ class Home extends Component {
         <Header name={username} location={location} />
         <div className="home-container">
           <div className="sidebar">
-            <p> Profile </p>
+            This is the sidebar
             <MediaQuery query="(min-width: 768px)">
               <img className="avatar" src="https://i.kym-cdn.com/entries/icons/mobile/000/028/861/cover3.jpg" />
             </MediaQuery>
           </div>
           <div className="content">
-            <Search />
+            <p>stuff</p>
           </div>
         </div>
       </main>
@@ -35,4 +30,6 @@ class Home extends Component {
   }
 }
 
-export default Home;
+
+export default DataVisualizations;
+
