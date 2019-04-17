@@ -40,7 +40,7 @@ EXPECTS:
     - N/A
 */
 //TODO:
-// - Implement this route
+// - Test this route
 router.get('/', function(req, res, next){
   queryUtils.getAllQueries(res);
 });
@@ -72,7 +72,7 @@ EXPECTS:
     - N/A
 */
 //TODO:
-// - Implement this route
+// - Test this route
 router.get('/user/:username', function(req, res, next){
   var username = req.params.username;
   queryUtils.getQueriesForUser(res, username);
@@ -92,6 +92,8 @@ BODY:
         - All three tracks and the first two artists will be seeded
         - The last artist and all the genres will not be seeded
 */
+// TODO:
+// - Save & Query to DB - NOT DONE
 router.post('/recommend', middlewares.checkToken, (req, res) => {
   jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
     if(err){
@@ -153,9 +155,10 @@ router.post('/recommend', middlewares.checkToken, (req, res) => {
               delete song["preview_url"];
               delete song["type"];
               delete song["href"];
-              songs.push(song)
+              songs.push(song);
             }
-            res.json(songs)
+            queryUtils.insertIntoCache('Recommendation', authorizedData['username'], req.body, songs);
+            res.json(songs);
           })
           .catch(err => {
             console.log(err);
@@ -180,16 +183,7 @@ EXPECTS:
     - 'selectedTracks' - If query is for selected Tracks
       - Should be an array of spotify track id's
 */
-//TODO:
-// - Return Data of Tracks - DONE
-//   - If Data for Top Tracks:
-//     - Get Song Info from Global Top 50 Playlist (id: 37i9dQZEVXbMDoHDwVN2tF) - DONE
-//     - Process through getAvgFeats - DONE
-//     - Return data object - DONE
-//   - If Data for Given Tracks:
-//     - Get Song Info of given tracks - DONE
-//     - Process through getAvgFeats - DONE
-//     - Return data object- DONE
+// TODO:
 // - Save & Query to DB - NOT DONE
 router.post('/visual', middlewares.checkToken, (req, res) => {
   jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
@@ -227,6 +221,7 @@ router.post('/visual', middlewares.checkToken, (req, res) => {
                   res.status(500);
                   res.json(err);
                 }
+                queryUtils.insertIntoCache('Visualization', authorizedData['username'], req.body, data);
                 res.json(data);
               })
             })
@@ -249,6 +244,7 @@ router.post('/visual', middlewares.checkToken, (req, res) => {
                   res.status(500);
                   res.json(err);
                 }
+                queryUtils.insertIntoCache('Visualization', authorizedData['username'], req.body, data);
                 res.json(data);
               })
             })
