@@ -14,7 +14,7 @@ class Header extends Component {
   }
   render() {
     const { className, name, location, logout } = this.props;
-    const locations = ['Logout', 'Account', 'Profile', 'Home'];
+    const locations = ['Logout', 'Account', 'Profile', 'Home', 'My Data', 'Recommendation'];
     const navItems = locations.map(item => {
       let href = `/${item}`
       if (location.toLowerCase().includes(item.toLowerCase())) {
