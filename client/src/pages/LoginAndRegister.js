@@ -20,7 +20,6 @@ class Register extends Component {
 
   makeState = name => ({ target }) => {
     this.setState({ [name]: target.value })
-    console.log(this.state)
   };
 
   handleChange = () => {
