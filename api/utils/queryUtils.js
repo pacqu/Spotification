@@ -1,5 +1,5 @@
 //Moment Setup
-var moment = require('moment');
+const moment = require('moment');
 //Axios for Spotify Web API calls
 const axios = require('axios');
 //MongoDB Connection
@@ -67,4 +67,21 @@ const getQueriesForUser = (res, username) => {
   });
 }
 
-module.exports = {getAllQueries, getQueriesForUser};
+/**
+ * Stores a given query in the query cache
+ * @function
+ * @param res - response object to use
+ * @param {string} username - username in question
+ */
+const insertIntoCache = (queryType, username, reqBody, resObj) => {
+  const queryCache = db.collection('queryCache');
+  queryCache.insert({
+    'queryType': queryType,
+    'timeOfQuery': moment().format(),
+    'username': username,
+    'reqBody': reqBody,
+    'resObj': resObj
+  });
+}
+
+module.exports = {getAllQueries, getQueriesForUser, insertIntoCache};
