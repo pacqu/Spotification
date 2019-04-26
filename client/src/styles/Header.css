@@ -1,4 +1,5 @@
 .nav {
+  z-index: 9999;
   width: 100%;
   position: fixed;
   overflow: hidden;
@@ -8,13 +9,15 @@
 }
 
 .menu-item-container {
+  width: 100%;
 }
 
 .nav-image {
   margin-right: 10px;
   float: right;
-  height: 35px;
-  width: 35px;
+  height: 55px;
+  width: 55px;
+  padding-bottom: 100px;
   border-radius: 100%;
   padding: 8px;
 }

@@ -182,7 +182,7 @@ class Register extends Component {
               <div className={overlayContainerClass}>
                 <div className="overlay">
                   <div className={overlayClass}>
-                    <h1>Hello, Friend!</h1>
+                    <h1 style={{color: 'white'}}>Hello, Friend!</h1>
                     {this.state.isSignup ? (
                       <p> Back to sign in </p>
                     ) : (

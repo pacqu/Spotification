@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import Header from '../components/Header';
+import Loading from '../components/Loading';
 import PropTypes from 'prop-types';  
 import Cookies from 'js-cookie';
 import axios from 'axios';
@@ -39,7 +40,7 @@ function ProtectedRoute({ component: Component, path }) {
       <Header name={""} location={path} />
       <br />
       <br />
-      <h2> Loading...</h2>
+      <Loading loading />
     </>)
   }
 }

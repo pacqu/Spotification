@@ -2,11 +2,13 @@ import React, { Component } from 'react';
 import axios from "axios";
 import Cookies from "js-cookie";
 import Input from "../components/Input";
+import '../styles/Search.css';
 
 class Search extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      currentTab: "Songs",
       query: ""
     };
   }

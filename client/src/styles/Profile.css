@@ -12,8 +12,12 @@
   border-radius: 50%;
 }
 
+.user-details {
+  margin: 0 10px;
+}
+
 .chart {
-  margin: 0 30px;
+  margin: 0 20px 10px 0px;
 }
 
 @media screen and (min-width: 768px) {
@@ -28,7 +32,6 @@
   }
 
   .sidebar {
-    max-width: 300px;
     grid-area: sidebar;
   }
 
