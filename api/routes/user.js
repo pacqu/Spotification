@@ -309,6 +309,9 @@ router.get('/listening-data', middlewares.checkToken, (req, res) => {
 EXPECTS:
   HEADERS:
     - 'Authorization': 'Bearer <token>'
+    BODY:
+    - 'playlistName': Desired name of newly created playlist
+    - 'playlistTrackUris': Array of Spotify Track URI's for tracks to be added to playlist
 */
 router.post('/create-playlist', middlewares.checkToken, (req, res) => {
   jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
