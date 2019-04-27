@@ -7,7 +7,8 @@ const classNames = require('classnames');
 export default React.forwardRef((props, ref) => {
   const inputClass = classNames({
     defaultInput: true,
-    fullWidth: props.fullWidth ? props.fullWidth : false
+    fullWidth: props.fullWidth ? props.fullWidth : false,
+    spotify: props.spotify ? props.spotify : false
   });
   return (
     <input

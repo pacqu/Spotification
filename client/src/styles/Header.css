@@ -4,6 +4,8 @@
   position: fixed;
   overflow: hidden;
   background-color: #333;
+  background: url('../static/header.png');
+  background-size: cover;
   color: var(--white);
   top: 0;
 }

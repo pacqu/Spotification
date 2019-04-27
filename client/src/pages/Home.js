@@ -4,6 +4,7 @@ import Search from '../components/Search';
 import MediaQuery from 'react-responsive';
 import '../styles/Home.css';
 
+// todo have a search bar, song list with plus signs and an indicator of added songs
 class Home extends Component {
   constructor(props){
     super(props);

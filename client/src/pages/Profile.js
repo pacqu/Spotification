@@ -10,6 +10,7 @@ import { ListGroup, ListGroupItem } from "shards-react";
 
 import '../styles/Profile.css';
 
+// todo: add devices https://developer.spotify.com/documentation/web-api/reference/player/get-a-users-available-devices/
 class Profile extends Component {
 	constructor(props){
     super(props);

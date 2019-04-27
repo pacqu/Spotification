@@ -15,7 +15,7 @@
 @media screen and (min-width: 768px) {
   .home-container {
     display: grid;
-    grid-template-columns: [sidebar] 3fr [content] 8fr;
+    grid-template-columns: [sidebar] 3fr [content] 9fr;
   }
 
   .dropdown {
@@ -24,7 +24,8 @@
   }
 
   .sidebar {
-    max-width: 300px;
+    height: 100vh;
+    background-color: rgba(65, 54, 54, 0.324);
     grid-area: sidebar;
   }
 
