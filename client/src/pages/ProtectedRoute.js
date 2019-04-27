@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import Header from '../components/Header';
-import PropTypes from 'prop-types';  
+import PropTypes from 'prop-types';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 
