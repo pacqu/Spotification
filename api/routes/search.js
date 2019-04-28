@@ -37,8 +37,6 @@ EXPECTS:
   BODY:
     - N/A
 */
-//TODO:
-// - Implement this route
 router.get('/', middlewares.checkToken, (req, res) => {
   //Validate Auth Token
   jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
@@ -60,9 +58,9 @@ router.get('/', middlewares.checkToken, (req, res) => {
       const users = db.collection('users');
       users.find({'username': authorizedData['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
         if(err) {
-          console.log(err.data);
+          console.log(err);
           res.status(500);
-          res.json(err.data);
+          res.json(err);
         }
         user = results[0];
         spotifyData.checkRefresh(user, db, spotifyApi, (err, checkedUser) => {
@@ -140,7 +138,7 @@ EXPECTS:
     - N/A
 */
 //TODO:
-// - Implement this route
+// - Save & Query to DB - NOT DONE
 router.get('/album/:albumId', middlewares.checkToken, (req, res) => {
   jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
     if(err){
@@ -209,7 +207,7 @@ EXPECTS:
     - N/A
 */
 //TODO:
-// - Implement this route
+// - Save & Query to DB - NOT DONE
 router.get('/artist/:artistId', middlewares.checkToken, (req, res) => {
   jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
     if(err){
@@ -278,7 +276,7 @@ EXPECTS:
     - N/A
 */
 //TODO:
-// - Implement this route
+// - Save & Query to DB - NOT DONE
 router.get('/playlist/:playlistId', middlewares.checkToken, (req, res) => {
   jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
     if(err){

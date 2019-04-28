@@ -160,7 +160,7 @@ const getSimilairity= (data1, data2, next) => {
   let sqrtd2 = Math.sqrt(data2Vals.reduce(squareReducer));
   let denom = sqrtd1*sqrtd2;
   let num = 0;
-  for (int i = 0; i < data1Vals.length; i++){
+  for (let i = 0; i < data1Vals.length; i++){
     num += data1Vals[i]*data2Vals[i];
   }
   return num/denom;

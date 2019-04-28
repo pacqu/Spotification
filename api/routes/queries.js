@@ -50,8 +50,6 @@ EXPECTS:
   HEADERS:
     - 'Authorization': 'Bearer <token>'
 */
-//TODO:
-// - Test this route
 router.get('/user', middlewares.checkToken, function(req, res, next){
   jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
     if(err){
@@ -71,8 +69,6 @@ EXPECTS:
   BODY:
     - N/A
 */
-//TODO:
-// - Test this route
 router.get('/user/:username', function(req, res, next){
   var username = req.params.username;
   queryUtils.getQueriesForUser(res, username);
