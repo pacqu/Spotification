@@ -20,6 +20,27 @@ class Profile extends Component {
   // Object.entries(res.data[0].listeningData.avgFeatures) -> for each loops thru data
   // Object.entries(res.data[0].listeningData.avgFeatures).filter(item=> item[0] !=="duration_ms") -> filter out ms for now
   // Remove .filter(item=> item[0] !=="duration_ms") => .map(item => item[0]) when graph options fixed.
+	componentDidMount(){
+		const { data }  = this.props;
+		if (!(data.listeningData)) this.spotifyData();
+    else {
+      let array = Object.entries(
+        data.listeningData.avgFeatures
+      ).filter(item => item[0] !== "duration_ms");
+      this.setState({
+        features: array,
+        featuresName: array.map(item => item[0]),
+        featuresValue: array.map(item => item[1]),
+        topSongs: Object.entries(data.listeningData.songs).map(
+          item => item[1].name
+        ),
+        loadingDone: true
+      });
+      console.log(this.state.topSongs);
+      console.log(Object.entries(data));
+    }
+	}
+
   spotifyData = () => {
     axios.get("/user/listening-data", {
       headers: { Authorization: "Bearer " + Cookies.get("cookie") }
@@ -60,7 +81,7 @@ class Profile extends Component {
     };
     return <Bar data={data} />;
   };
-  
+
   //maps top 3 songs, change number for more or less songs
   SongList = () => {
     let songs = this.state.topSongs.slice(0,3).map((item =>
@@ -73,7 +94,7 @@ class Profile extends Component {
       </ul>
     )
   }
-	
+
   render() {
     const { data, location } = this.props;
     const { username } = data;

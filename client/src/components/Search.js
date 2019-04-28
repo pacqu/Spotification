@@ -15,7 +15,7 @@ class Search extends Component {
     axios.get(`/search?search=${target.value}`, { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
     .then(res => {
       if (res.data.tracks.items) {
-        console.log(res.data.tracks.items)
+        //console.log(res.data.tracks.items)
         this.setState({
           [name]: target.value,
           results: res.data.tracks.items
@@ -65,7 +65,7 @@ class Search extends Component {
         return(<li data-id={i} onClick={(e) => onClick(e, this.state.results)}>{track.name} by {track.artists[0].name} of {track.album.name}</li>)
       })
     }
-    console.log(tracks)
+    //console.log(tracks)
     return(
       <div>
       <Input
