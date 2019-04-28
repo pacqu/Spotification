@@ -150,4 +150,20 @@ const getAvgFeats = (user, db, songs, next) => {
   })
 }
 
+const getSimilairity= (data1, data2, next) => {
+  delete data1.duration_ms;
+  delete data2.duration_ms;
+  let data1Vals = Object.values(data1);
+  let data2Vals = Object.values(data2);
+  let squareReducer = (accumulator, currentValue) => accumulator + Math.pow(currentValue,2);
+  let sqrtd1 = Math.sqrt(data1Vals.reduce(squareReducer));
+  let sqrtd2 = Math.sqrt(data2Vals.reduce(squareReducer));
+  let denom = sqrtd1*sqrtd2;
+  let num = 0;
+  for (let i = 0; i < data1Vals.length; i++){
+    num += data1Vals[i]*data2Vals[i];
+  }
+  return num/denom;
+}
+
 module.exports = {checkRefresh, getAvgFeats};
