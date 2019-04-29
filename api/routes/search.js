@@ -42,7 +42,6 @@ router.get('/', middlewares.checkToken, (req, res) => {
   jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
     if(err){
       console.log('ERROR: Could not connect to the protected route');
-      console.log(err)
       res.status(401);
       res.send('Error with given token');
     } else {
