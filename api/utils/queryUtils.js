@@ -70,8 +70,6 @@ const getQueriesForUser = (res, username) => {
 /**
  * Stores a given query in the query cache
  * @function
- * @param res - response object to use
- * @param {string} username - username in question
  */
 const insertIntoCache = (queryType, user, reqBody, resObj) => {
   const queryCache = db.collection('queries');
@@ -177,4 +175,62 @@ const songParser = (results) => {
   return songs;
 }
 
-module.exports = {getAllQueries, getQueriesForUser, insertIntoCache, songParser};
+/**
+ * Checks query cache of query was called before
+ * @function
+ */
+const checkQueryCache = (queryType, username, reqBody) => {
+  const queryCache = db.collection('queries');
+  const queryPayload = {
+    'queryType': queryType,
+    'reqBody': reqBody,
+    'username': username
+  }
+  queries.find(queryPayload).toArray((err, results) => {
+    if (err) {
+      console.log(err);
+      return null;
+    } else if ( results.length == 0  || !(results) ) {
+      return null;
+    } else {
+      return results[0]['resObj'];
+    }
+  });
+}
+
+/**
+ * Parses a Spotify API Call to return a list of songs
+ * @function
+ */
+const songParser = (results) => {
+  songs = [];
+  for (let song of results.data.tracks) {
+    song['album'] = {
+      name: song['album']['name'],
+      id: song['album']['id'],
+    }
+    artists = []
+    for (let artist of song['artists']) {
+      artists.push({
+        name: artist['name'],
+        id: artist['id'],
+      })
+    }
+    song['artists'] = artists;
+    delete song["available_markets"];
+    delete song["disc_number"];
+    delete song["external_ids"];
+    delete song["is_local"];
+    delete song["explicit"];
+    delete song["track_number"];
+    delete song["external_urls"];
+    delete song["preview_url"];
+    delete song["type"];
+    delete song["href"];
+    songs.push(song);
+  }
+  return songs;
+}
+
+module.exports = {getAllQueries, getQueriesForUser, insertIntoCache, 
+  songParser, checkQueryCache};
