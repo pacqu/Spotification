@@ -21,7 +21,7 @@ class Home extends Component {
         <Header name={username} location={location} />
         <div className="home-container">
           <div className="sidebar">
-            This is the sidebar
+            <p> Profile </p>
             <MediaQuery query="(min-width: 768px)">
               <img className="avatar" src="https://i.kym-cdn.com/entries/icons/mobile/000/028/861/cover3.jpg" />
             </MediaQuery>

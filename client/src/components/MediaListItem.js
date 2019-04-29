@@ -16,7 +16,6 @@ const MediaListItem = ({ name, primaryContext, secondaryContext, coverArtUrl }) 
         <div className="info-name">{name}</div>
         <div className="info-context">
           <p>{primaryContext}</p>
-          {/* <div className="context-primary">{primaryContext}</div> */}
           { secondaryContext && <div className="context-secondary">{secondaryContext}</div> }
         </div>
       </div>
