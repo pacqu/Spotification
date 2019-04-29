@@ -1,66 +1,25 @@
 import React, { Component } from "react";
-import axios from "axios";
-import Cookies from "js-cookie";
-import { Redirect } from 'react-router-dom';
 import Header from '../components/Header';
 import MediaQuery from 'react-responsive';
-import '../styles/Home.css';
+
+import '../styles/Layout.css';
+import '../styles/Profile.css';
+
 import { Bar } from 'react-chartjs-2';
+import HorizontalBarGraph from '../components/HorizontalBarGraph'
+import Chart from '../components/Chart';
 
 class Profile extends Component {
 	constructor(props){
     super(props);
     this.state = {
-			features: [],
-			featuresName: [],
-      featuresValue: [],
-      topSongs: []
     };
   }
-  // Object.entries(res.data[0].listeningData.avgFeatures) -> for each loops thru data
-  // Object.entries(res.data[0].listeningData.avgFeatures).filter(item=> item[0] !=="duration_ms") -> filter out ms for now
-  // Remove .filter(item=> item[0] !=="duration_ms") => .map(item => item[0]) when graph options fixed.
+
 	componentDidMount(){
-		const { data }  = this.props;
-		if (!(data.listeningData)) this.spotifyData();
-    else {
-      let array = Object.entries(
-        data.listeningData.avgFeatures
-      ).filter(item => item[0] !== "duration_ms");
-      this.setState({
-        features: array,
-        featuresName: array.map(item => item[0]),
-        featuresValue: array.map(item => item[1]),
-        topSongs: Object.entries(data.listeningData.songs).map(
-          item => item[1].name
-        ),
-        loadingDone: true
-      });
-      console.log(this.state.topSongs);
-      console.log(Object.entries(data));
-    }
 	}
 
   spotifyData = () => {
-    axios.get("/user/listening-data", {
-      headers: { Authorization: "Bearer " + Cookies.get("cookie") }
-    })
-    .then(res => {
-      let array = Object.entries(
-        res.data[0].listeningData.avgFeatures
-      ).filter(item => item[0] !== "duration_ms");
-      this.setState({
-        features: array,
-        featuresName: array.map(item => item[0]),
-        featuresValue: array.map(item => item[1]),
-        topSongs: Object.entries(res.data[0].listeningData.songs).map(
-          item => item[1].name
-        ),
-        loadingDone: true
-      });
-      console.log(this.state.topSongs);
-      console.log(Object.entries(res.data));
-    });
   };
 
   BarGraph = props => {
@@ -82,14 +41,12 @@ class Profile extends Component {
     return <Bar data={data} />;
   };
 
-  //maps top 3 songs, change number for more or less songs
-  SongList = () => {
-    let songs = this.state.topSongs.slice(0,3).map((item =>
+  SongList = (topSongs) => {
+    let songs = topSongs.slice(0,10).map((item =>
       <li>{item}</li>
     ))
     return (
       <ul>
-        <h3>My Top Songs</h3>
         <li>{songs}</li>
       </ul>
     )
@@ -97,7 +54,12 @@ class Profile extends Component {
 
   render() {
     const { data, location } = this.props;
-    const { username } = data;
+    const { username, listeningData } = data;
+
+    const topSongs = Object.entries(listeningData.songs).map(item => [item[1].artists.name, item[1].name])
+    const { sortedGenres } = listeningData;
+    const barData = sortedGenres.map(g => [g.genre, g.count]).slice(0, 7);
+
     return (
       <main>
         <Header name={username} location={location} />
@@ -109,8 +71,15 @@ class Profile extends Component {
             </MediaQuery>
           </div>
           <div className="content">
-            {this.BarGraph()}
-            {this.SongList()}
+            <Chart title="My Top Songs" className="chart">
+              {this.SongList(topSongs)}
+            </Chart>
+            <Chart title="Favorite Genres" className="chart">
+              <HorizontalBarGraph label={"Count"} barData={barData} />
+            </Chart>
+            <Chart title="Bar data">
+              {this.BarGraph()}
+            </Chart>
           </div>
         </div>
       </main>

@@ -2,17 +2,18 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/Button.css';
 
-const className = require('classnames');
+const classNames = require('classnames');
 
 //todo : Add button sizes
 export default function({
+  className,
   children,
   onClick,
   inverted,
   type,
   to,
   }) {
-  const buttonStyles = className('radiusButton', { inverted });
+  const buttonStyles = classNames('radiusButton', className, { inverted });
   return to ? (
     <Link className="radiusLink" to={to}>
       <button

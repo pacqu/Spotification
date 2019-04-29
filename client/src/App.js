@@ -7,7 +7,7 @@ import Home from './pages/Home';
 import LnR from './pages/LoginAndRegister'
 import Profile from './pages/Profile'
 import DataVisualizations from './pages/DataVisualizations'
-import Recommendation from './pages/Recommendation';
+import Recommendation from './pages/Recommendation'
 import './styles/App.css';
 
 class App extends Component {

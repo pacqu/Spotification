@@ -1,53 +1,69 @@
 import React, { Component } from "react";
 import Header from '../components/Header';
 import Search from '../components/Search';
-import Button from "../components/Button";
+import Button from '../components/Button';
+import SongList from '../components/SongList';
+import MediaListItem from '../components/MediaListItem';
 import MediaQuery from 'react-responsive';
-import '../styles/Home.css';
+
 import axios from "axios";
 import Cookies from "js-cookie";
+
+import '../styles/Recommendation.css';
+import '../styles/Layout.css';
 
 class Recommendation extends Component {
 	constructor(props){
     super(props);
     this.state = {
       displayRecs: false,
+      results: [],
+      recTracks: [],
       seedTracks: [],
       seedArtists: [],
-      seedGenres: []
+      seedGenres: [],
+      query: ''
     }
-	}
-
-  recOnTrackClick = (e, tracks) => {
-    if (e.currentTarget.dataset.id) {
-      let seedTracks = this.state.seedTracks;
-      if (seedTracks.length <=4){
-        seedTracks.push(tracks[e.currentTarget.dataset.id]);
-        this.setState({seedTracks: seedTracks});
-        //console.log(this.state.seedTracks)
+  }
+  
+  handleQuery = e => {
+    e.preventDefault();
+    axios.get(`/search?search=${this.state.query}`, { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
+    .then(res => {
+      if (res.data.tracks.items) {
+        this.setState({ results: res.data.tracks.items })
       }
-    }
+      console.log(this.state)
+    })
+    .catch(err => {
+      console.log(err);
+    });
+  }
+
+  handleQueryChange = e => {
+    this.setState({ query: e.target.value })
+    console.log(this.state)
+  }
+
+  handleSongClick = (song) => {
+    let { seedTracks } = this.state;
+    seedTracks.push(song);
+    this.setState({ seedTracks });
   }
 
   removeFromTracks(e, track){
-    let filteredSeedTracks = this.state.seedTracks.filter((seedTrack) => {
-      return (track.name != seedTrack.name) || (track.artists[0].name != seedTrack.artists[0].name) || (track.album.name != seedTrack.album.name)
-    });
-    this.setState({
-      seedTracks: filteredSeedTracks
-    })
-    console.log(filteredSeedTracks);
+    let { seedTracks } = this.state
+    seedTracks = seedTracks.filter((seedTrack) => (
+      track.name != seedTrack.name) || (track.artists[0].name != seedTrack.artists[0].name) || (track.album.name != seedTrack.album.name
+    ));
+    this.setState({ seedTracks })
   }
 
   handleSubmitRec = (e) => {
     e.preventDefault();
     let trackIds = this.state.seedTracks.map(track => track.id);
-    console.log(trackIds);
-    axios.post('/queries/recommend',
-    { seedTracks: trackIds},
-    { headers: { Authorization: `Bearer ${Cookies.get("cookie")}`}})
+    axios.post('/queries/recommend', { seedTracks: trackIds }, { headers: { Authorization: `Bearer ${Cookies.get("cookie")}`}})
     .then(res => {
-      console.log(res.data);
       this.setState({
         displayRecs: true,
         recTracks: res.data
@@ -60,47 +76,40 @@ class Recommendation extends Component {
 
   render() {
     const { data, location } = this.props;
+    const { results, displayRecs, recTracks, seedTracks, seedArtists, seedGenres } = this.state;
     const { username } = data;
-    let seedTrackDisplay = [];
-    if (this.state.seedTracks !== undefined && this.state.seedTracks.length > 0){
-      seedTrackDisplay = this.state.seedTracks.map((track,i) => {
-          return(<li data-id={i} onClick={(e) => this.removeFromTracks(e,this.state.seedTracks[i])} >{track.name} by {track.artists[0].name} of {track.album.name}</li>)
-      })
-    }
-    let content = (
-      <div className="content">
-      <Search onTrackClick={this.recOnTrackClick}/>
-      <h5>Selected Seed Tracks</h5>
-      {seedTrackDisplay}
-      <Button onClick={(e) => this.handleSubmitRec(e)}>Get Recommendations</Button>
-      </div>
-    )
-    if (this.state.displayRecs){
-      let recDisplay = []
-      if (this.state.recTracks !== undefined && this.state.recTracks.length > 0){
-        recDisplay = this.state.recTracks.map((track,i) => {
-            return(<li data-id={i} >{track.name} by {track.artists[0].name} of {track.album.name}</li>)
-        })
-        content = (
-          <div className="content">
-          <h3>Recommendations</h3>
-          {recDisplay}
-          </div>
-        )
-      }
-    }
+
+    const showRecs = (recTracks.length > 0 && displayRecs);
+    const seedTracksDisplay = seedTracks.map((track, i) => {
+      return (
+        <MediaListItem name={track.name} primaryContext={track.artists[0].name} coverArtUrl={track.album.images[0].url} />
+      )
+    })
 
     return (
       <main>
         <Header name={username} location={location} />
         <div className="home-container">
           <div className="sidebar">
-            This is the sidebar
-            <MediaQuery query="(min-width: 768px)">
-              <img className="avatar" src="https://i.kym-cdn.com/entries/icons/mobile/000/028/861/cover3.jpg" />
-            </MediaQuery>
+            <p>Currently Selected ({seedTracks.length})</p>
+            { seedTracks.length > 0 && (<>
+              { seedTracksDisplay }
+              <Button onClick={(e) => this.handleSubmitRec(e)}>Get Recs</Button>
+            </>)}
           </div>
-          {content}
+          <div className="content">
+            <Search
+              handleChange={this.handleQueryChange}
+              handleQuery={this.handleQuery}
+            />
+            { results.length > 0 ? "" : ( <p> Nothing to see here...</p>)}
+            { showRecs ? (<>
+              <h2> Recommendations </h2>
+              <SongList songs={recTracks} />
+            </>) : (
+              <SongList handleClick={this.handleSongClick} songs={results} />
+            )}
+          </div>
         </div>
       </main>
     )

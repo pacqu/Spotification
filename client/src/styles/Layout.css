@@ -1,0 +1,43 @@
+h1,
+h2,
+h3,
+p {
+  color: #fff;
+}
+
+.home-container {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  padding-top: 22px;
+  margin-top: 45px;
+  background-color: rgb(24, 24, 24);
+}
+
+.avatar {
+  height: 200px;
+  max-width: 200px;
+  border-radius: 50%;
+}
+
+@media screen and (min-width: 768px) {
+  .home-container {
+    display: grid;
+    grid-template-columns: [sidebar] 3fr [content] 8fr;
+  }
+
+  .dropdown {
+    list-style: none;
+    text-align: center;
+  }
+
+  .sidebar {
+    max-width: 300px;
+    grid-area: sidebar;
+  }
+
+  .content {
+    width: 95%;
+    grid-area: content;
+  }
+}

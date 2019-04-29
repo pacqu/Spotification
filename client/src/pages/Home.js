@@ -2,12 +2,17 @@ import React, { Component } from 'react';
 import Header from '../components/Header';
 import Search from '../components/Search';
 import MediaQuery from 'react-responsive';
+import '../styles/Layout.css';
 import '../styles/Home.css';
 
 class Home extends Component {
   constructor(props){
     super(props);
   }
+  componentDidMount() {
+    console.log(this.props.data)
+  }
+  
   render() {
     const { data, location } = this.props;
     const { username } = data;
