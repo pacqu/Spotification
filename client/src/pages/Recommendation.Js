@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import classNames from 'classnames';
 import { Tabs, Tab, TabList, TabPanel } from 'react-tabs';
 
 import Header from '../components/Header';
@@ -21,6 +22,7 @@ class Recommendation extends Component {
     super(props);
     this.state = {
       displayRecs: false,
+      currentTab: 'Songs',
       results: [],
       recTracks: [],
       artistResults: [],
@@ -86,8 +88,12 @@ class Recommendation extends Component {
 
   render() {
     const { data, location } = this.props;
-    const { results, displayRecs, recTracks, seedTracks, seedArtists, seedGenres } = this.state;
+    const { currentTab, results, displayRecs, recTracks, seedTracks, seedArtists, seedGenres } = this.state;
     const { username } = data;
+
+    const songTabStyles = classNames('tab', { 'active': currentTab === 'Songs' })
+    const artistTabStyles = classNames('tab', { 'active': currentTab === 'Artists' })
+    const genreTabStyles = classNames('tab', { 'active': currentTab === 'Genres' })
 
     const showRecs = (recTracks.length > 0 && displayRecs);
     const seedTracksDisplay = seedTracks.map((track, i) => {
@@ -112,9 +118,9 @@ class Recommendation extends Component {
             <div className="tabs">
               <Tabs>
                 <TabList className="browse-headers">
-                  <Tab className="tab active"> Songs </Tab>
-                  <Tab className="tab"> Artists </Tab>
-                  <Tab className="tab"> Genres </Tab>
+                  <Tab onClick={() => this.setState({ currentTab: 'Songs' })} className={songTabStyles}> Songs </Tab>
+                  <Tab onClick={() => this.setState({ currentTab: 'Artists' })} className={artistTabStyles}> Artists </Tab>
+                  <Tab onClick={() => this.setState({ currentTab: 'Genres' })} className={genreTabStyles}> Genres </Tab>
                 </TabList>
                 <TabPanel>
                   <Search
