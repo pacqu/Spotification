@@ -1,0 +1,30 @@
+.search-field {
+  display: flex;
+  justify-content: center;
+}
+
+.search-input {
+  width: 80%;
+  position: relative;
+}
+
+.search-button {
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  right: 3px;
+  color: white;
+  background-color: transparent;
+  border: none;
+  height: 60%;
+  outline: none;
+}
+
+.search-button-icon {
+  width: auto;
+}
+
+.search-button-icon::after {
+  display: inline-block;
+  font-style: normal
+}

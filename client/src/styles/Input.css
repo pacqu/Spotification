@@ -8,3 +8,15 @@
 .fullWidth {
     width: 100%;
 }
+
+.search {
+	border-radius: 20px;
+	outline: none;
+	padding-left: 20px;
+	padding-right: 40px;
+	background-color: transparent;
+	border: 2px solid white;
+	height: 35px;
+	color: #fff;
+	box-sizing: border-box;
+}
