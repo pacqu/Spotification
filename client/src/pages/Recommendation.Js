@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import classNames from 'classnames';
 import { Tabs, Tab, TabList, TabPanel } from 'react-tabs';
-
 import Header from '../components/Header';
 import Search from '../components/Search';
 import Button from '../components/Button';
@@ -10,7 +9,6 @@ import ArtistView from '../components/ArtistView';
 import BrowseView from '../components/BrowseView';
 import MediaListItem from '../components/MediaListItem';
 import MediaQuery from 'react-responsive';
-
 import axios from "axios";
 import Cookies from "js-cookie";
 
