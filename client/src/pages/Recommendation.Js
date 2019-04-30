@@ -23,7 +23,8 @@ class Recommendation extends Component {
     this.state = {
       displayRecs: false,
       currentTab: 'Songs',
-      results: [],
+      songResults: [],
+      artistResults: [],
       recTracks: [],
       artistResults: [],
       genres: [],
@@ -33,13 +34,24 @@ class Recommendation extends Component {
       query: ''
     }
   }
-  
+
   handleQuery = e => {
     e.preventDefault();
-    axios.get(`/search?search=${this.state.query}`, { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
+    let tabState = 'track', resultsType = 'tracks', stateType = 'songResults';
+    if (this.state.currentTab === 'Artists') {
+      tabState = 'artist';
+      resultsType = 'artists';
+      stateType = 'artistResults';
+    }
+    else if (this.state.currentTab === 'Album') {
+      tabState = 'album';
+      resultsType = 'albums';
+      stateType = 'albumResults';
+    }
+    axios.get(`/search?search=${this.state.query}&searchType=${tabState}`, { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
     .then(res => {
-      if (res.data.tracks.items) {
-        this.setState({ results: res.data.tracks.items })
+      if (res.data[resultsType].items) {
+        this.setState({ [stateType]: res.data[resultsType].items, displayRecs: false })
       }
       console.log(this.state)
     })
@@ -54,27 +66,43 @@ class Recommendation extends Component {
   }
 
   handleSongClick = (song) => {
-    let { seedTracks } = this.state;
-    if (seedTracks.length > 4) {
-      alert('Please don\'t add more than 5 songs!');
+    let { seedTracks, seedArtists, seedGenres } = this.state;
+    if ((seedTracks.length + seedArtists.length + seedGenres.length) > 4) {
+      alert('Please don\'t add more than 5 seeds!');
     } else {
       seedTracks.push(song);
       this.setState({ seedTracks });
     }
   }
 
-  removeFromTracks(e, track){
-    let { seedTracks } = this.state
-    seedTracks = seedTracks.filter((seedTrack) => (
-      track.name != seedTrack.name) || (track.artists[0].name != seedTrack.artists[0].name) || (track.album.name != seedTrack.album.name
-    ));
-    this.setState({ seedTracks })
+  handleAlbumClick = (artist) => {
+    let { seedTracks, seedArtists, seedGenres } = this.state;
+    if ((seedTracks.length + seedArtists.length + seedGenres.length) > 4) {
+      alert('Please don\'t add more than 5 seeds!');
+    } else {
+      seedArtists.push(artist);
+      this.setState({ seedArtists });
+    }
+  }
+
+  removeFromSeeds(seedType, deletedSeed){
+    let { seedTracks, seedArtists, seedGenres } = this.state
+    console.log("why");
+    if (seedType == 'track'){
+      seedTracks = seedTracks.filter((seedTrack) => (deletedSeed.id != seedTrack.id));
+      this.setState({ seedTracks })
+      }
+    if (seedType == 'artist'){
+      seedArtists = seedArtists.filter((seedArtist) => (deletedSeed.id != seedArtist.id));
+      this.setState({ seedArtists })
+      }
   }
 
   handleSubmitRec = (e) => {
     e.preventDefault();
     let trackIds = this.state.seedTracks.map(track => track.id);
-    axios.post('/queries/recommend', { seedTracks: trackIds }, { headers: { Authorization: `Bearer ${Cookies.get("cookie")}`}})
+    let artistIds = this.state.seedArtists.map(artist => artist.id);
+    axios.post('/queries/recommend', { seedTracks: trackIds, seedArtists: artistIds }, { headers: { Authorization: `Bearer ${Cookies.get("cookie")}`}})
     .then(res => {
       this.setState({
         displayRecs: true,
@@ -88,7 +116,7 @@ class Recommendation extends Component {
 
   render() {
     const { data, location } = this.props;
-    const { currentTab, results, displayRecs, recTracks, seedTracks, seedArtists, seedGenres } = this.state;
+    const { currentTab, songResults, artistResults, displayRecs, recTracks, seedTracks, seedArtists, seedGenres } = this.state;
     const { username } = data;
 
     const songTabStyles = classNames('tab', { 'active': currentTab === 'Songs' })
@@ -98,7 +126,12 @@ class Recommendation extends Component {
     const showRecs = (recTracks.length > 0 && displayRecs);
     const seedTracksDisplay = seedTracks.map((track, i) => {
       return (
-        <MediaListItem name={track.name} primaryContext={track.artists[0].name} coverArtUrl={track.album.images[0].url} />
+        <MediaListItem name={track.name} primaryContext={track.artists[0].name} coverArtUrl={track.album.images[0].url}/>
+      )
+    })
+    const seedArtistsDisplay = seedArtists.map((artist, i) => {
+      return (
+        <MediaListItem name={artist.name} coverArtUrl={artist.images[0] ? artist.images[0].url : ''}/>
       )
     })
 
@@ -107,9 +140,14 @@ class Recommendation extends Component {
         <Header name={username} location={location} />
         <div className="home-container">
           <div className="sidebar">
-            <p>Currently Selected ({seedTracks.length})</p>
+            <p>Currently Selected ({seedTracks.length + seedArtists.length})</p>
             { seedTracks.length > 0 && (<>
               { seedTracksDisplay }
+            </>)}
+            { seedArtists.length > 0 && (<>
+              { seedArtistsDisplay }
+            </>)}
+            { (seedTracks.length + seedArtists.length) > 0 && (<>
               <Button onClick={(e) => this.handleSubmitRec(e)}>Get Recs</Button>
             </>)}
           </div>
@@ -127,18 +165,26 @@ class Recommendation extends Component {
                     handleChange={this.handleQueryChange}
                     handleQuery={this.handleQuery}
                   />
-                  { results.length > 0 ? "" : ( <p> Nothing to see here...</p>)}
+                  { songResults.length > 0 ? "" : ( <p> Nothing to see here...</p>)}
                   { showRecs ? (<>
                     <h2> Recommendations </h2>
                     <SongList songs={recTracks} />
                   </>) : (
-                    <SongList handleClick={this.handleSongClick} songs={results} />
+                    <SongList handleClick={this.handleSongClick} songs={songResults} />
                   )}
                 </TabPanel>
                 <TabPanel>
-                  <h2> Artists </h2>
-                  <Search />
-                  <ArtistView />
+                  <Search
+                    handleChange={this.handleQueryChange}
+                    handleQuery={this.handleQuery}
+                  />
+                  { artistResults.length > 0 ? "" : ( <p> Nothing to see here...</p>)}
+                  { showRecs ? (<>
+                    <h2> Recommendations </h2>
+                    <SongList songs={recTracks} />
+                  </>) : (
+                    <ArtistView handleClick={this.handleAlbumClick} artists={artistResults}/>
+                  )}
                 </TabPanel>
                 <TabPanel>
                   <h2> Genres </h2>
@@ -147,7 +193,7 @@ class Recommendation extends Component {
                 </TabPanel>
               </Tabs>
             </div>
-            
+
           </div>
         </div>
       </main>
