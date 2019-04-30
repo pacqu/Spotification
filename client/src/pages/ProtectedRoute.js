@@ -13,7 +13,8 @@ function ProtectedRoute({ component: Component, path }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const result = await axios.get('/user/', { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
+        const result = await axios.get('/user/', { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} });
+        const listeningDataResult = await axios.get('/user/listening-data', { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} });
 
         if (result.status === 200) {
           setData(result.data);
