@@ -14,6 +14,7 @@ import BrowseView from '../components/BrowseView';
 import MediaListItem from '../components/MediaListItem';
 import MediaQuery from 'react-responsive';
 
+import Chart from '../components/Chart';
 import axios from "axios";
 import Cookies from "js-cookie";
 
@@ -108,7 +109,6 @@ class DataVisualizations extends Component {
 				recTracks: res.data,
 				selectedFeaturesName: array.map(item => item[0]),
         selectedFeaturesValue: array.map(item => item[1]),
-        //recTracks: res.data
       })
 			console.log(this.state.selectedFeaturesName)
     })
@@ -133,9 +133,6 @@ class DataVisualizations extends Component {
         ),
         loadingDone: true
       });
-			console.log(this.state.userFeaturesName);
-			console.log(this.state.userFeaturesValue);
-      console.log(Object.entries(res.data));
     });
   };
 
@@ -144,48 +141,16 @@ class DataVisualizations extends Component {
 		const { results, displayRecs, recTracks, seedTracks } = this.state;
     const { username } = data;
 		const showRecs = (recTracks.length > 0 && displayRecs);
-		let seedTrackDisplay = [];
+
 		const seedTracksDisplay = seedTracks.map((track, i) => {
 			return (
 				<MediaListItem name={track.name} primaryContext={track.artists[0].name} coverArtUrl={track.album.images[0].url} />
 			)
 		})
 
-		if (this.state.seedTracks !== undefined && this.state.seedTracks.length > 0){
-			seedTrackDisplay = this.state.seedTracks.map((track,i) => {
-					return(<li data-id={i} onClick={(e) => this.removeFromTracks(e,this.state.seedTracks[i])} >{track.name} by {track.artists[0].name} of {track.album.name}</li>)
-			})
-		}
-
-		let content = (
-			<div className="content">
-			<Search
-				handleChange={this.handleQueryChange}
-				handleQuery={this.handleQuery}
-			/>
-			{ results.length > 0 ? "" : ( <p> Select up to 10 tracks</p>)}
-			{ showRecs ? (<>
-				<h2> Recommendations </h2>
-				<SongList songs={recTracks} />
-			</>) : (
-				<SongList handleClick={this.handleSongClick} songs={results} />
-			)}
-			</div>
-    )
-
-		if (this.state.displayRecs){
-			content = (
-				<div className="content">
-			 <DoubleBarGraph
-			 	labels={this.state.userFeaturesName}
-				barData1={this.state.userFeaturesValue}
-				label1={"My Songs"}
-				barData2={this.state.selectedFeaturesValue}
-				label2={"Selected Songs"}
-			 />
-	      </div>
-			)
-		}
+		const seedTrackDisplay = seedTracks.map((track,i) => {
+			return(<li data-id={i} onClick={(e) => this.removeFromTracks(e,this.state.seedTracks[i])} >{track.name} by {track.artists[0].name} of {track.album.name}</li>)
+		})
 
     return (
       <main>
@@ -199,7 +164,33 @@ class DataVisualizations extends Component {
 					</>)}
           </div>
           <div className="content">
-						{content}
+						{displayRecs ? (
+							<Chart title="Song Attributes">
+								<div className="content">
+									<DoubleBarGraph
+										labels={this.state.userFeaturesName}
+										barData1={this.state.userFeaturesValue}
+										label1={"My Songs"}
+										barData2={this.state.selectedFeaturesValue}
+										label2={"Selected Songs"}
+									/>
+								</div>
+							</Chart>
+						) : (
+							<div className="content">
+								<Search
+									handleChange={this.handleQueryChange}
+									handleQuery={this.handleQuery}
+								/>
+								{ results.length > 0 ? "" : ( <p> Select up to 10 tracks</p>)}
+								{ showRecs ? (<>
+									<h2> Recommendations </h2>
+									<SongList songs={recTracks} />
+								</>) : (
+									<SongList handleClick={this.handleSongClick} songs={results} />
+								)}
+							</div>
+						)}
           </div>
         </div>
       </main>
