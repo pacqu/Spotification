@@ -72,7 +72,7 @@ class DataVisualizations extends Component {
 
 	handleSongClick = (song) => {
     let { seedTracks } = this.state;
-    if (seedTracks.length > 4) {
+    if (seedTracks.length > 9) {
       alert('Please don\'t add more than 10 songs!');
     } else {
       seedTracks.push(song);
