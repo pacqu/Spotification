@@ -1,8 +1,6 @@
 import React from 'react';
 import '../styles/LandingPage.css';
 import Button from '../components/Button';
-import lmfao from '../static/kaizenworld.jpg';
-import Logo from '../static/logo.svg';
 import { Link } from 'react-router-dom';
 
 export default function() {

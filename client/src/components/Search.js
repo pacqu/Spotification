@@ -29,7 +29,7 @@ class Search extends Component {
             inverted
             className="search-button"
             onClick={this.props.handleQuery}
-          > Search 
+          > Search
           </Button>
         </div>
       </div>

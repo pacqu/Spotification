@@ -12,7 +12,7 @@ class Home extends Component {
   componentDidMount() {
     console.log(this.props.data)
   }
-  
+
   render() {
     const { data, location } = this.props;
     const { username } = data;

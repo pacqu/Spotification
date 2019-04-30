@@ -55,7 +55,6 @@ class Register extends Component {
       axios
         .post("/user/", { username, password })
         .then(res => {
-          console.log('hello')
           console.log(res);
           const { token } = res.data;
           Cookies.set("cookie", token);
