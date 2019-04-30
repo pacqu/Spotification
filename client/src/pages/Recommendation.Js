@@ -75,7 +75,7 @@ class Recommendation extends Component {
     }
   }
 
-  handleAlbumClick = (artist) => {
+  handleArtistClick = (artist) => {
     let { seedTracks, seedArtists, seedGenres } = this.state;
     if ((seedTracks.length + seedArtists.length + seedGenres.length) > 4) {
       alert('Please don\'t add more than 5 seeds!');
@@ -183,7 +183,7 @@ class Recommendation extends Component {
                     <h2> Recommendations </h2>
                     <SongList songs={recTracks} />
                   </>) : (
-                    <ArtistView handleClick={this.handleAlbumClick} artists={artistResults}/>
+                    <ArtistView handleClick={this.handleArtistClick} artists={artistResults}/>
                   )}
                 </TabPanel>
                 <TabPanel>
