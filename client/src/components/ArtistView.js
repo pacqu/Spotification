@@ -2,14 +2,14 @@ import React from 'react';
 import '../styles/ArtistView.css';
 import PropTypes from 'prop-types';
 
-const ArtistView = ({ artists,}) => {
+const ArtistView = ({ artists, handleClick }) => {
   const renderArtists = () => {
     console.log(artists)
     return artists.map((artist, i) => {
       return (
         <li className='artist-item' key={ i }>
           <a>
-            <div>
+            <div onClick={() => handleClick(artist)}>
               <div className='artist-image'>
                 <img src={artist.images[0] ? artist.images[0].url : ''} />
               </div>
