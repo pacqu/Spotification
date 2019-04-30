@@ -102,7 +102,7 @@ const getAvgFeats = (user, db, songs, next) => {
     delete song["type"];
     delete song["href"];
     idQueries += `${song['id']},`;
-    data['songs'].push(song);
+    data['songs'][song.id] = song;
     data['avgFeatures']['popularity'] += song['popularity'];
   }
   //console.log(albums)
@@ -114,10 +114,12 @@ const getAvgFeats = (user, db, songs, next) => {
   {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
   .then(results => {
     for (let song of results['data']['audio_features']){
+      data['songs'][song.id]['features'] = song;
       for (let feature of features){
         data['avgFeatures'][feature] += song[feature]
       }
     }
+    data['songs'] = Object.values(data['songs']);
     for (let feature of Object.keys(data['avgFeatures'])){
       data['avgFeatures'][feature] /= data['songs'].length;
     }
@@ -137,7 +139,7 @@ const getAvgFeats = (user, db, songs, next) => {
       sortableGenres = Object.keys(genres).map(key => { return {genre: key, count: genres[key]} })
       //console.log(sortableGenres)
       sortableGenres = sortableGenres.sort((g1, g2) => g2.count - g1.count)
-      data['sortedGenres'] = sortableGenres
+      data['sortedGenres'] = sortableGenres;
       //console.log(sortableGenres)
       next(null, data);
     })
