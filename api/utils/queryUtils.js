@@ -176,25 +176,17 @@ const songParser = (results) => {
 }
 
 /**
- * Checks query cache of query was called before
+ * Stores a given query in the query cache
  * @function
  */
-const checkQueryCache = (queryType, username, reqBody) => {
-  const queryCache = db.collection('queries');
-  const queryPayload = {
-    'queryType': queryType,
-    'reqBody': reqBody,
-    'username': username
-  }
-  queries.find(queryPayload).toArray((err, results) => {
-    if (err) {
-      console.log(err);
-      return null;
-    } else if ( results.length == 0  || !(results) ) {
-      return null;
-    } else {
-      return results[0]['resObj'];
-    }
+const insertSongFeatsIntoCache = (results) => {
+  const songFeats = db.collection('song_feats');
+  // actual data in results['data']
+  // store audio features too
+  // solution will be to hit the cache and add back the results when done
+  songFeats.insert({
+    'id': 2, 
+    'audioFeats': 3
   });
 }
 
@@ -233,4 +225,4 @@ const songParser = (results) => {
 }
 
 module.exports = {getAllQueries, getQueriesForUser, insertIntoCache, 
-  songParser, checkQueryCache};
+  songParser};

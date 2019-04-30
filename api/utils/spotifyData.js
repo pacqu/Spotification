@@ -71,9 +71,7 @@ const getAvgFeats = (user, db, songs, next) => {
       time_signature: 0
     }
   }
-  let features = ["danceability","energy","key","loudness","mode","speechiness",
-  "acousticness","instrumentalness","liveness",
-  "valence","tempo","duration_ms","time_signature"];
+  let features = Object.keys(data.avgFeatures);
   var idQueries = "";
   let genreArtists = [];
   let genres = {};
@@ -119,8 +117,7 @@ const getAvgFeats = (user, db, songs, next) => {
         data['avgFeatures'][feature] += song[feature]
       }
     }
-    data['songs'] = Object.values(data['songs']);
-    for (let feature of Object.keys(data['avgFeatures'])){
+    for (let feature of features)){
       data['avgFeatures'][feature] /= data['songs'].length;
     }
     //TO-DO: Query and Save to Cache

@@ -106,12 +106,6 @@ router.post('/recommend', middlewares.checkToken, (req, res) => {
         return;
       }
 
-      possibleResponse = queryUtils.checkQueryCache('Recommendation', authorizedData['username'], req.body);
-      if(possibleResponse){
-        res.json(possibleResponse);
-        return;
-      }
-
       const users = db.collection('users');
       users.find({'username': authorizedData['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
         if(err) {
@@ -167,11 +161,6 @@ router.post('/visual', middlewares.checkToken, (req, res) => {
       console.log('ERROR: Could not connect to the protected route');
       res.sendStatus(403);
     } else {
-      possibleResponse = queryUtils.checkQueryCache('Visualization', authorizedData['username'], req.body);
-      if(possibleResponse){
-        res.json(possibleResponse);
-        return;
-      }
       const users = db.collection('users');
       users.find({'username': authorizedData['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
         if(err) {
