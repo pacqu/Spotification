@@ -4,9 +4,11 @@
   --white: #ffffff;
 }
 
+body {
+  background: #181818;
+}
+
 .App {
-  width: 100vw;
-  height: 100vh;
   text-align: center;
   position: relative;
   background-color: rgb(24,24,24);
