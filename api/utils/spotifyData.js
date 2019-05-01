@@ -159,8 +159,8 @@ const getSimilairity = (data1, data2, next) => {
   }
   delete data1.duration_ms;
   delete data2.duration_ms;
-  data1.popularity /= 100;
-  data2.popularity /= 100;
+  data1.popularity /= 90;
+  data2.popularity /= 90;
   data1.key /= 11;
   data2.key /= 11;
   data1.loudness /= -60;
@@ -181,13 +181,10 @@ const getSimilairity = (data1, data2, next) => {
   let sqrtd1 = Math.sqrt(data1Vals.reduce(squareReducer));
   let sqrtd2 = Math.sqrt(data2Vals.reduce(squareReducer));
   let denom = sqrtd1*sqrtd2;
-  //console.log(denom)
   let num = 0;
   for (let i = 0; i < data1Vals.length; i++){
     num += data1Vals[i]*data2Vals[i];
   }
-  //console.log(num)
-  //console.log(num/denom)
   console.log(100 - ((1 - num/denom) * 750))
   next(100 - ((1 - num/denom) * 750));
   return;
