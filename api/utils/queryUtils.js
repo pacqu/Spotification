@@ -185,7 +185,7 @@ const insertSongFeatsIntoCache = (ids, results) => {
   // store audio features too
   // solution will be to hit the cache and add back the results when done
   for (let i = 0; i < ids.length; i++){
-    songFeats.insert({
+    songFeats.insertOne({
       'song_id': ids[i], 
       'audioFeats': results[i]
     });
@@ -196,18 +196,21 @@ const insertSongFeatsIntoCache = (ids, results) => {
  * Does a preemptive search for existing songs
  * @function
  */
-const songSearchByIds = (ids) => {
+const songSearchByIds = (ids, callback) => {
   const songFeats = db.collection('song_feats');
-  var id_arr = ids.map(x => {'song_id': x})
+  var id_arr = ids.map(x => {return {'song_id': x}});
+  console.log(id_arr)
   songFeats.find({
     '$or': id_arr
   }).toArray((err, results) => {
     if(err){
       console.log("oh no");
+      callback({'ids': ids, 'results': []});
     } else {
       var used_ids = results.map(x => x['song_id']);
       var new_ids = ids.filter(x => !used_ids.includes(x));
-      return [new_ids, results];
+      var final_results = results.map(x => {return x['audioFeats']})
+      callback({'ids': new_ids, 'results': final_results});
     }
   });
 }
