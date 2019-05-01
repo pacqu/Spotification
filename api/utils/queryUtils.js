@@ -179,15 +179,17 @@ const songParser = (results) => {
  * Stores a given query in the query cache
  * @function
  */
-const insertSongFeatsIntoCache = (results) => {
+const insertSongFeatsIntoCache = (ids, results) => {
   const songFeats = db.collection('song_feats');
   // actual data in results['data']
   // store audio features too
   // solution will be to hit the cache and add back the results when done
-  songFeats.insert({
-    'id': 2, 
-    'audioFeats': 3
-  });
+  for (let i = 0; i < ids.length; i++){
+    songFeats.insert({
+      'id': ids[i], 
+      'audioFeats': results[i]
+    });
+  }
 }
 
 /**
@@ -225,4 +227,4 @@ const songParser = (results) => {
 }
 
 module.exports = {getAllQueries, getQueriesForUser, insertIntoCache, 
-  songParser};
+  songParser, insertSongFeatsIntoCache};

@@ -3,6 +3,7 @@ var moment = require('moment');
 
 //Axios for Spotify Web API calls
 const axios = require('axios');
+var queryUtils = require('./queryUtils')
 
 //Function to refresh auth token if necessary
 //If Refresh Necessary, Function needs to:
@@ -73,6 +74,7 @@ const getAvgFeats = (user, db, songs, next) => {
   }
   let features = Object.keys(data.avgFeatures);
   var idQueries = "";
+  var idsArray = [];
   let genreArtists = [];
   let genres = {};
   for (let song of songs){
@@ -100,7 +102,12 @@ const getAvgFeats = (user, db, songs, next) => {
     delete song["type"];
     delete song["href"];
     idQueries += `${song['id']},`;
+<<<<<<< HEAD
     data['songs'][song.id] = song;
+=======
+    data['songs'].push(song);
+    idsArray.push(song['id']);
+>>>>>>> adeed song caching, still have to actually make use of the cache
     data['avgFeatures']['popularity'] += song['popularity'];
   }
   //console.log(albums)
@@ -111,6 +118,7 @@ const getAvgFeats = (user, db, songs, next) => {
   axios.get(`https://api.spotify.com/v1/audio-features?ids=${idQueries}`,
   {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
   .then(results => {
+    queryUtils.insertSongFeatsIntoCache(idsArray, results['data']['audio_features']);
     for (let song of results['data']['audio_features']){
       data['songs'][song.id]['features'] = song;
       for (let feature of features){
