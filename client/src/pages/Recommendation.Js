@@ -186,7 +186,7 @@ class Recommendation extends Component {
             { seedItems.length > 0 && (<>
               <Button className="rec-button" onClick={(e) => this.handleSubmitRec(e)}>Get Recs</Button>
             </>)}
-            { !!songResults.length && (
+            { !!seedItems.length && (
               <div className="playlist-container">
                 <Input onChange={this.setPlayListName} placeholder="my playlist..."></Input>
                 <Button onClick={() => this.savePlaylists()}> Save Playlists </Button>
