@@ -8,7 +8,6 @@ function msToMinutesAndSeconds(ms) {
 }
 
 export default function SongList({ songs, handleClick }) {
-  console.log(songs)
   const tracks = songs.map((song, i) => (
     <li onClick={() => handleClick(song)} className='user-song-item' key={ i }>
       <div className='play-song'>

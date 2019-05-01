@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import classNames from 'classnames';
 import { Tabs, Tab, TabList, TabPanel } from 'react-tabs';
 
+import Input from '../components/Input';
 import Header from '../components/Header';
 import Search from '../components/Search';
 import Button from '../components/Button';
@@ -31,6 +32,7 @@ class Recommendation extends Component {
       genres: [],
       seedItems: [],
       query: '',
+      playlistName: '',
       err: ''
     }
   }
@@ -102,7 +104,7 @@ class Recommendation extends Component {
     this.setState({ seedItems });
   }
 
-  handleSubmitRec = (e) => {
+  handleSubmitRec = e => {
     e.preventDefault();
     let { seedItems } = this.state;
     let seedTracks = seedItems.filter(item => item.type === 'track').map(track => track.id);
@@ -117,7 +119,21 @@ class Recommendation extends Component {
       })
     })
     .catch(err => {
-      console.log(err)
+      this.setState({ err : err.toString() });
+    })
+  }
+
+  setPlayListName = e => this.setState({ playlistName : e.target.value });
+
+  savePlaylists = () => {
+    let { playlistName, songResults } = this.state;
+    songResults = songResults.map(track => track.uri);
+    axios.post('/user/create-playlist', { playlistName, playlistTrackUris : songResults }, { headers: { Authorization: `Bearer ${Cookies.get("cookie")}`}})
+    .then(res => {
+      console.log(res);
+      alert('Playlist saved!');
+    })
+    .catch(err => {
       this.setState({ err : err.toString() });
     })
   }
@@ -168,8 +184,14 @@ class Recommendation extends Component {
               { seedItemsDisplay }
             </>)}
             { seedItems.length > 0 && (<>
-              <Button onClick={(e) => this.handleSubmitRec(e)}>Get Recs</Button>
+              <Button className="rec-button" onClick={(e) => this.handleSubmitRec(e)}>Get Recs</Button>
             </>)}
+            { !!songResults.length && (
+              <div className="playlist-container">
+                <Input onChange={this.setPlayListName} placeholder="my playlist..."></Input>
+                <Button onClick={() => this.savePlaylists()}> Save Playlists </Button>
+              </div>
+            )}
           </div>
 
           <div className="content">
