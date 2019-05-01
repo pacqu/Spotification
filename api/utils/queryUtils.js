@@ -186,10 +186,30 @@ const insertSongFeatsIntoCache = (ids, results) => {
   // solution will be to hit the cache and add back the results when done
   for (let i = 0; i < ids.length; i++){
     songFeats.insert({
-      'id': ids[i], 
+      'song_id': ids[i], 
       'audioFeats': results[i]
     });
   }
+}
+
+/**
+ * Does a preemptive search for existing songs
+ * @function
+ */
+const songSearchByIds = (ids) => {
+  const songFeats = db.collection('song_feats');
+  var id_arr = ids.map(x => {'song_id': x})
+  songFeats.find({
+    '$or': id_arr
+  }).toArray((err, results) => {
+    if(err){
+      console.log("oh no");
+    } else {
+      var used_ids = results.map(x => x['song_id']);
+      var new_ids = ids.filter(x => !used_ids.includes(x));
+      return [new_ids, results];
+    }
+  });
 }
 
 /**
@@ -227,4 +247,4 @@ const songParser = (results) => {
 }
 
 module.exports = {getAllQueries, getQueriesForUser, insertIntoCache, 
-  songParser, insertSongFeatsIntoCache};
+  songParser, insertSongFeatsIntoCache, songSearchByIds};

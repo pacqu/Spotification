@@ -101,14 +101,15 @@ const getAvgFeats = (user, db, songs, next) => {
     delete song["preview_url"];
     delete song["type"];
     delete song["href"];
-    idQueries += `${song['id']},`;
-<<<<<<< HEAD
-    data['songs'][song.id] = song;
-=======
     data['songs'].push(song);
     idsArray.push(song['id']);
->>>>>>> adeed song caching, still have to actually make use of the cache
     data['avgFeatures']['popularity'] += song['popularity'];
+  }
+  var query_results = queryUtils.songSearchByIds(idsArray);
+  idsArray = query_results[0];  // contains the ids that need to be searched
+  var cache_results = query_results[1];  // contains actual results
+  for (let id of idsArray){
+    idQueries += `${id},`;
   }
   //console.log(albums)
   genreArtists = genreArtists.filter((el,i,a) => i === a.indexOf(el));
@@ -117,8 +118,9 @@ const getAvgFeats = (user, db, songs, next) => {
   spotifyAccessToken = user['spotifyAuthTokens']['access'];
   axios.get(`https://api.spotify.com/v1/audio-features?ids=${idQueries}`,
   {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
-  .then(results => {
-    queryUtils.insertSongFeatsIntoCache(idsArray, results['data']['audio_features']);
+  .then(_results => {
+    results = cache_results.concat(_results);
+    queryUtils.insertSongFeatsIntoCache(idsArray, _results['data']['audio_features']);
     for (let song of results['data']['audio_features']){
       data['songs'][song.id]['features'] = song;
       for (let feature of features){
@@ -133,16 +135,12 @@ const getAvgFeats = (user, db, songs, next) => {
     {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
     .then(results => {
       for (let artist of results['data']['artists']){
-        //console.log(artist)
         for (let genre of artist['genres']){
-          //console.log(genre)
           if (genre in genres) genres[genre] += 1;
           else genres[genre] = 1;
         }
       }
-      //console.log(genres);
       sortableGenres = Object.keys(genres).map(key => { return {genre: key, count: genres[key]} })
-      //console.log(sortableGenres)
       sortableGenres = sortableGenres.sort((g1, g2) => g2.count - g1.count)
       data['sortedGenres'] = sortableGenres;
       //console.log(sortableGenres)
