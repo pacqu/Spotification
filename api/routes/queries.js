@@ -127,33 +127,8 @@ router.post('/recommend', middlewares.checkToken, (req, res) => {
           {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
           .then(results => {
             //console.log(results.data)
-            songs = [];
-            for (let song of results.data.tracks){
-              song['album'] = {
-                name: song['album']['name'],
-                id: song['album']['id'],
-              }
-              artists = []
-              for (let artist of song['artists']){
-                artists.push({
-                  name: artist['name'],
-                  id: artist['id'],
-                })
-              }
-              song['artists'] = artists;
-              delete song["available_markets"];
-              delete song["disc_number"];
-              delete song["external_ids"];
-              delete song["is_local"];
-              delete song["explicit"];
-              delete song["track_number"];
-              delete song["external_urls"];
-              delete song["preview_url"];
-              delete song["type"];
-              delete song["href"];
-              songs.push(song);
-            }
-            queryUtils.insertIntoCache('Recommendation', authorizedData['username'], req.body, songs);
+            songs = queryUtils.songParser(results);
+            queryUtils.insertIntoCache('Recommendation', user, req.body, songs);
             res.json(songs);
           })
           .catch(err => {
@@ -211,13 +186,14 @@ router.post('/visual', middlewares.checkToken, (req, res) => {
                 if (item.is_local) continue;
                 tracks.push(item.track);
               }
+              req.body['tracks'] = tracks;
               spotifyData.getAvgFeats(checkedUser, db, tracks, (err, data) => {
                 if(err){
                   console.log(err);
                   res.status(500);
                   res.json(err);
                 }
-                queryUtils.insertIntoCache('Visualization', authorizedData['username'], req.body, data);
+                queryUtils.insertIntoCache('Visualization', user, req.body, data);
                 res.json(data);
               })
             })
@@ -233,14 +209,15 @@ router.post('/visual', middlewares.checkToken, (req, res) => {
             axios.get(`https://api.spotify.com/v1/tracks?ids=${trackIds.join(',')}`,
             {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
             .then(results => {
-              console.log(results['data'])
+              //console.log(results['data'])
+              req.body['tracks'] = results['data']['tracks'];
               spotifyData.getAvgFeats(checkedUser, db, results['data']['tracks'], (err, data) => {
                 if(err){
                   console.log(err);
                   res.status(500);
                   res.json(err);
                 }
-                queryUtils.insertIntoCache('Visualization', authorizedData['username'], req.body, data);
+                queryUtils.insertIntoCache('Visualization', user, req.body, data);
                 res.json(data);
               })
             })
