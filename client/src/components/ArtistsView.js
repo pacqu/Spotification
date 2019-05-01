@@ -6,10 +6,6 @@ const ArtistView = ({ artists }) => {
 
   const renderArtists = () => {
     return artists.map((artist, i) => {
-      // const artistSongsAction = (artist) => {
-        // fetchArtistSongs(artist.id, token);
-        // updateHeaderTitle(artist.name);
-      // };
       return (
         <li className='artist-item' key={ i }>
           <a>
