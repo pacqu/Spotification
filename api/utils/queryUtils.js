@@ -142,40 +142,6 @@ const insertIntoCache = (queryType, user, reqBody, resObj) => {
 }
 
 /**
- * Parses a Spotify API Call to return a list of songs
- * @function
- */
-const songParser = (results) => {
-  songs = [];
-  for (let song of results.data.tracks) {
-    song['album'] = {
-      name: song['album']['name'],
-      id: song['album']['id'],
-    }
-    artists = []
-    for (let artist of song['artists']) {
-      artists.push({
-        name: artist['name'],
-        id: artist['id'],
-      })
-    }
-    song['artists'] = artists;
-    delete song["available_markets"];
-    delete song["disc_number"];
-    delete song["external_ids"];
-    delete song["is_local"];
-    delete song["explicit"];
-    delete song["track_number"];
-    delete song["external_urls"];
-    delete song["preview_url"];
-    delete song["type"];
-    delete song["href"];
-    songs.push(song);
-  }
-  return songs;
-}
-
-/**
  * Stores a given query in the query cache
  * @function
  */
