@@ -88,8 +88,6 @@ BODY:
         - All three tracks and the first two artists will be seeded
         - The last artist and all the genres will not be seeded
 */
-// TODO:
-// - Save & Query to DB - NOT DONE
 router.post('/recommend', middlewares.checkToken, (req, res) => {
   jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
     if(err){
@@ -102,11 +100,12 @@ router.post('/recommend', middlewares.checkToken, (req, res) => {
       const seedGenres = req.body.seedGenres;
       const seedLength = (seedTracks ? seedTracks.length : 0) + (seedArtists ? seedArtists.length : 0) + (seedGenres ? seedGenres.length : 0)
       //TODO: Improve check so seeds dont have to exist
-      if ( !(seedLength)){
+      if (!(seedLength)){
         res.status(400);
         res.send('No seeds given.');
         return;
       }
+
       const users = db.collection('users');
       users.find({'username': authorizedData['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
         if(err) {
@@ -122,20 +121,19 @@ router.post('/recommend', middlewares.checkToken, (req, res) => {
           }
           spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
           axios.get(`https://api.spotify.com/v1/recommendations?${seedTracks ? 'seed_tracks=' + seedTracks.join(',') + '&' : ""}` +
-          `${seedArtists ? 'seed_artists=' + seedArtists.join(',') + '&' : ""}` +
-          `${seedGenres ? 'seed_genres=' + seedGenres.join(',') : ""}`,
-          {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
-          .then(results => {
-            //console.log(results.data)
-            songs = queryUtils.songParser(results);
-            queryUtils.insertIntoCache('Recommendation', user, req.body, songs);
-            res.json(songs);
-          })
-          .catch(err => {
-            console.log(err);
-            res.status(500);
-            res.json(err);
-          })
+            `${seedArtists ? 'seed_artists=' + seedArtists.join(',') + '&' : ""}` +
+            `${seedGenres ? 'seed_genres=' + seedGenres.join(',') : ""}`,
+            {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
+            .then(results => {
+              songs = queryUtils.songParser(results);
+              queryUtils.insertIntoCache('Recommendation', authorizedData['username'], req.body, songs);
+              res.json(songs);
+            })
+            .catch(err => {
+              console.log(err);
+              res.status(500);
+              res.json(err);
+            });
         })
       })
     }

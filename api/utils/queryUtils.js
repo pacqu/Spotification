@@ -70,8 +70,6 @@ const getQueriesForUser = (res, username) => {
 /**
  * Stores a given query in the query cache
  * @function
- * @param res - response object to use
- * @param {string} username - username in question
  */
 const insertIntoCache = (queryType, user, reqBody, resObj) => {
   const queryCache = db.collection('queries');
@@ -144,6 +142,46 @@ const insertIntoCache = (queryType, user, reqBody, resObj) => {
 }
 
 /**
+ * Stores a given query in the query cache
+ * @function
+ */
+const insertSongFeatsIntoCache = (ids, results) => {
+  const songFeats = db.collection('song_feats');
+  // actual data in results['data']
+  // store audio features too
+  // solution will be to hit the cache and add back the results when done
+  for (let i = 0; i < ids.length; i++){
+    songFeats.insertOne({
+      'song_id': ids[i], 
+      'audioFeats': results[i]
+    });
+  }
+}
+
+/**
+ * Does a preemptive search for existing songs
+ * @function
+ */
+const songSearchByIds = (ids, callback) => {
+  const songFeats = db.collection('song_feats');
+  var id_arr = ids.map(x => {return {'song_id': x}});
+  console.log(id_arr)
+  songFeats.find({
+    '$or': id_arr
+  }).toArray((err, results) => {
+    if(err){
+      console.log("oh no");
+      callback({'ids': ids, 'results': []});
+    } else {
+      var used_ids = results.map(x => x['song_id']);
+      var new_ids = ids.filter(x => !used_ids.includes(x));
+      var final_results = results.map(x => {return x['audioFeats']})
+      callback({'ids': new_ids, 'results': final_results});
+    }
+  });
+}
+
+/**
  * Parses a Spotify API Call to return a list of songs
  * @function
  */
@@ -177,4 +215,5 @@ const songParser = (results) => {
   return songs;
 }
 
-module.exports = {getAllQueries, getQueriesForUser, insertIntoCache, songParser};
+module.exports = {getAllQueries, getQueriesForUser, insertIntoCache, 
+  songParser, insertSongFeatsIntoCache, songSearchByIds};

@@ -3,6 +3,7 @@ var moment = require('moment');
 
 //Axios for Spotify Web API calls
 const axios = require('axios');
+var queryUtils = require('./queryUtils')
 
 //Function to refresh auth token if necessary
 //If Refresh Necessary, Function needs to:
@@ -71,10 +72,9 @@ const getAvgFeats = (user, db, songs, next) => {
       time_signature: 0
     }
   }
-  let features = ["danceability","energy","key","loudness","mode","speechiness",
-  "acousticness","instrumentalness","liveness",
-  "valence","tempo","duration_ms","time_signature"];
+  let features = Object.keys(data.avgFeatures);
   var idQueries = "";
+  var idsArray = [];
   let genreArtists = [];
   let genres = {};
   for (let song of songs){
@@ -101,55 +101,62 @@ const getAvgFeats = (user, db, songs, next) => {
     delete song["preview_url"];
     delete song["type"];
     delete song["href"];
-    idQueries += `${song['id']},`;
-    data['songs'][song.id] = song;
+    data['songs'].push(song);
+    idsArray.push(song['id']);
     data['avgFeatures']['popularity'] += song['popularity'];
   }
-  //console.log(albums)
-  genreArtists = genreArtists.filter((el,i,a) => i === a.indexOf(el));
-  genreArtists = genreArtists.slice(0,50)
-  //TO-DO: Query and Save to Cache
-  spotifyAccessToken = user['spotifyAuthTokens']['access'];
-  axios.get(`https://api.spotify.com/v1/audio-features?ids=${idQueries}`,
-  {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
-  .then(results => {
-    for (let song of results['data']['audio_features']){
-      data['songs'][song.id]['features'] = song;
-      for (let feature of features){
-        data['avgFeatures'][feature] += song[feature]
-      }
+  queryUtils.songSearchByIds(idsArray, query_results => {
+    idsArray = query_results['ids'];  // contains the ids that need to be searched
+    var cache_results = query_results['results'];  // contains actual results
+    for (let id of idsArray){
+      idQueries += `${id},`;
     }
-    data['songs'] = Object.values(data['songs']);
-    for (let feature of Object.keys(data['avgFeatures'])){
-      data['avgFeatures'][feature] /= data['songs'].length;
-    }
+    //console.log(albums)
+    genreArtists = genreArtists.filter((el,i,a) => i === a.indexOf(el));
+    genreArtists = genreArtists.slice(0,50)
     //TO-DO: Query and Save to Cache
-    axios.get(`https://api.spotify.com/v1/artists?ids=${genreArtists.join(',')}`,
+    spotifyAccessToken = user['spotifyAuthTokens']['access'];
+    axios.get(`https://api.spotify.com/v1/audio-features?ids=${idQueries}`,
     {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
-    .then(results => {
-      for (let artist of results['data']['artists']){
-        //console.log(artist)
-        for (let genre of artist['genres']){
-          //console.log(genre)
-          if (genre in genres) genres[genre] += 1;
-          else genres[genre] = 1;
+    .then(_results => {
+      queryUtils.insertSongFeatsIntoCache(idsArray, _results['data']['audio_features']);
+      var results = [];
+      if(_results['data']['audio_features'].length !== 1){
+        results = _results['data']['audio_features'];
+      }
+      results = results.concat(cache_results);
+      // console.log(cache_results);
+      for (let song of results){
+        for (let feature of features){
+          data['avgFeatures'][feature] += song[feature]
         }
       }
-      //console.log(genres);
-      sortableGenres = Object.keys(genres).map(key => { return {genre: key, count: genres[key]} })
-      //console.log(sortableGenres)
-      sortableGenres = sortableGenres.sort((g1, g2) => g2.count - g1.count)
-      data['sortedGenres'] = sortableGenres;
-      //console.log(sortableGenres)
-      next(null, data);
+      for (let feature of features){
+        data['avgFeatures'][feature] /= data['songs'].length;
+      }
+      //TO-DO: Query and Save to Cache
+      axios.get(`https://api.spotify.com/v1/artists?ids=${genreArtists.join(',')}`,
+      {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
+      .then(results => {
+        for (let artist of results['data']['artists']){
+          for (let genre of artist['genres']){
+            if (genre in genres) genres[genre] += 1;
+            else genres[genre] = 1;
+          }
+        }
+        sortableGenres = Object.keys(genres).map(key => { return {genre: key, count: genres[key]} })
+        sortableGenres = sortableGenres.sort((g1, g2) => g2.count - g1.count)
+        data['sortedGenres'] = sortableGenres
+        next(null, data);
+      })
+      .catch(err => {
+        next(err, data);
+      })
     })
     .catch(err => {
-      next(err, data);
+      next(err,data);
     })
-  })
-  .catch(err => {
-    next(err,data);
-  })
+  });
 }
 
 const getSimilairity = (data1, data2, next) => {
