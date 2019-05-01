@@ -1,6 +1,7 @@
 .media-list-item {
   margin-left: 30px;
   display: flex;
+  justify-content: center;
 }
 .media-list-item .item-cover-art {
   position: relative;

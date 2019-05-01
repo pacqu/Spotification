@@ -35,14 +35,16 @@ class Register extends Component {
       axios
         .post("/user/login", { username, password })
         .then(res => {
-          console.log(res);
           Cookies.set("cookie", res.data.token);
-          this.setState({
-            LnR: false,
-            spotifyAuthUrl: res.data.user.spotifyAuthUrl,
-            spotifyAuth:res.data.user.spotifyAuth,
-            notice: ""
-          });
+          axios.get('/user/listening-data', { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
+            .then(resTwo => {
+              this.setState({
+                LnR: false,
+                spotifyAuthUrl: res.data.user.spotifyAuthUrl,
+                spotifyAuth:res.data.user.spotifyAuth,
+                notice: ""
+              });
+            })
         })
         .catch(err => {
           console.log(err);

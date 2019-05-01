@@ -2,13 +2,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import '../styles/AlbumView.css';
 
-const AlbumView = ({ albums, addSelect }) => {
+const AlbumView = ({ albums, handleClick }) => {
   const renderAlbums = () => {
     return albums.map((album, i) => {
       return (
         <li
           className='album-item'
-          onClick={() => addSelect(`${album.artists[0].name} - ${album.name}`)}
+          onClick={() => handleClick(album)}
           key={ i }
         >
           <div>
