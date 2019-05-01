@@ -152,20 +152,45 @@ const getAvgFeats = (user, db, songs, next) => {
   })
 }
 
-const getSimilairity= (data1, data2, next) => {
+const getSimilairity = (data1, data2, next) => {
+  if (!(data1 && data2)){
+    next(-1);
+    return;
+  }
   delete data1.duration_ms;
   delete data2.duration_ms;
+  data1.popularity /= 100;
+  data2.popularity /= 100;
+  data1.key /= 11;
+  data2.key /= 11;
+  data1.loudness /= -60;
+  data2.loudness /= -60;
+  data1.tempo /= 200;
+  data2.tempo /= 200;
+  data1.valence *= 2;
+  data2.valence *= 2;
+  data1.energy *= 2;
+  data2.energy *= 2;
+  data1.mode *= 2;
+  data2.mode *= 2;
+  data1.danceability *= 2;
+  data2.danceability *= 2;
   let data1Vals = Object.values(data1);
   let data2Vals = Object.values(data2);
   let squareReducer = (accumulator, currentValue) => accumulator + Math.pow(currentValue,2);
   let sqrtd1 = Math.sqrt(data1Vals.reduce(squareReducer));
   let sqrtd2 = Math.sqrt(data2Vals.reduce(squareReducer));
   let denom = sqrtd1*sqrtd2;
+  //console.log(denom)
   let num = 0;
   for (let i = 0; i < data1Vals.length; i++){
     num += data1Vals[i]*data2Vals[i];
   }
-  return num/denom;
+  //console.log(num)
+  //console.log(num/denom)
+  console.log(100 - ((1 - num/denom) * 750))
+  next(100 - ((1 - num/denom) * 750));
+  return;
 }
 
-module.exports = {checkRefresh, getAvgFeats};
+module.exports = {checkRefresh, getAvgFeats, getSimilairity};

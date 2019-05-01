@@ -155,8 +155,31 @@ router.get('/username/:username', middlewares.checkToken, (req, res) => {
           res.status(404);
           res.send("Given user does not exist");
         }
-        console.log(results)
-        res.json(results);
+        var givenUser = results[0]
+        users.find({'username': authorizedData['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
+          if(err) {
+            console.log(err);
+            res.status(500);
+            res.json(err);
+          }
+          if ( results.length == 0  || !(results) ) {
+            console.log('ERROR: User could not be found');
+            res.status(404);
+            res.send("Given user does not exist");
+          }
+          var loggedInUser = results[0];
+          spotifyData.getSimilairity(givenUser.listeningData.avgFeatures, loggedInUser.listeningData.avgFeatures, (data) => {
+            var similarity = null;
+            //console.log(data);
+            if (data !== -1) similarity = data;
+            givenUser.similarity = data;
+            res.json(givenUser);
+            return;
+          })
+          //console.log(results)
+          //res.json(results);
+        });
+        //res.json(results);
       });
       //res.json({ authorizedData });
     }
