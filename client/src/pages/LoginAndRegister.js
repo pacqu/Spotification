@@ -36,8 +36,6 @@ class Register extends Component {
         .post("/user/login", { username, password })
         .then(res => {
           Cookies.set("cookie", res.data.token);
-          console.log(res.data)
-          console.log('here')
           this.setState({
             LnR: false,
             spotifyAuthUrl: res.data.user.spotifyAuthUrl,
