@@ -5,6 +5,7 @@ import { Tabs, Tab, TabList, TabPanel } from 'react-tabs';
 
 import HorizontalBarGraph from '../components/HorizontalBarGraph';
 import DoubleBarGraph from '../components/DoubleBarGraph';
+import RadarGraph from '../components/RadarGraph';
 import Header from '../components/Header';
 import Search from '../components/Search';
 import Button from '../components/Button';
@@ -26,13 +27,24 @@ class DataVisualizations extends Component {
     super(props);
 		this.state = {
       displayRecs: false,
+			currentTab: 'Songs',
       seedTracks: [],
 			results: [],
       recTracks: [],
-			selectedFeaturesName: [],
-			selectedFeaturesValue: [],
+			bar1FeaturesName:[],
+			bar1FeaturesValue:[],
+			bar2FeaturesName:[],
+			bar2FeaturesValue:[],
+			radarFeaturesName: [],
+			radarFeaturesValue:[],
+			selectedbar1FeaturesValue: [],
+			selectedbar2FeaturesValue: [],
+			selectedradarFeaturesValue: [],
+			spotifybar1FeaturesValue: [],
+			spotifybar2FeaturesValue:[],
+			spotifyradarFeaturesValue:[],
 			userFeaturesName: [],
-			userFeaturesValue: []
+			userFeaturesValue: [],
     }
 	}
 
@@ -43,12 +55,59 @@ class DataVisualizations extends Component {
       let array = Object.entries(
         data.listeningData.avgFeatures
       ).filter(item => item[0] !== "duration_ms");
+			//Filtering for first bar graph
+			let bar1array = Object.entries(
+	       data.listeningData.avgFeatures
+	     ).filter(item =>
+				item[0] !== "duration_ms"
+				&& item[0] !== "mode"
+				&& item[0] !== "acousticness"
+				&& item[0] !== "danceability"
+				&& item[0] !== "energy"
+				&& item[0] !== "liveness"
+				&& item[0] !== "valence"
+				&& item[0] !== "instrumentalness"
+				&& item[0] !== "speechiness");
+				//Filtering for radar
+			let radarArray = Object.entries(
+				data.listeningData.avgFeatures
+			).filter(item =>
+				item[0] !== "duration_ms"
+				&& item[0] !== "key"
+				&& item[0] !== "mode"
+				&& item[0] !== "time_signature"
+				&& item[0] !== "instrumentalness"
+				&& item[0] !== "loudness"
+				&& item[0] !== "speechiness"
+				&& item[0] !== "popularity"
+				&& item[0] !== "tempo");
+				//Filtering for second bar graph (horizontal bar graph)
+			let bar2array = Object.entries(
+	       data.listeningData.avgFeatures
+	     ).filter(item =>
+				item[0] !== "duration_ms"
+				&& item[0] !== "key"
+				&& item[0] !== "mode"
+				&& item[0] !== "time_signature"
+				&& item[0] !== "acousticness"
+				&& item[0] !== "danceability"
+				&& item[0] !== "energy"
+				&& item[0] !== "liveness"
+				&& item[0] !== "valence"
+				&& item[0] !== "loudness"
+				&& item[0] !== "popularity"
+				&& item[0] !== "tempo");
       this.setState({
-        userFeaturesName: array.map(item => item[0]),
-        userFeaturesValue: array.map(item => item[1]),
+				bar1FeaturesName: bar1array.map(item => item[0]),
+        bar1FeaturesValue: bar1array.map(item => item[1]),
+				bar2FeaturesName: bar2array.map(item => item[0]),
+        bar2FeaturesValue: bar2array.map(item => item[1]),
+				radarFeaturesName: radarArray.map(item => item[0]),
+				radarFeaturesValue: radarArray.map(item => item[1]),
         loadingDone: true
       });
       console.log(Object.entries(data));
+
     }
 	}
 
@@ -91,6 +150,67 @@ class DataVisualizations extends Component {
     console.log(filteredSeedTracks);
   }
 
+	handleShowSpotifyData = (e) => {
+		e.preventDefault();
+		this.setState({
+			currentTab: 'Spotify'
+		})
+		axios.post('/queries/visual',
+		{ visualType: 'top'},
+		{ headers: { Authorization: `Bearer ${Cookies.get("cookie")}`}})
+		.then(res => {
+			console.log(res);
+			let bar1array = Object.entries(
+	       res.data.avgFeatures
+	     ).filter(item =>
+				item[0] !== "duration_ms"
+				&& item[0] !== "mode"
+				&& item[0] !== "acousticness"
+				&& item[0] !== "danceability"
+				&& item[0] !== "energy"
+				&& item[0] !== "liveness"
+				&& item[0] !== "valence"
+				&& item[0] !== "instrumentalness"
+				&& item[0] !== "speechiness");
+			let radarArray = Object.entries(
+				res.data.avgFeatures
+				).filter(item =>
+				item[0] !== "duration_ms"
+				&& item[0] !== "key"
+				&& item[0] !== "mode"
+				&& item[0] !== "time_signature"
+				&& item[0] !== "instrumentalness"
+				&& item[0] !== "loudness"
+				&& item[0] !== "speechiness"
+				&& item[0] !== "popularity"
+				&& item[0] !== "tempo");
+				//Filtering for second bar graph
+				let bar2array = Object.entries(
+		       res.data.avgFeatures
+		     ).filter(item =>
+					item[0] !== "duration_ms"
+					&& item[0] !== "key"
+					&& item[0] !== "mode"
+					&& item[0] !== "time_signature"
+					&& item[0] !== "acousticness"
+					&& item[0] !== "danceability"
+					&& item[0] !== "energy"
+					&& item[0] !== "liveness"
+					&& item[0] !== "valence"
+					&& item[0] !== "loudness"
+					&& item[0] !== "popularity"
+					&& item[0] !== "tempo");
+			this.setState({
+				spotifybar1FeaturesValue: bar1array.map(item => item[1]),
+				spotifyradarFeaturesValue: radarArray.map(item => item[1]),
+				spotifybar2FeaturesValue: bar2array.map(item => item[1])
+			})
+		})
+		.catch(err => {
+			console.log(err);
+		})
+	}
+
 	handleSubmitData = (e) => {
     e.preventDefault();
     let trackIds = this.state.seedTracks.map(track => track.id);
@@ -104,13 +224,53 @@ class DataVisualizations extends Component {
 			let array = Object.entries(
         res.data.avgFeatures
       ).filter(item => item[0] !== "duration_ms");
+			let bar1array = Object.entries(
+	       res.data.avgFeatures
+	     ).filter(item =>
+				item[0] !== "duration_ms"
+				&& item[0] !== "mode"
+				&& item[0] !== "acousticness"
+				&& item[0] !== "danceability"
+				&& item[0] !== "energy"
+				&& item[0] !== "liveness"
+				&& item[0] !== "valence"
+				&& item[0] !== "instrumentalness"
+				&& item[0] !== "speechiness");
+			let radarArray = Object.entries(
+				res.data.avgFeatures
+				).filter(item =>
+				item[0] !== "duration_ms"
+				&& item[0] !== "key"
+				&& item[0] !== "mode"
+				&& item[0] !== "time_signature"
+				&& item[0] !== "instrumentalness"
+				&& item[0] !== "loudness"
+				&& item[0] !== "speechiness"
+				&& item[0] !== "popularity"
+				&& item[0] !== "tempo");
+				//Filtering for second bar graph
+				let bar2array = Object.entries(
+		       res.data.avgFeatures
+		     ).filter(item =>
+					item[0] !== "duration_ms"
+					&& item[0] !== "key"
+					&& item[0] !== "mode"
+					&& item[0] !== "time_signature"
+					&& item[0] !== "acousticness"
+					&& item[0] !== "danceability"
+					&& item[0] !== "energy"
+					&& item[0] !== "liveness"
+					&& item[0] !== "valence"
+					&& item[0] !== "loudness"
+					&& item[0] !== "popularity"
+					&& item[0] !== "tempo");
       this.setState({
         displayRecs: true,
 				recTracks: res.data,
-				selectedFeaturesName: array.map(item => item[0]),
-        selectedFeaturesValue: array.map(item => item[1]),
+				selectedbar1FeaturesValue: bar1array.map(item => item[1]),
+				selectedradarFeaturesValue: radarArray.map(item => item[1]),
+				selectedbar2FeaturesValue: bar2array.map(item => item[1])
       })
-			console.log(this.state.selectedFeaturesName)
     })
     .catch(err => {
       console.log(err);
@@ -136,12 +296,16 @@ class DataVisualizations extends Component {
     });
   };
 
+
   render() {
     const { data, location } = this.props;
-		const { results, displayRecs, recTracks, seedTracks } = this.state;
+		const { currentTab, results, displayRecs, recTracks, seedTracks } = this.state;
     const { username } = data;
-		const showRecs = (recTracks.length > 0 && displayRecs);
 
+		const songTabStyles = classNames('tab', { 'active': currentTab === 'Songs' })
+		const spotifyTabStyles = classNames('tab', { 'active': currentTab === 'Spotify' })
+
+		const showRecs = (recTracks.length > 0 && displayRecs);
 		const seedTracksDisplay = seedTracks.map((track, i) => {
 			return (
 				<MediaListItem name={track.name} primaryContext={track.artists[0].name} coverArtUrl={track.album.images[0].url} />
@@ -164,18 +328,43 @@ class DataVisualizations extends Component {
 					</>)}
           </div>
           <div className="content">
+					<div className="tabs">
+						<Tabs>
+						<TabList className="browse-headers">
+							<Tab onClick={() => this.setState({ currentTab: 'Songs' })} className={songTabStyles}> Songs </Tab>
+							<Tab onClick={(e) => this.handleShowSpotifyData(e)} className={spotifyTabStyles}> Spotify Data </Tab>
+						</TabList>
+						<TabPanel>
 						{displayRecs ? (
+							<div className="content">
 							<Chart title="Song Attributes">
-								<div className="content">
 									<DoubleBarGraph
-										labels={this.state.userFeaturesName}
-										barData1={this.state.userFeaturesValue}
+										labels={this.state.bar1FeaturesName}
+										barData1={this.state.bar1FeaturesValue}
 										label1={"My Songs"}
-										barData2={this.state.selectedFeaturesValue}
+										barData2={this.state.selectedbar1FeaturesValue}
 										label2={"Selected Songs"}
 									/>
-								</div>
 							</Chart>
+							<Chart>
+								<RadarGraph
+									labels={this.state.radarFeaturesName}
+									barData1={this.state.radarFeaturesValue}
+									label1={"My Songs"}
+									barData2={this.state.selectedradarFeaturesValue}
+									label2={"Spotify Songs"}
+								/>
+							</Chart>
+							<Chart>
+								<HorizontalBarGraph
+									labels={this.state.bar2FeaturesName}
+									barData1={this.state.bar2FeaturesValue}
+									label1={"My Songs"}
+									barData2={this.state.selectedbar2FeaturesValue}
+									label2={"Selected Songs"}
+								/>
+							</Chart>
+							</div>
 						) : (
 							<div className="content">
 								<Search
@@ -191,6 +380,41 @@ class DataVisualizations extends Component {
 								)}
 							</div>
 						)}
+						</TabPanel>
+						<TabPanel>
+							<p>Compare your listening patterns to Spotify-wide users</p>
+							<Chart title="Song Attributes">
+								<div className="content">
+									<DoubleBarGraph
+										labels={this.state.bar1FeaturesName}
+										barData1={this.state.bar1FeaturesValue}
+										label1={"My Songs"}
+										barData2={this.state.spotifybar1FeaturesValue}
+										label2={"Spotify Songs"}
+									/>
+								</div>
+							</Chart>
+							<Chart>
+								<RadarGraph
+									labels={this.state.radarFeaturesName}
+									barData1={this.state.radarFeaturesValue}
+									label1={"My Songs"}
+									barData2={this.state.spotifyradarFeaturesValue}
+									label2={"Spotify Songs"}
+							 	/>
+							</Chart>
+							<Chart>
+								<HorizontalBarGraph
+									labels={this.state.bar2FeaturesName}
+									barData1={this.state.bar2FeaturesValue}
+									label1={"My Songs"}
+									barData2={this.state.spotifybar2FeaturesValue}
+									label2={"Spotify Songs"}
+								/>
+							</Chart>
+						</TabPanel>
+						</Tabs>
+						</div>
           </div>
         </div>
       </main>
