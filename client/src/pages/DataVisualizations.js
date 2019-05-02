@@ -107,7 +107,6 @@ class DataVisualizations extends Component {
         loadingDone: true
       });
       //console.log(Object.entries(data));
-
     }
 	}
 
@@ -118,7 +117,6 @@ class DataVisualizations extends Component {
 			if (res.data.tracks.items) {
 				this.setState({ results: res.data.tracks.items })
 			}
-			console.log(this.state)
 		})
 		.catch(err => {
 			console.log(err);
@@ -127,7 +125,6 @@ class DataVisualizations extends Component {
 
 	handleQueryChange = e => {
 		this.setState({ query: e.target.value })
-		console.log(this.state)
 	}
 
 	handleSongClick = (song) => {
@@ -147,7 +144,7 @@ class DataVisualizations extends Component {
     this.setState({
       seedTracks: filteredSeedTracks
     })
-    console.log(filteredSeedTracks);
+    //console.log(filteredSeedTracks);
   }
 
 	handleShowSpotifyData = (e) => {
@@ -159,7 +156,6 @@ class DataVisualizations extends Component {
 		{ visualType: 'top'},
 		{ headers: { Authorization: `Bearer ${Cookies.get("cookie")}`}})
 		.then(res => {
-			console.log(res);
 			let bar1array = Object.entries(
 	       res.data.avgFeatures
 	     ).filter(item =>
@@ -214,14 +210,10 @@ class DataVisualizations extends Component {
 	handleSubmitData = (e) => {
     e.preventDefault();
     let trackIds = this.state.seedTracks.map(track => track.id);
-    console.log(trackIds);
     axios.post('/queries/visual',
 		{ visualType: 'selected', selectedTracks: trackIds},
     { headers: { Authorization: `Bearer ${Cookies.get("cookie")}`}})
     .then(res => {
-			console.log("this is the res data after submitting")
-      console.log(res.data);
-			console.log(res.data.avgFeatures);
 			let array = Object.entries(
         res.data.avgFeatures
       ).filter(item => item[0] !== "duration_ms");
