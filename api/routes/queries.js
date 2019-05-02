@@ -126,7 +126,7 @@ router.post('/recommend', middlewares.checkToken, (req, res) => {
             {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
             .then(results => {
               songs = queryUtils.songParser(results);
-              queryUtils.insertIntoCache('Recommendation', authorizedData['username'], req.body, songs);
+              queryUtils.insertIntoCache('Recommendation', user, req.body, songs);
               res.json(songs);
             })
             .catch(err => {
@@ -207,7 +207,6 @@ router.post('/visual', middlewares.checkToken, (req, res) => {
             axios.get(`https://api.spotify.com/v1/tracks?ids=${trackIds.join(',')}`,
             {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
             .then(results => {
-              //console.log(results['data'])
               req.body['tracks'] = results['data']['tracks'];
               spotifyData.getAvgFeats(checkedUser, db, results['data']['tracks'], (err, data) => {
                 if(err){

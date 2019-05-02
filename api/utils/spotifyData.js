@@ -77,16 +77,20 @@ const getAvgFeats = (user, db, songs, next) => {
   var idsArray = [];
   let genreArtists = [];
   let genres = {};
+  let popularityObj = {};
   for (let song of songs){
     song['album'] = {
       name: song['album']['name'],
       id: song['album']['id'],
+      images: song['album']['images']
     }
     artists = []
+    //console.log(song)
     for (let artist of song['artists']){
       artists.push({
         name: artist['name'],
         id: artist['id'],
+        images: artist['images']
       })
       genreArtists.push(artist['id']);
     }
@@ -103,7 +107,7 @@ const getAvgFeats = (user, db, songs, next) => {
     delete song["href"];
     data['songs'].push(song);
     idsArray.push(song['id']);
-    data['avgFeatures']['popularity'] += song['popularity'];
+    popularityObj[song['id']] = song['popularity'];
   }
   queryUtils.songSearchByIds(idsArray, query_results => {
     idsArray = query_results['ids'];  // contains the ids that need to be searched
@@ -111,7 +115,6 @@ const getAvgFeats = (user, db, songs, next) => {
     for (let id of idsArray){
       idQueries += `${id},`;
     }
-    //console.log(albums)
     genreArtists = genreArtists.filter((el,i,a) => i === a.indexOf(el));
     genreArtists = genreArtists.slice(0,50)
     //TO-DO: Query and Save to Cache
@@ -119,11 +122,14 @@ const getAvgFeats = (user, db, songs, next) => {
     axios.get(`https://api.spotify.com/v1/audio-features?ids=${idQueries}`,
     {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
     .then(_results => {
-      queryUtils.insertSongFeatsIntoCache(idsArray, _results['data']['audio_features']);
       var results = [];
-      if(_results['data']['audio_features'].length !== 1){
+      if(_results['data']['audio_features'].length !== 1 || _results['data']['audio_features'][0]){
+        for (let track of _results['data']['audio_features']){
+          track['popularity'] = popularityObj[track.id];
+        }
         results = _results['data']['audio_features'];
       }
+      queryUtils.insertSongFeatsIntoCache(idsArray, _results['data']['audio_features']);
       results = results.concat(cache_results);
       // console.log(cache_results);
       for (let song of results){
@@ -174,16 +180,26 @@ const getSimilairity = (data1, data2, next) => {
   data2.loudness /= -60;
   data1.tempo /= 200;
   data2.tempo /= 200;
-  data1.valence *= 2;
+  /*data1.valence *= 2;
   data2.valence *= 2;
   data1.energy *= 2;
   data2.energy *= 2;
   data1.mode *= 2;
   data2.mode *= 2;
   data1.danceability *= 2;
-  data2.danceability *= 2;
-  let data1Vals = Object.values(data1);
-  let data2Vals = Object.values(data2);
+  data2.danceability *= 2;*/
+  let dataKeys = Object.keys(data1);
+  let data1Vals = []//Object.values(data1);
+  let data2Vals = []//Object.values(data2);
+  for (let key of dataKeys){
+    console.log(key)
+    data1Vals.push(data1[key]);
+    data2Vals.push(data2[key]);
+  }
+  //console.log(data1Vals.length)
+  //console.log(data2Vals.length)
+  //console.log(data1Vals)
+  //console.log(data2Vals)
   let squareReducer = (accumulator, currentValue) => accumulator + Math.pow(currentValue,2);
   let sqrtd1 = Math.sqrt(data1Vals.reduce(squareReducer));
   let sqrtd2 = Math.sqrt(data2Vals.reduce(squareReducer));
@@ -192,6 +208,9 @@ const getSimilairity = (data1, data2, next) => {
   for (let i = 0; i < data1Vals.length; i++){
     num += data1Vals[i]*data2Vals[i];
   }
+  //console.log(num)
+  //console.log(denom)
+  //console.log(num/denom)
   console.log(100 - ((1 - num/denom) * 750))
   next(100 - ((1 - num/denom) * 750));
   return;
