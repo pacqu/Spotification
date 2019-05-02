@@ -337,7 +337,7 @@ class DataVisualizations extends Component {
 						<TabPanel>
 						{displayRecs ? (
 							<div className="content">
-							<Chart title="Song Attributes">
+							<Chart title="Musical Elements">
 									<DoubleBarGraph
 										labels={this.state.bar1FeaturesName}
 										barData1={this.state.bar1FeaturesValue}
@@ -346,16 +346,16 @@ class DataVisualizations extends Component {
 										label2={"Selected Songs"}
 									/>
 							</Chart>
-							<Chart>
+							<Chart title = "Song Attributes">
 								<RadarGraph
 									labels={this.state.radarFeaturesName}
 									barData1={this.state.radarFeaturesValue}
 									label1={"My Songs"}
 									barData2={this.state.selectedradarFeaturesValue}
-									label2={"Spotify Songs"}
+									label2={"Selected Songs"}
 								/>
 							</Chart>
-							<Chart>
+							<Chart title = "Vocals vs Instrumentals">
 								<HorizontalBarGraph
 									labels={this.state.bar2FeaturesName}
 									barData1={this.state.bar2FeaturesValue}
@@ -383,7 +383,7 @@ class DataVisualizations extends Component {
 						</TabPanel>
 						<TabPanel>
 							<p>Compare your listening patterns to Spotify-wide users</p>
-							<Chart title="Song Attributes">
+							<Chart title="Musical Elements">
 								<div className="content">
 									<DoubleBarGraph
 										labels={this.state.bar1FeaturesName}
@@ -394,7 +394,7 @@ class DataVisualizations extends Component {
 									/>
 								</div>
 							</Chart>
-							<Chart>
+							<Chart title = "Song Attributes">
 								<RadarGraph
 									labels={this.state.radarFeaturesName}
 									barData1={this.state.radarFeaturesValue}
@@ -403,7 +403,7 @@ class DataVisualizations extends Component {
 									label2={"Spotify Songs"}
 							 	/>
 							</Chart>
-							<Chart>
+							<Chart title = "Vocals vs Instrumentals">
 								<HorizontalBarGraph
 									labels={this.state.bar2FeaturesName}
 									barData1={this.state.bar2FeaturesValue}
