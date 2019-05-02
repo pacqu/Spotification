@@ -92,7 +92,9 @@ class Profile extends Component {
               <img className="avatar" src="https://i.kym-cdn.com/entries/icons/mobile/000/028/861/cover3.jpg" />
             </MediaQuery>
             <h1>{profileName}</h1>
-            <Button inverted> Add Friend </Button>
+            { profileName != username && (
+              <Button inverted> Add Friend </Button>
+            )}
             <div className="similarity-container">
               <h2>Similarity Score</h2>
               { similarity && (
