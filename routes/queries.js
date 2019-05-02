@@ -250,4 +250,14 @@ router.post('/collablist', function(req, res, next){
   res.send('Route Not Implemented');
 });
 
+/* DELETE queries/ - Drops All Users
+FOR DEVELOPMENT ONLY - COMMENT THIS OUT FOR PRODUCTION
+*/
+router.delete('/', (req, res) => {
+  const queryCache = db.collection('queries');
+  const queryDel = queryCache.drop((err, delOK) => {
+    if (err) res.json(err);
+    if (delOK) res.json({delted: delOK});
+  })
+});
 module.exports = router;
