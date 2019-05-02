@@ -189,7 +189,7 @@ router.get('/username/:username', middlewares.checkToken, (req, res) => {
     } else {
       //If token is successfully verified, we can send the autorized data
       const users = db.collection('users');
-      users.find({'username': username}, {'projection': {'password': 0, 'salt': 0, 'spotifyAuth': 0, 'spotifyAuthTokens': 0, 'spotifyAuthUrl': 0}}).toArray( (err, results) => {
+      users.find({'username': username}, {'projection': {'password': 0, 'salt': 0, 'spotifyAuthTokens': 0, 'spotifyAuthUrl': 0}}).toArray( (err, results) => {
         if(err) {
           console.log(err);
           res.status(500);
@@ -201,32 +201,37 @@ router.get('/username/:username', middlewares.checkToken, (req, res) => {
           res.send("Given user does not exist");
         }
         var givenUser = results[0]
-        users.find({'username': authorizedData['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
-          if(err) {
-            console.log(err);
-            res.status(500);
-            res.json(err);
-          }
-          if ( results.length == 0  || !(results) ) {
-            console.log('ERROR: User could not be found');
-            res.status(404);
-            res.send("Given user does not exist");
-          }
-          var loggedInUser = results[0];
-          spotifyData.getSimilairity(givenUser.listeningData.avgFeatures, loggedInUser.listeningData.avgFeatures, (data) => {
-            var similarity = null;
-            //console.log(data);
-            if (data !== -1) similarity = data;
-            givenUser.similarity = data;
-            res.json(givenUser);
-            return;
-          })
-          //console.log(results)
-          //res.json(results);
-        });
-        //res.json(results);
+        if (givenUser.spotifyAuth && givenUser.listeningData){
+          users.find({'username': authorizedData['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
+            if(err) {
+              console.log(err);
+              res.status(500);
+              res.json(err);
+            }
+            if ( results.length == 0  || !(results) ) {
+              console.log('ERROR: User could not be found');
+              res.status(404);
+              res.send("Given user does not exist");
+            }
+            var loggedInUser = results[0];
+            let givenUserFeatures = (givenUser.listeningData ? givenUser.listeningData.avgFeatures : null )
+            let loggedInUserFeatures = (loggedInUser.listeningData ? loggedInUser.listeningData.avgFeatures : null )
+            spotifyData.getSimilairity(givenUserFeatures, loggedInUserFeatures, (data) => {
+              var similarity = null;
+              //console.log(data);
+              if (data !== -1) similarity = data;
+              givenUser.similarity = data;
+              res.json(givenUser);
+              return;
+            })
+            //console.log(results)
+            //res.json(results);
+          });
+        }
+        else{
+          res.json(givenUser);
+        }
       });
-      //res.json({ authorizedData });
     }
   });
 });
@@ -302,28 +307,57 @@ router.post('/spotifyauth', middlewares.checkToken, (req, res) => {
           'refresh': data.body['refresh_token'],
           'expires': timeTokenExpires
         }
-        console.log(authorizedData['username'])
-        const users = db.collection('users');
-        users.updateOne({'username': authorizedData['username']},
-        {$set : {'spotifyAuthTokens': spotifyAuthTokens, 'spotifyAuth': true} },
-        {}, (err, results) => {
-          if(err) {
-            console.log(err);
-            res.status(500);
-            res.json(err);
-          }
-          spotifyApi.setAccessToken(data.body['access_token']);
-          spotifyApi.setRefreshToken(data.body['refresh_token']);
-          users.find({'username': authorizedData['username']}, {'projection': {'password': 0}}).toArray( (err, results) => {
+        axios.get(`https://api.spotify.com/v1/me`,
+        {headers: { Authorization: `Bearer ${data.body['access_token']}`}})
+        .then(results => {
+          console.log(results)
+          let images = results.data.images;
+          const users = db.collection('users');
+          users.updateOne({'username': authorizedData['username']},
+          {$set : {'spotifyAuthTokens': spotifyAuthTokens, 'spotifyAuth': true, 'images': images} },
+          {}, (err, results) => {
             if(err) {
               console.log(err);
               res.status(500);
               res.json(err);
             }
-            console.log(results)
-            res.json(results);
+            spotifyApi.setAccessToken(data.body['access_token']);
+            spotifyApi.setRefreshToken(data.body['refresh_token']);
+            users.find({'username': authorizedData['username']}, {'projection': {'password': 0, 'salt': 0, 'spotifyAuthTokens': 0}}).toArray( (err, results) => {
+              if(err) {
+                console.log(err);
+                res.status(500);
+                res.json(err);
+              }
+              console.log(results)
+              res.json(results);
+            })
           })
-        });
+        })
+        .catch(err => {
+          console.log(err['response'].data);
+          const users = db.collection('users');
+          users.updateOne({'username': authorizedData['username']},
+          {$set : {'spotifyAuthTokens': spotifyAuthTokens, 'spotifyAuth': true} },
+          {}, (err, results) => {
+            if(err) {
+              console.log(err);
+              res.status(500);
+              res.json(err);
+            }
+            spotifyApi.setAccessToken(data.body['access_token']);
+            spotifyApi.setRefreshToken(data.body['refresh_token']);
+            users.find({'username': authorizedData['username']}, {'projection': {'password': 0, 'salt': 0, 'spotifyAuthTokens': 0}}).toArray( (err, results) => {
+              if(err) {
+                console.log(err);
+                res.status(500);
+                res.json(err);
+              }
+              console.log(results)
+              res.json(results);
+            })
+          })
+        })
       })
       .catch( (err) => {
         console.log(err);
