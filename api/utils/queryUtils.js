@@ -73,6 +73,7 @@ const getQueriesForUser = (res, username) => {
  */
 const insertIntoCache = (queryType, user, reqBody, resObj) => {
   const queryCache = db.collection('queries');
+
    if (queryType === 'Recommendation'){
      if (reqBody.seedTracks){
        axios.get(`https://api.spotify.com/v1/tracks?ids=${reqBody.seedTracks}`,
@@ -152,7 +153,7 @@ const insertSongFeatsIntoCache = (ids, results) => {
   // solution will be to hit the cache and add back the results when done
   for (let i = 0; i < ids.length; i++){
     songFeats.insertOne({
-      'song_id': ids[i], 
+      'song_id': ids[i],
       'audioFeats': results[i]
     });
   }
@@ -164,6 +165,7 @@ const insertSongFeatsIntoCache = (ids, results) => {
  */
 const songSearchByIds = (ids, callback) => {
   const songFeats = db.collection('song_feats');
+  //songFeats.drop()
   var id_arr = ids.map(x => {return {'song_id': x}});
   console.log(id_arr)
   songFeats.find({
@@ -176,6 +178,7 @@ const songSearchByIds = (ids, callback) => {
       var used_ids = results.map(x => x['song_id']);
       var new_ids = ids.filter(x => !used_ids.includes(x));
       var final_results = results.map(x => {return x['audioFeats']})
+      console.log(final_results)
       callback({'ids': new_ids, 'results': final_results});
     }
   });
@@ -217,5 +220,5 @@ const songParser = (results) => {
   return songs;
 }
 
-module.exports = {getAllQueries, getQueriesForUser, insertIntoCache, 
+module.exports = {getAllQueries, getQueriesForUser, insertIntoCache,
   songParser, insertSongFeatsIntoCache, songSearchByIds};

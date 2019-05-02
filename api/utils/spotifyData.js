@@ -77,6 +77,7 @@ const getAvgFeats = (user, db, songs, next) => {
   var idsArray = [];
   let genreArtists = [];
   let genres = {};
+  let popularityObj = {};
   for (let song of songs){
     song['album'] = {
       name: song['album']['name'],
@@ -104,7 +105,7 @@ const getAvgFeats = (user, db, songs, next) => {
     delete song["href"];
     data['songs'].push(song);
     idsArray.push(song['id']);
-    data['avgFeatures']['popularity'] += song['popularity'];
+    popularityObj[song['id']] = song['popularity'];
   }
   queryUtils.songSearchByIds(idsArray, query_results => {
     idsArray = query_results['ids'];  // contains the ids that need to be searched
@@ -112,7 +113,6 @@ const getAvgFeats = (user, db, songs, next) => {
     for (let id of idsArray){
       idQueries += `${id},`;
     }
-    //console.log(albums)
     genreArtists = genreArtists.filter((el,i,a) => i === a.indexOf(el));
     genreArtists = genreArtists.slice(0,50)
     //TO-DO: Query and Save to Cache
@@ -120,11 +120,14 @@ const getAvgFeats = (user, db, songs, next) => {
     axios.get(`https://api.spotify.com/v1/audio-features?ids=${idQueries}`,
     {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
     .then(_results => {
-      queryUtils.insertSongFeatsIntoCache(idsArray, _results['data']['audio_features']);
       var results = [];
-      if(_results['data']['audio_features'].length !== 1){
+      if(_results['data']['audio_features'].length !== 1 || _results['data']['audio_features'][0]){
+        for (let track of _results['data']['audio_features']){
+          track['popularity'] = popularityObj[track.id];
+        }
         results = _results['data']['audio_features'];
       }
+      queryUtils.insertSongFeatsIntoCache(idsArray, _results['data']['audio_features']);
       results = results.concat(cache_results);
       // console.log(cache_results);
       for (let song of results){
