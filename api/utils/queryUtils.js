@@ -114,7 +114,7 @@ const insertIntoCache = (queryType, user, reqBody, resObj) => {
        })
      }
      else if (reqBody.seedArtists){
-       axios.get(`https://api.spotify.com/v1/artists?ids=${seedArtists}`,
+       axios.get(`https://api.spotify.com/v1/artists?ids=${reqBody.seedArtists}`,
        {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
        .then(results => {
          reqBody['artists'] = results.data.artists;
@@ -191,7 +191,6 @@ const songSearchByIds = (ids, callback) => {
 const songParser = (results) => {
   songs = [];
   for (let song of results.data.tracks) {
-    print(song)
     song['album'] = {
       name: song['album']['name'],
       id: song['album']['id'],

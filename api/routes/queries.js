@@ -126,7 +126,7 @@ router.post('/recommend', middlewares.checkToken, (req, res) => {
             {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
             .then(results => {
               songs = queryUtils.songParser(results);
-              queryUtils.insertIntoCache('Recommendation', authorizedData['username'], req.body, songs);
+              queryUtils.insertIntoCache('Recommendation', user, req.body, songs);
               res.json(songs);
             })
             .catch(err => {
