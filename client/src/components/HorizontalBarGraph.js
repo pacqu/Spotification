@@ -7,20 +7,20 @@ export default function HorizontalBarGraph({ labels, barData1, label1, barData2,
     datasets: [
       {
         label: label1,
-        backgroundColor: 'rgba(255,99,132,0.3)',
-        borderColor: 'rgba(255,99,132,1)',
+        backgroundColor: 'rgba(38, 166, 91, 0.3)',
+        borderColor: 'rgba(38, 166, 91, 1)',
         borderWidth: 1,
-        hoverBackgroundColor: 'rgba(255,99,132,0.4)',
-        hoverBorderColor: 'rgba(255,99,132,1)',
+        hoverBackgroundColor: 'rgba(38, 166, 91,0.4)',
+        hoverBorderColor: 'rgba(38, 166, 91, 1)',
         data: barData1
       },
       {
         label: label2,
-        backgroundColor: 'rgba(140, 20, 252, 0.3)',
-        borderColor: 'rgba(140, 20, 252, 1)',
+        backgroundColor: 'rgba(245, 230, 83,0.3)',
+        borderColor: 'rgba(245, 230, 83, 1)',
         borderWidth: 1,
-        hoverBackgroundColor: 'rgba(140, 20, 252, 0.4)',
-        hoverBorderColor: 'rgba(140, 20, 252, 1)',
+        hoverBackgroundColor: 'rgba(245, 230, 83, 0.4)',
+        hoverBorderColor: 'rgba(245, 230, 83, 1)',
         data: barData2
       }
     ]

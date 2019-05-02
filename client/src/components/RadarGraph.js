@@ -17,12 +17,12 @@ export default function HorizontalBarGraph({ labels, barData1, label1, barData2,
       },
       {
         label: label2,
-	      backgroundColor: 'rgba(255,99,132,0.2)',
-	      borderColor: 'rgba(255,99,132,1)',
-	      pointBackgroundColor: 'rgba(255,99,132,1)',
+	      backgroundColor: 'rgba(89, 171, 227, 0.2)',
+	      borderColor: 'rgba(89, 171, 227, 1)',
+	      pointBackgroundColor: 'rgba(89, 171, 227, 1)',
 	      pointBorderColor: '#fff',
 	      pointHoverBackgroundColor: '#fff',
-	      pointHoverBorderColor: 'rgba(255,99,132,1)',
+	      pointHoverBorderColor: 'rgba(89, 171, 227,1)',
 	      data: barData2
       }
     ]

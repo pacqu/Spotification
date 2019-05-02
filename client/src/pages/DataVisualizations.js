@@ -106,7 +106,7 @@ class DataVisualizations extends Component {
 				radarFeaturesValue: radarArray.map(item => item[1]),
         loadingDone: true
       });
-      console.log(Object.entries(data));
+      //console.log(Object.entries(data));
 
     }
 	}
@@ -219,6 +219,7 @@ class DataVisualizations extends Component {
 		{ visualType: 'selected', selectedTracks: trackIds},
     { headers: { Authorization: `Bearer ${Cookies.get("cookie")}`}})
     .then(res => {
+			console.log("this is the res data after submitting")
       console.log(res.data);
 			console.log(res.data.avgFeatures);
 			let array = Object.entries(
