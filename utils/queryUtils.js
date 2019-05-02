@@ -73,7 +73,6 @@ const getQueriesForUser = (res, username) => {
  */
 const insertIntoCache = (queryType, user, reqBody, resObj) => {
   const queryCache = db.collection('queries');
-  //queryCache.drop()
    if (queryType === 'Recommendation'){
      if (reqBody.seedTracks){
        axios.get(`https://api.spotify.com/v1/tracks?ids=${reqBody.seedTracks}`,
@@ -165,7 +164,6 @@ const insertSongFeatsIntoCache = (ids, results) => {
  */
 const songSearchByIds = (ids, callback) => {
   const songFeats = db.collection('song_feats');
-  //songFeats.drop()
   var id_arr = ids.map(x => {return {'song_id': x}});
   console.log(id_arr)
   songFeats.find({

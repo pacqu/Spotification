@@ -470,4 +470,14 @@ router.get('/similarity', middlewares.checkToken, (req, res) => {
   })
 });
 
+/* DELETE search/ - Drops All Users
+FOR DEVELOPMENT ONLY - COMMENT THIS OUT FOR PRODUCTION
+*/
+router.delete('/', (req, res) => {
+  const songFeats = db.collection('song_feats');
+  const featsDel = songFeats.drop((err, delOK) => {
+    if (err) res.json(err);
+    if (delOK) res.json({delted: delOK});
+  })
+});
 module.exports = router;
