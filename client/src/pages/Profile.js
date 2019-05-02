@@ -7,7 +7,6 @@ import '../styles/Layout.css';
 import '../styles/Profile.css';
 
 import { Bar } from 'react-chartjs-2';
-import Button from '../components/Button';
 import DarkCard from '../components/DarkCard'
 import HorizontalBarGraph from '../components/HorizontalBarGraph'
 import CircularProgressbar from 'react-circular-progressbar';
@@ -92,9 +91,6 @@ class Profile extends Component {
               <img className="avatar" src="https://i.kym-cdn.com/entries/icons/mobile/000/028/861/cover3.jpg" />
             </MediaQuery>
             <h1>{profileName}</h1>
-            { profileName != username && (
-              <Button inverted> Add Friend </Button>
-            )}
             <div className="similarity-container">
               <h2>Similarity Score</h2>
               { similarity && (
