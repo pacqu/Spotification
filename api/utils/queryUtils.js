@@ -191,12 +191,14 @@ const songParser = (results) => {
     song['album'] = {
       name: song['album']['name'],
       id: song['album']['id'],
+      images: song['album']['images']
     }
     artists = []
     for (let artist of song['artists']) {
       artists.push({
         name: artist['name'],
         id: artist['id'],
+        images: artist['images']
       })
     }
     song['artists'] = artists;

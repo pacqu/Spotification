@@ -436,4 +436,56 @@ router.post('/create-playlist', middlewares.checkToken, (req, res) => {
   });
 });
 
+/* GET user/playlists - Gets Playlists of Logged-In User
+EXPECTS:
+  HEADERS:
+    - 'Authorization': 'Bearer <token>'
+*/
+router.get('/playlists', middlewares.checkToken, (req, res) => {
+  jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
+    if(err){
+      console.log('ERROR: Could not connect to the protected route');
+      res.status(401);
+      res.send('Error with given token');
+    } else {
+      //If token is successfully verified, we can send the autorized data
+      const users = db.collection('users');
+      users.find({'username': authorizedData['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
+        if(err) {
+          console.log(err);
+          res.status(500);
+          res.json(err);
+        }
+        if ( results.length == 0  || !(results) ) {
+          console.log('ERROR: User could not be found');
+          res.status(404);
+          res.send("Given user does not exist");
+        }
+        user = results[0];
+        spotifyData.checkRefresh(user, db, spotifyApi, (err, checkedUser) => {
+          if(err){
+            console.log(err);
+            res.status(500);
+            res.json(err);
+          }
+          spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
+          axios.get('https://api.spotify.com/v1/me/playlists?limit=50',
+          {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
+          .then(results => {
+            console.log(results.data)
+            res.json(results.data)
+          })
+          .catch(err => {
+            console.log(err);
+            res.status(500);
+            res.json(err);
+          })
+
+        })
+      });
+      //res.json({ authorizedData });
+    }
+  });
+});
+
 module.exports = router;

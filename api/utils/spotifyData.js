@@ -83,6 +83,7 @@ const getAvgFeats = (user, db, songs, next) => {
       id: song['album']['id'],
     }
     artists = []
+    //console.log(song)
     for (let artist of song['artists']){
       artists.push({
         name: artist['name'],
@@ -174,16 +175,26 @@ const getSimilairity = (data1, data2, next) => {
   data2.loudness /= -60;
   data1.tempo /= 200;
   data2.tempo /= 200;
-  data1.valence *= 2;
+  /*data1.valence *= 2;
   data2.valence *= 2;
   data1.energy *= 2;
   data2.energy *= 2;
   data1.mode *= 2;
   data2.mode *= 2;
   data1.danceability *= 2;
-  data2.danceability *= 2;
-  let data1Vals = Object.values(data1);
-  let data2Vals = Object.values(data2);
+  data2.danceability *= 2;*/
+  let dataKeys = Object.keys(data1);
+  let data1Vals = []//Object.values(data1);
+  let data2Vals = []//Object.values(data2);
+  for (let key of dataKeys){
+    console.log(key)
+    data1Vals.push(data1[key]);
+    data2Vals.push(data2[key]);
+  }
+  //console.log(data1Vals.length)
+  //console.log(data2Vals.length)
+  //console.log(data1Vals)
+  //console.log(data2Vals)
   let squareReducer = (accumulator, currentValue) => accumulator + Math.pow(currentValue,2);
   let sqrtd1 = Math.sqrt(data1Vals.reduce(squareReducer));
   let sqrtd2 = Math.sqrt(data2Vals.reduce(squareReducer));
@@ -192,6 +203,9 @@ const getSimilairity = (data1, data2, next) => {
   for (let i = 0; i < data1Vals.length; i++){
     num += data1Vals[i]*data2Vals[i];
   }
+  //console.log(num)
+  //console.log(denom)
+  //console.log(num/denom)
   console.log(100 - ((1 - num/denom) * 750))
   next(100 - ((1 - num/denom) * 750));
   return;

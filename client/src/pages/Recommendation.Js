@@ -256,7 +256,6 @@ class Recommendation extends Component {
                 </TabPanel>
               </Tabs>
             </div>
-
           </div>
         </div>
       </main>

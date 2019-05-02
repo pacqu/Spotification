@@ -309,7 +309,7 @@ router.get('/playlist/:playlistId', middlewares.checkToken, (req, res) => {
           axios.get(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
           {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
           .then(results => {
-            //console.log(results.data)
+            console.log(results.data)
             res.json(results.data)
           })
           .catch(err => {
@@ -317,6 +317,153 @@ router.get('/playlist/:playlistId', middlewares.checkToken, (req, res) => {
             res.status(500);
             res.json(err);
           })
+        })
+      })
+    }
+  })
+});
+
+/* GET search/similarity - Get similarity between user and given spotify entity
+EXPECTS:
+  HEADERS:
+    - 'Authorization': 'Bearer <token>'
+  BODY:
+    - N/A
+*/
+router.get('/similarity', middlewares.checkToken, (req, res) => {
+  //Validate Auth Token
+  jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
+    if(err){
+      console.log('ERROR: Could not connect to the protected route');
+      res.status(401);
+      res.send('Error with given token');
+    } else {
+      //Check if query string was given
+      var idType = req.query.type;
+      var id = req.query.id;
+      if (!(idType && id)){
+        res.status(400);
+        res.send('Invalid spotify entity given.');
+        return;
+      }
+      //Grab User from DB to get spotify auth
+      const users = db.collection('users');
+      users.find({'username': authorizedData['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
+        if(err) {
+          console.log(err);
+          res.status(500);
+          res.json(err);
+        }
+        user = results[0];
+        spotifyData.checkRefresh(user, db, spotifyApi, (err, checkedUser) => {
+          if(err){
+            console.log(err.data);
+            res.status(500);
+            res.json(err.data);
+          }
+          spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
+          //song
+          if (idType === 'song') {
+            axios.get(`https://api.spotify.com/v1/tracks?ids=${id}`,
+              {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
+              .then(results => {
+                //console.log(featResults.data
+                spotifyData.getAvgFeats(checkedUser, db, results['data']['tracks'], (err, data) => {
+                  if(err){
+                    console.log(err);
+                    res.status(500);
+                    res.json(err);
+                  }
+                  spotifyData.getSimilairity(data.avgFeatures, user.listeningData.avgFeatures, (data) => {
+                    var similarity = null;
+                    if (data !== -1) similarity = data;
+                    res.json({score: data});
+                  })
+                })
+              })
+              .catch(err => {
+                console.log(err['response'].data);
+                res.status(500);
+                res.json(err['response'].data);
+              })
+            }
+          //artist
+          if (idType === 'artist') {
+            axios.get(`https://api.spotify.com/v1/artists/${id}/top-tracks?country=US`,
+              {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
+              .then(results => {
+                spotifyData.getAvgFeats(checkedUser, db, results['data']['tracks'], (err, data) => {
+                  if(err){
+                    console.log(err);
+                    res.status(500);
+                    res.json(err);
+                  }
+                  spotifyData.getSimilairity(data.avgFeatures, user.listeningData.avgFeatures, (data) => {
+                    var similarity = null;
+                    if (data !== -1) similarity = data;
+                    res.json({score: data});
+                  })
+                })
+              })
+              .catch(err => {
+                console.log(err['response'].data);
+                res.status(500);
+                res.json(err['response'].data);
+              })
+            }
+          //album
+          if (idType === 'album') {
+            axios.get(`https://api.spotify.com/v1/albums/${id}/tracks`,
+              {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
+              .then(results => {
+                spotifyData.getAvgFeats(checkedUser, db, results['data']['items'], (err, data) => {
+                  if(err){
+                    console.log(err);
+                    res.status(500);
+                    res.json(err);
+                  }
+                  spotifyData.getSimilairity(data.avgFeatures, user.listeningData.avgFeatures, (data) => {
+                    var similarity = null;
+                    if (data !== -1) similarity = data;
+                    res.json({score: data});
+                  })
+                })
+              })
+              .catch(err => {
+                console.log(err);
+                res.status(500);
+                res.json(err['response']);
+              })
+            }
+          //playlist
+          if (idType === 'playlist') {
+            axios.get(`https://api.spotify.com/v1/playlists/${id}/tracks`,
+              {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
+              .then(results => {
+                let tracks = []
+                for (let item of results['data']['items']){
+                  if (item.is_local) continue;
+                  tracks.push(item.track);
+                }
+                spotifyData.getAvgFeats(checkedUser, db, tracks, (err, data) => {
+                  if(err){
+                    console.log(err);
+                    res.status(500);
+                    res.json(err);
+                  }
+                  spotifyData.getSimilairity(data.avgFeatures, user.listeningData.avgFeatures, (data) => {
+                    var similarity = null;
+                    if (data !== -1) similarity = data;
+                    res.json({score: data});
+                  })
+                })
+              })
+              .catch(err => {
+                console.log(err);
+                res.status(500);
+                res.json(err['response']);
+              })
+            }
         })
       })
     }
