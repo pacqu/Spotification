@@ -47,6 +47,7 @@ router.get('/', middlewares.checkToken, (req, res) => {
     } else {
       //Check if query string was given
       var searchString = req.query.search;
+      var limit = req.query.limit;
       if (!(searchString)){
         res.status(400);
         res.send('No query string given.');
@@ -70,7 +71,7 @@ router.get('/', middlewares.checkToken, (req, res) => {
             res.json(err.data);
           }
           spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
-          axios.get(`https://api.spotify.com/v1/search?q=${searchString}&type=${searchType}`,
+          axios.get(`https://api.spotify.com/v1/search?q=${searchString}&type=${searchType}${limit ? '&limit='+limit : ''}`,
           {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
           .then(results => {
             console.log(results.data)
