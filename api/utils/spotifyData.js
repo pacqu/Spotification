@@ -82,6 +82,7 @@ const getAvgFeats = (user, db, songs, next) => {
     song['album'] = {
       name: song['album']['name'],
       id: song['album']['id'],
+      images: song['album']['images']
     }
     artists = []
     //console.log(song)
@@ -89,6 +90,7 @@ const getAvgFeats = (user, db, songs, next) => {
       artists.push({
         name: artist['name'],
         id: artist['id'],
+        images: artist['images']
       })
       genreArtists.push(artist['id']);
     }

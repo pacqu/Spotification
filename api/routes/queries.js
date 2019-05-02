@@ -207,7 +207,6 @@ router.post('/visual', middlewares.checkToken, (req, res) => {
             axios.get(`https://api.spotify.com/v1/tracks?ids=${trackIds.join(',')}`,
             {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
             .then(results => {
-              //console.log(results['data'])
               req.body['tracks'] = results['data']['tracks'];
               spotifyData.getAvgFeats(checkedUser, db, results['data']['tracks'], (err, data) => {
                 if(err){
