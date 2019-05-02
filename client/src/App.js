@@ -20,7 +20,7 @@ class App extends Component {
             <Route exact path="/" component={LandingPage} />
             <Route path="/login" component={LnR} />
             <Route path="/home" render={props => <ProtectedRoute component={Home} path="Home" {...props} />} />
-            <Route path="/Profile" render={props => <ProtectedRoute component={Profile} path="Profile" {...props} />} />
+            <Route path="/Profile/:username" render={props => <ProtectedRoute component={Profile} path="Profile" {...props} />} />
             <Route path="/Data" render={props => <ProtectedRoute component={DataVisualizations} path="Data" {...props} />} />
             <Route path="/Recommendation" render={props => <ProtectedRoute component={Recommendation} path="Recommendation" path="/Recommendation" {...props} />} />
           </Switch>

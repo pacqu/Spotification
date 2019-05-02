@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 
-function ProtectedRoute({ component: Component, path }) {
+function ProtectedRoute({ component: Component, path, match }) {
   const [loaded, setLoad] = useState(false);
   const [auth, setAuth] = useState(false);
   const [data, setData] = useState({});
@@ -44,7 +44,7 @@ function ProtectedRoute({ component: Component, path }) {
 
   if (loaded) {
     if (auth) {
-      return (<Component data={data[0]} location={path} /> )
+      return (<Component data={data[0]} location={path} profileName={match.params.username} /> )
     } else {
       return (<Redirect to="/login" />)
     }

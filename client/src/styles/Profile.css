@@ -1,0 +1,19 @@
+.top-row {
+  margin-bottom: 30px;
+  width: 100%;
+  display: flex;
+}
+
+.similarity-container {
+  margin-top: 3em;
+  width: 100%;
+}
+
+.similarity {
+  width: 50%;
+}
+
+.CircularProgressbar-path       { stroke: red;  }
+.CircularProgressbar-trail      { stroke: gray; }
+.CircularProgressbar-text       { fill: yellow; }
+.CircularProgressbar-background { fill: green;  }
