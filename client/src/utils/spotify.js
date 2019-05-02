@@ -1,5 +1,5 @@
 const clientId = encodeURIComponent('536061589cf34fe9ab2db5c316d69fa3');
-const redirectUri = 'http://localhost:3000/';
+const redirectUri = process.env.PORT ? 'https://spotification.herokuapp.com/login':'http://localhost:4000/login';
 let accessToken = '';
 
 const Spotify = {

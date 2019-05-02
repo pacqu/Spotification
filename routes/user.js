@@ -52,7 +52,7 @@ router.post('/', function(req, res, next) {
   users.find({'username': username}, {}).toArray( (err, results) => {
     console.log("Found the following records");
     console.log(results);
-    if ( results.length == 0  || !(results) ) {
+    if ( !(results) || results.length == 0 ) {
       let {salt, passHash} = verify.saltHashPassword(password);
       let userDoc = {
         'username': username,
