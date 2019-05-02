@@ -110,7 +110,7 @@ router.get('/', middlewares.checkToken, (req, res) => {
     } else {
       //If token is successfully verified, we can send the autorized data
       const users = db.collection('users');
-      users.find({'username': authorizedData['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
+      users.find({'username': authorizedData['username']}, {'projection': {'password': 0, 'salt': 0 }}).toArray( (err, results) => {
         if(err) {
           console.log(err);
           res.status(500);
@@ -121,10 +121,55 @@ router.get('/', middlewares.checkToken, (req, res) => {
           res.status(404);
           res.send("Given user does not exist");
         }
-        console.log(results)
-        res.json(results);
+        let user = results[0];
+        if (user.spotifyAuth){
+          if (!(user.images)){
+            spotifyData.checkRefresh(user, db, spotifyApi, (err, checkedUser) => {
+              if(err){
+                console.log(err.data);
+                res.status(500);
+                res.json(err.data);
+              }
+              spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
+              axios.get(`https://api.spotify.com/v1/me`,
+              {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
+              .then(results => {
+                console.log(results)
+                let images = results.data.images;
+                users.updateOne({'username': checkedUser['username']},
+                {$set : {'images': images} },
+                {}, (err, results) => {
+                  if(err) {
+                    console.log(err);
+                    res.status(500);
+                    res.json(err);
+                  }
+                  users.find({'username': checkedUser['username']}, {'projection': {'password': 0, 'salt': 0, 'spotifyAuthTokens': 0}}).toArray( (err, results) => {
+                    if(err) {
+                      console.log(err);
+                      res.status(500);
+                      res.json(err);
+                    }
+                    console.log(results)
+                    res.json(results);
+                  })
+                });
+              })
+              .catch(err => {
+                console.log(err['response'].data);
+                res.status(500);
+                res.json(err['response'].data);
+              })
+            })
+          }
+          else{
+            res.json(results);
+          }
+        }
+        else{
+          res.json(results);
+        }
       });
-      //res.json({ authorizedData });
     }
   });
 });
@@ -144,7 +189,7 @@ router.get('/username/:username', middlewares.checkToken, (req, res) => {
     } else {
       //If token is successfully verified, we can send the autorized data
       const users = db.collection('users');
-      users.find({'username': username}, {'projection': {'password': 0, 'salt': 0, 'spotifyAuth': 0, 'spotifyAuthTokens': 0, 'spotifyAuthUrl': 0,}}).toArray( (err, results) => {
+      users.find({'username': username}, {'projection': {'password': 0, 'salt': 0, 'spotifyAuth': 0, 'spotifyAuthTokens': 0, 'spotifyAuthUrl': 0}}).toArray( (err, results) => {
         if(err) {
           console.log(err);
           res.status(500);
