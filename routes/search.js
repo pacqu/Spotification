@@ -364,7 +364,7 @@ router.get('/similarity', middlewares.checkToken, (req, res) => {
           }
           spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
           //song
-          if (idType === 'song') {
+          if (idType === 'track') {
             axios.get(`https://api.spotify.com/v1/tracks?ids=${id}`,
               {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
               .then(results => {
