@@ -567,4 +567,38 @@ router.get('/playlists', middlewares.checkToken, (req, res) => {
   });
 });
 
+router.get('/refresh-tokens', middlewares.checkToken, (req, res) => {
+  jwt.verify(req.token, jwtSecret, (err, authorizedData) => {
+    if(err){
+      console.log('ERROR: Could not connect to the protected route');
+      res.status(401);
+      res.send('Error with given token');
+    } else {
+      //If token is successfully verified, we can send the autorized data
+      const users = db.collection('users');
+      users.find({'username': authorizedData['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
+        if(err) {
+          console.log(err);
+          res.status(500);
+          res.json(err);
+        }
+        if ( results.length == 0  || !(results) ) {
+          console.log('ERROR: User could not be found');
+          res.status(404);
+          res.send("Given user does not exist");
+        }
+        user = results[0];
+        spotifyData.forceRefresh(user, db, spotifyApi, (err, checkedUser) => {
+          if(err){
+            console.log(err);
+            res.status(500);
+            res.json(err);
+          }
+          res.json(checkedUser);
+        })
+      });
+    }
+  });
+});
+
 module.exports = router;

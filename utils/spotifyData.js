@@ -50,6 +50,39 @@ const checkRefresh = (user, db, spotifyApi, next) => {
     next(null, user)
   }
 }
+const forceRefresh = (user, db, spotifyApi, next) => {
+  //If we need to foce a refresh for misc reasons
+  //Call Spotify API to Refresh Token
+  spotifyApi.setRefreshToken(user['spotifyAuthTokens']['refresh'])
+  spotifyApi.refreshAccessToken().then((data) => {
+    var timeTokenExpires = moment().add(data.body['expires_in'],'s').format();
+    console.log(timeTokenExpires);
+    spotifyAuthTokens = {
+      'access': data.body['access_token'],
+      'refresh': user['spotifyAuthTokens']['refresh'],
+      'expires': timeTokenExpires
+    }
+    const users = db.collection('users');
+    users.updateOne({'username': user['username']},
+    {$set : {'spotifyAuthTokens': spotifyAuthTokens, 'spotifyAuth': true} },
+    {}, (err, results) => {
+      if(err) {
+        next(err, user)
+      }
+      users.find({'username': user['username']}, {'projection': {'password': 0, 'salt':0 }}).toArray( (err, results) => {
+        if(err) {
+          next(err, user)
+        }
+        user = results[0]
+        next(null,user)
+      });
+    });
+  },
+  (err) => {
+    //console.log(err)
+    next(err,user)
+  })
+}
 
 const getAvgFeats = (user, db, songs, next) => {
   let data = {
@@ -216,4 +249,4 @@ const getSimilairity = (data1, data2, next) => {
   return;
 }
 
-module.exports = {checkRefresh, getAvgFeats, getSimilairity};
+module.exports = {checkRefresh, forceRefresh, getAvgFeats, getSimilairity};
