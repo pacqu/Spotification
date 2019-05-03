@@ -174,16 +174,6 @@ class DataVisualizations extends Component {
     }
   }
 
-	removeFromTracks(e, track){
-    let filteredSeedTracks = this.state.seedTracks.filter((seedTrack) => {
-      return (track.name != seedTrack.name) || (track.artists[0].name != seedTrack.artists[0].name) || (track.album.name != seedTrack.album.name)
-    });
-    this.setState({
-      seedTracks: filteredSeedTracks
-    })
-    //console.log(filteredSeedTracks);
-  }
-
 	handleShowSpotifyData = (e) => {
 		e.preventDefault();
 		this.setState({
