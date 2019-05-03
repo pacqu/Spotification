@@ -1,0 +1,17 @@
+.dark-card {
+  color: #fff;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  word-wrap: break-word;
+  background-color: #1a1635;
+  background-clip: border-box;
+  border: 1px solid #313452;
+  border-radius: 0;
+}
+
+.card-body {
+  padding: 1.88rem 1.81rem;
+  flex: 1 1 auto;
+}

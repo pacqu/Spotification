@@ -28,6 +28,9 @@ class Header extends Component {
     const locations = ['Logout', 'Account', 'Profile', 'Home', 'Data', 'Recommendation'];
     const navItems = locations.map(item => {
       let href = `/${item}`
+      if (item === 'Profile') {
+        href = `/${item}/${name}`
+      }
       if (location.toLowerCase().includes(item.toLowerCase())) {
         return (<a href={href} key={item} className="menu-item"> {item} </a>)
       } else if (item.includes('Logout')) {
