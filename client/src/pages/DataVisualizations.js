@@ -1,4 +1,3 @@
-
 import React, { Component } from "react";
 import classNames from 'classnames';
 import { Tabs, Tab, TabList, TabPanel } from 'react-tabs';
@@ -11,6 +10,7 @@ import Search from '../components/Search';
 import Button from '../components/Button';
 import SongList from '../components/SongList';
 import ArtistView from '../components/ArtistView';
+import AlbumView from '../components/AlbumView';
 import BrowseView from '../components/BrowseView';
 import MediaListItem from '../components/MediaListItem';
 import MediaQuery from 'react-responsive';
@@ -30,6 +30,8 @@ class DataVisualizations extends Component {
 			currentTab: 'Songs',
       seedTracks: [],
 			currentAlbum: '',
+      artistResults: [],
+      albumResults: [],
 			results: [],
       recTracks: [],
 			bar1FeaturesName:[],
@@ -113,14 +115,27 @@ class DataVisualizations extends Component {
 
 	handleQuery = e => {
 		e.preventDefault();
-		axios.get(`/search?search=${this.state.query}`, { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
+		let tabState = 'track', resultsType = 'tracks', stateType = 'results';
+		if (this.state.currentTab === 'Artists') {
+			tabState = 'artist';
+			resultsType = 'artists';
+			stateType = 'artistResults';
+		} else if (this.state.currentTab === 'Albums') {
+			tabState = 'album';
+			resultsType = 'albums';
+			stateType = 'albumResults';
+		}
+		axios.get(`/search?search=${this.state.query}&searchType=${tabState}`, { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
 		.then(res => {
-			if (res.data.tracks.items) {
-				this.setState({ results: res.data.tracks.items })
+			let data = res.data[resultsType].items;
+			data = data.map(item => item.type = tabState);
+			if (res.data[resultsType].items) {
+				this.setState({ [stateType]: res.data[resultsType].items, displayRecs: false })
 			}
+			console.log(this.state);
 		})
 		.catch(err => {
-			console.log(err);
+			this.setState({ err : err.toString() });
 		});
 	}
 
@@ -128,6 +143,36 @@ class DataVisualizations extends Component {
 		this.setState({ query: e.target.value })
 	}
 
+	handleSeedClick = seed => {
+		let tabState = 'artist', dataState= 'tracks';
+		if (this.state.currentTab === 'Albums') {
+			tabState = 'album'
+			dataState = 'items';
+		}
+		axios.get(`search/${tabState}/${seed.id}`, { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
+		.then(res => {
+			console.log(res)
+			let seedSongs = res.data[dataState].map(song => Object.assign({}, song, { album : { name : seed.name, images: [ seed.images[0] ] } } ))
+			this.setState({
+				displayRecs: false,
+				results: seedSongs,
+				currentTab: 'Songs'
+			})
+		})
+		.catch(err => {
+			this.setState({ err : err.toString() });
+		})
+	}
+
+	handleSongClick = (song) => {
+    let { seedTracks } = this.state;
+    if (seedTracks.length > 9) {
+      alert('Please don\'t add more than 10 songs!');
+    } else {
+      seedTracks.push(song);
+      this.setState({ seedTracks });
+    }
+  }
 
 	removeFromTracks(e, track){
     let filteredSeedTracks = this.state.seedTracks.filter((seedTrack) => {
@@ -199,6 +244,12 @@ class DataVisualizations extends Component {
 		})
 	}
 
+	removeFromSeeds(id) {
+		let { seedTracks } = this.state;
+		seedTracks = seedTracks.filter(seedTracks  => seedTracks.id != id);
+		this.setState({ seedTracks });
+	}
+
 	handleSubmitData = (e) => {
     e.preventDefault();
     let trackIds = this.state.seedTracks.map(track => track.id);
@@ -256,6 +307,7 @@ class DataVisualizations extends Component {
 				selectedradarFeaturesValue: radarArray.map(item => item[1]),
 				selectedbar2FeaturesValue: bar2array.map(item => item[1])
       })
+			console.log(this.state.selectedbar2FeaturesValue);
     })
     .catch(err => {
       console.log(err);
@@ -281,25 +333,24 @@ class DataVisualizations extends Component {
     });
   };
 
-
   render() {
     const { data, location } = this.props;
-		const { currentTab, results, displayRecs, recTracks, seedTracks,currentAlbum } = this.state;
+		const { currentTab, results, displayRecs, recTracks, seedTracks,currentAlbum,
+		albumResults,
+		artistResults, } = this.state;
     const { username } = data;
 
 		const songTabStyles = classNames('tab', { 'active': currentTab === 'Songs' })
 		const spotifyTabStyles = classNames('tab', { 'active': currentTab === 'Spotify' })
+		const artistTabStyles = classNames('tab', { 'active': currentTab === 'Artists' })
+		const albumTabStyles = classNames('tab', { 'active': currentTab === 'Albums' })
 
 		const showRecs = (recTracks.length > 0 && displayRecs);
-		const seedTracksDisplay = seedTracks.map((track, i) => {
-			return (
-				<MediaListItem name={track.name} primaryContext={track.artists[0].name} coverArtUrl={track.album.images[0].url} />
-			)
+		const seedTracksDisplay = seedTracks.map((seedTrack, i) => {
+			return (<MediaListItem onClick={() => this.removeFromSeeds(seedTrack.id)} name={seedTrack.name} primaryContext={seedTrack.artists[0].name} coverArtUrl={seedTrack.album.images[0].url ? seedTrack.album.images[0].url : 'https://upload.wikimedia.org/wikipedia/en/c/c5/No_album_cover.jpg'}/>)
 		})
 
-		const seedTrackDisplay = seedTracks.map((track,i) => {
-			return(<li data-id={i} onClick={(e) => this.removeFromTracks(e,this.state.seedTracks[i])} >{track.name} by {track.artists[0].name} of {track.album.name}</li>)
-		})
+		const tabs = ['Songs', 'Artists', 'Albums', 'Spotify'];
 
     return (
       <main>
@@ -314,9 +365,11 @@ class DataVisualizations extends Component {
           </div>
           <div className="content">
 					<div className="tabs">
-						<Tabs>
+						<Tabs selectedIndex={tabs.indexOf(currentTab)}>
 						<TabList className="browse-headers">
 							<Tab onClick={() => this.setState({ currentTab: 'Songs' })} className={songTabStyles}> Songs </Tab>
+							<Tab onClick={() => this.setState({ currentTab: 'Artists' })} className={artistTabStyles}> Artists </Tab>
+							<Tab onClick={() => this.setState({ currentTab: 'Albums' })} className={albumTabStyles}> Albums </Tab>
 							<Tab onClick={(e) => this.handleShowSpotifyData(e)} className={spotifyTabStyles}> Spotify Data </Tab>
 						</TabList>
 						<TabPanel>
@@ -365,6 +418,36 @@ class DataVisualizations extends Component {
 								)}
 							</div>
 						)}
+						</TabPanel>
+						<TabPanel>
+							<Search
+								handleChange={this.handleQueryChange}
+								handleQuery={this.handleQuery}
+							/>
+							{ showRecs ? (<>
+								<h2> Recommendations </h2>
+								<Button onClick={() => this.setState({ showRecs : !showRecs })}> Go Back </Button>
+								<SongList songs={recTracks} />
+							</>) : artistResults.length > 0 ? (
+								<ArtistView handleClick={this.handleSeedClick} artists={artistResults}/>
+							) : (
+								<p> Nothing to see here... </p>
+							)}
+						</TabPanel>
+						<TabPanel>
+							<h2> Albums </h2>
+							<Search
+								handleChange={this.handleQueryChange}
+								handleQuery={this.handleQuery}
+							/>
+							{ showRecs ? (<>
+								<h2> Recommendations </h2>
+								<SongList songs={recTracks} />
+							</>) : albumResults.length > 0 ? (
+								<AlbumView handleClick={this.handleSeedClick} albums={albumResults} />
+							) : (
+								<p> Nothing to see here... </p>
+							)}
 						</TabPanel>
 						<TabPanel>
 							<p>Compare your listening patterns to Spotify-wide users</p>
