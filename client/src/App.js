@@ -8,6 +8,7 @@ import LnR from './pages/LoginAndRegister'
 import Profile from './pages/Profile'
 import DataVisualizations from './pages/DataVisualizations'
 import Recommendation from './pages/Recommendation'
+import SimilarityScores from './pages/SimilarityScores'
 import './styles/App.css';
 
 class App extends Component {
@@ -23,6 +24,7 @@ class App extends Component {
             <Route path="/Profile/:username" render={props => <ProtectedRoute component={Profile} path="Profile" {...props} />} />
             <Route path="/Data" render={props => <ProtectedRoute component={DataVisualizations} path="Data" {...props} />} />
             <Route path="/Recommendation" render={props => <ProtectedRoute component={Recommendation} path="Recommendation" path="/Recommendation" {...props} />} />
+            <Route path="/Similar" render={props => <ProtectedRoute component={SimilarityScores} path="Similar" {...props} />} />
           </Switch>
         </Router>
       </main>
