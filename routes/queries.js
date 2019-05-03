@@ -191,6 +191,7 @@ router.post('/visual', middlewares.checkToken, (req, res) => {
                   res.status(500);
                   res.json(err);
                 }
+                console.log(data);
                 queryUtils.insertIntoCache('Visualization', user, req.body, data);
                 res.json(data);
               })
