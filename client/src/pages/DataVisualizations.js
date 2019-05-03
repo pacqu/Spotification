@@ -29,6 +29,7 @@ class DataVisualizations extends Component {
       displayRecs: false,
 			currentTab: 'Songs',
       seedTracks: [],
+			currentAlbum: '',
 			results: [],
       recTracks: [],
 			bar1FeaturesName:[],
@@ -127,15 +128,6 @@ class DataVisualizations extends Component {
 		this.setState({ query: e.target.value })
 	}
 
-	handleSongClick = (song) => {
-    let { seedTracks } = this.state;
-    if (seedTracks.length > 9) {
-      alert('Please don\'t add more than 10 songs!');
-    } else {
-      seedTracks.push(song);
-      this.setState({ seedTracks });
-    }
-  }
 
 	removeFromTracks(e, track){
     let filteredSeedTracks = this.state.seedTracks.filter((seedTrack) => {
@@ -292,7 +284,7 @@ class DataVisualizations extends Component {
 
   render() {
     const { data, location } = this.props;
-		const { currentTab, results, displayRecs, recTracks, seedTracks } = this.state;
+		const { currentTab, results, displayRecs, recTracks, seedTracks,currentAlbum } = this.state;
     const { username } = data;
 
 		const songTabStyles = classNames('tab', { 'active': currentTab === 'Songs' })
