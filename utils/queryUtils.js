@@ -145,16 +145,13 @@ const insertIntoCache = (queryType, user, reqBody, resObj) => {
  * Stores a given query in the query cache
  * @function
  */
-const insertSongFeatsIntoCache = (ids, results) => {
+const insertSongFeatsIntoCache = (results) => {
   const songFeats = db.collection('song_feats');
   // actual data in results['data']
   // store audio features too
   // solution will be to hit the cache and add back the results when done
-  for (let i = 0; i < ids.length; i++){
-    songFeats.insertOne({
-      'song_id': ids[i],
-      'audioFeats': results[i]
-    });
+  for (let i = 0; i < results.length; i++){
+    songFeats.insertOne(results[i]);
   }
 }
 
@@ -164,20 +161,22 @@ const insertSongFeatsIntoCache = (ids, results) => {
  */
 const songSearchByIds = (ids, callback) => {
   const songFeats = db.collection('song_feats');
-  var id_arr = ids.map(x => {return {'song_id': x}});
-  console.log(id_arr)
+  var id_arr = ids.map(x => {return {'id': x}});
+  //console.log(id_arr)
   songFeats.find({
     '$or': id_arr
   }).toArray((err, results) => {
     if(err){
       console.log("oh no");
-      callback({'ids': ids, 'results': []});
+      callback({'results': []});
     } else {
-      var used_ids = results.map(x => x['song_id']);
+      var used_ids = results.map(x => x['id']);
+      console.log(used_ids)
       var new_ids = ids.filter(x => !used_ids.includes(x));
-      var final_results = results.map(x => {return x['audioFeats']})
-      console.log(final_results)
-      callback({'ids': new_ids, 'results': final_results});
+      console.log(new_ids)
+      //console.log('results')
+      //console.log(results)
+      callback({ids: new_ids, results: results});
     }
   });
 }

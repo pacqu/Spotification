@@ -216,6 +216,8 @@ router.get('/username/:username', middlewares.checkToken, (req, res) => {
             var loggedInUser = results[0];
             let givenUserFeatures = (givenUser.listeningData ? givenUser.listeningData.avgFeatures : null )
             let loggedInUserFeatures = (loggedInUser.listeningData ? loggedInUser.listeningData.avgFeatures : null )
+            //console.log(givenUserFeatures);
+            //console.log(loggedInUserFeatures);
             spotifyData.getSimilairity(givenUserFeatures, loggedInUserFeatures, (data) => {
               var similarity = null;
               //console.log(data);

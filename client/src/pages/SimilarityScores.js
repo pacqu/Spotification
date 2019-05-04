@@ -70,36 +70,11 @@ class SimilarityScores extends Component {
   handleArtistClick = artist => {
     console.log(artist);
     this.setState({simItem: artist})
-    /*
-    axios.get(`search/artist/${artist.id}`, { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
-    .then(res => {
-      //let artistSongs = res.data.items.map(song => Object.assign({}, song, { album : { name : album.name, images: [ album.images[0] ] } } ))
-      this.setState({
-        songResults: [],
-        currentTab: 'Songs'
-      })
-    })
-    .catch(err => {
-      this.setState({ err : err.toString() });
-    })*/
   }
 
   handleAlbumClick = album => {
     console.log(album);
     this.setState({simItem: album})
-    /*
-    axios.get(`search/album/${album.id}`, { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
-    .then(res => {
-      console.log(res)
-      let albumSongs = res.data.items.map(song => Object.assign({}, song, { album : { name : album.name, images: [ album.images[0] ] } } ))
-      this.setState({
-        songResults: albumSongs,
-        currentTab: 'Songs'
-      })
-    })
-    .catch(err => {
-      this.setState({ err : err.toString() });
-    })*/
   }
 
   handleSongClick = (song) => {
@@ -136,11 +111,11 @@ class SimilarityScores extends Component {
     let simItemDisplay = null;
     if (simItem){
       if (simItem.type === 'track') {
-        simItemDisplay = <SimilarityItem onClick={() => this.removeFromSim()} id={simItem.id} type={simItem.type} name={simItem.name} primaryContext={simItem.artists[0].name} coverArtUrl={simItem.album.images[0].url ? simItem.album.images[0].url : 'https://upload.wikimedia.org/wikipedia/en/c/c5/No_album_cover.jpg'}/>
+        simItemDisplay = <SimilarityItem onClick={() => this.removeFromSim()} id={simItem.id} type={simItem.type} name={simItem.name} primaryContext={simItem.artists[0].name} coverArtUrl={simItem.album.images[0] ? simItem.album.images[0].url : 'https://upload.wikimedia.org/wikipedia/en/c/c5/No_album_cover.jpg'}/>
       } else if (simItem.type === 'artist') {
-        simItemDisplay = <SimilarityItem onClick={() => this.removeFromSim()} id={simItem.id} type={simItem.type} name={simItem.name} primaryContext={simItem.genres[0] ? simItem.genres[0] : ""} coverArtUrl={simItem.images[0].url ? simItem.images[0].url : 'https://upload.wikimedia.org/wikipedia/en/c/c5/No_album_cover.jpg'}/>
+        simItemDisplay = <SimilarityItem onClick={() => this.removeFromSim()} id={simItem.id} type={simItem.type} name={simItem.name} primaryContext={simItem.genres[0] ? simItem.genres[0] : ""} coverArtUrl={simItem.images[0] ? simItem.images[0].url : 'https://upload.wikimedia.org/wikipedia/en/c/c5/No_album_cover.jpg'}/>
       } else if (simItem.type === 'album') {
-        simItemDisplay = <SimilarityItem onClick={() => this.removeFromSim()} id={simItem.id} type={simItem.type} name={simItem.name} primaryContext={simItem.artists[0].name} coverArtUrl={simItem.images[0].url ? simItem.images[0].url : 'https://upload.wikimedia.org/wikipedia/en/c/c5/No_album_cover.jpg'}/>
+        simItemDisplay = <SimilarityItem onClick={() => this.removeFromSim()} id={simItem.id} type={simItem.type} name={simItem.name} primaryContext={simItem.artists[0].name} coverArtUrl={simItem.images[0] ? simItem.images[0].url : 'https://upload.wikimedia.org/wikipedia/en/c/c5/No_album_cover.jpg'}/>
       }
     }
 
