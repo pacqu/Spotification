@@ -168,7 +168,7 @@ const songSearchByIds = (ids, callback) => {
   }).toArray((err, results) => {
     if(err){
       console.log("oh no");
-      callback({'results': []});
+      callback({ids: ids, results: []});
     } else {
       var used_ids = results.map(x => x['id']);
       console.log(used_ids)
