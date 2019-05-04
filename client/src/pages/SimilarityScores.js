@@ -9,6 +9,7 @@ import Button from '../components/Button';
 import SongList from '../components/SongList';
 import ArtistView from '../components/ArtistView';
 import AlbumView from '../components/AlbumView';
+import PlaylistView from '../components/PlaylistView';
 import BrowseView from '../components/BrowseView';
 import SimilarityItem from '../components/SimilarityItem';
 
@@ -28,6 +29,7 @@ class SimilarityScores extends Component {
       songResults: [],
       artistResults: [],
       albumResults: [],
+      playlistResults: [],
       recTracks: [],
       genres: [],
       simItem: null,
@@ -49,11 +51,17 @@ class SimilarityScores extends Component {
       resultsType = 'albums';
       stateType = 'albumResults';
     }
+    else if (this.state.currentTab === 'Playlists') {
+      tabState = 'playlist';
+      resultsType = 'playlists';
+      stateType = 'playlistResults';
+    }
     axios.get(`/search?search=${this.state.query}&searchType=${tabState}`, { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
     .then(res => {
       let data = res.data[resultsType].items;
       data = data.map(item => item.type = tabState);
       if (res.data[resultsType].items) {
+        console.log(res.data[resultsType].items)
         this.setState({ [stateType]: res.data[resultsType].items, displayRecs: false })
       }
       console.log(this.state);
@@ -81,9 +89,13 @@ class SimilarityScores extends Component {
     console.log(song)
     this.setState({simItem: song})
   }
+  handlePlaylistClick = (playlist) => {
+    console.log(playlist)
+    this.setState({simItem: playlist})
+  }
 
   removeFromSim() {
-    this.setState({ simItem : null });
+    this.setState({simItem: null });
   }
 
   render() {
@@ -95,6 +107,7 @@ class SimilarityScores extends Component {
       songResults,
       albumResults,
       artistResults,
+      playlistResults,
       displayRecs,
       recTracks,
       simItem,
@@ -103,8 +116,8 @@ class SimilarityScores extends Component {
 
     const songTabStyles = classNames('tab', { 'active': currentTab === 'Songs' })
     const artistTabStyles = classNames('tab', { 'active': currentTab === 'Artists' })
-    const genreTabStyles = classNames('tab', { 'active': currentTab === 'Genres' })
     const albumTabStyles = classNames('tab', { 'active': currentTab === 'Albums' })
+    const playlistTabStyles = classNames('tab', { 'active': currentTab === 'Playlists' })
 
     const showRecs = (recTracks.length > 0 && displayRecs);
 
@@ -117,9 +130,12 @@ class SimilarityScores extends Component {
       } else if (simItem.type === 'album') {
         simItemDisplay = <SimilarityItem onClick={() => this.removeFromSim()} id={simItem.id} type={simItem.type} name={simItem.name} primaryContext={simItem.artists[0].name} coverArtUrl={simItem.images[0] ? simItem.images[0].url : 'https://upload.wikimedia.org/wikipedia/en/c/c5/No_album_cover.jpg'}/>
       }
+      else if (simItem.type === 'playlist') {
+        simItemDisplay = <SimilarityItem onClick={() => this.removeFromSim()} id={simItem.id} type={simItem.type} name={simItem.name} primaryContext={simItem.owner.display_name} coverArtUrl={simItem.images[0] ? simItem.images[0].url : 'https://upload.wikimedia.org/wikipedia/en/c/c5/No_album_cover.jpg'}/>
+      }
     }
 
-    const tabs = ['Songs', 'Artists', 'Albums'];
+    const tabs = ['Songs', 'Artists', 'Albums', 'Playlists'];
 
     return (
       <main>
@@ -140,6 +156,7 @@ class SimilarityScores extends Component {
                   <Tab onClick={() => this.setState({ currentTab: 'Songs' })} className={songTabStyles}> Songs </Tab>
                   <Tab onClick={() => this.setState({ currentTab: 'Artists' })} className={artistTabStyles}> Artists </Tab>
                   <Tab onClick={() => this.setState({ currentTab: 'Albums' })} className={albumTabStyles}> Albums </Tab>
+                  <Tab onClick={() => this.setState({ currentTab: 'Playlists' })} className={albumTabStyles}> Playlists </Tab>
                 </TabList>
                 <TabPanel>
                   <Search
@@ -172,6 +189,18 @@ class SimilarityScores extends Component {
                   />
                   { albumResults.length > 0 ? (
                     <AlbumView handleClick={this.handleAlbumClick} albums={albumResults} />
+                  ) : (
+                    <p> Nothing to see here... </p>
+                  )}
+                </TabPanel>
+                <TabPanel>
+                  <h2> Playlists </h2>
+                  <Search
+                    handleChange={this.handleQueryChange}
+                    handleQuery={this.handleQuery}
+                  />
+                { playlistResults.length > 0 ? (
+                    <PlaylistView handleClick={this.handlePlaylistClick} playlists={playlistResults} />
                   ) : (
                     <p> Nothing to see here... </p>
                   )}
