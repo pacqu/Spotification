@@ -364,17 +364,18 @@ router.get('/similarity', middlewares.checkToken, (req, res) => {
           }
           spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
           //song
-          if (idType === 'song') {
+          if (idType === 'track') {
             axios.get(`https://api.spotify.com/v1/tracks?ids=${id}`,
               {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
               .then(results => {
-                //console.log(featResults.data
+                //console.log(results['data']['tracks'])
                 spotifyData.getAvgFeats(checkedUser, db, results['data']['tracks'], (err, data) => {
                   if(err){
                     console.log(err);
                     res.status(500);
                     res.json(err);
                   }
+                  console.log(data)
                   spotifyData.getSimilairity(data.avgFeatures, user.listeningData.avgFeatures, (data) => {
                     var similarity = null;
                     if (data !== -1) similarity = data;
@@ -417,18 +418,25 @@ router.get('/similarity', middlewares.checkToken, (req, res) => {
             axios.get(`https://api.spotify.com/v1/albums/${id}/tracks`,
               {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
               .then(results => {
-                spotifyData.getAvgFeats(checkedUser, db, results['data']['items'], (err, data) => {
-                  if(err){
-                    console.log(err);
-                    res.status(500);
-                    res.json(err);
-                  }
-                  spotifyData.getSimilairity(data.avgFeatures, user.listeningData.avgFeatures, (data) => {
-                    var similarity = null;
-                    if (data !== -1) similarity = data;
-                    res.json({score: data});
+                let tracks = results['data']['items'];
+                let trackIds = tracks.map(track => track.id);
+                axios.get(`https://api.spotify.com/v1/tracks?ids=${trackIds.slice(0,50).join(',')}`,
+                  {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
+                  .then(results => {
+                    spotifyData.getAvgFeats(checkedUser, db, results['data']['tracks'], (err, data) => {
+                      if(err){
+                        console.log(err);
+                        res.status(500);
+                        res.json(err);
+                      }
+                      console.log(data)
+                      spotifyData.getSimilairity(data.avgFeatures, user.listeningData.avgFeatures, (data) => {
+                        var similarity = null;
+                        if (data !== -1) similarity = data;
+                        res.json({score: data});
+                      })
+                    })
                   })
-                })
               })
               .catch(err => {
                 console.log(err);

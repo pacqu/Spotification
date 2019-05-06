@@ -144,7 +144,11 @@ const getAvgFeats = (user, db, songs, next) => {
   }
   queryUtils.songSearchByIds(idsArray, query_results => {
     idsArray = query_results['ids'];  // contains the ids that need to be searched
+    //console.log('idsArray')
+    //console.log(idsArray);
     var cache_results = query_results['results'];  // contains actual results
+    //console.log('cache_results')
+    //console.log(cache_results)
     for (let id of idsArray){
       idQueries += `${id},`;
     }
@@ -155,16 +159,20 @@ const getAvgFeats = (user, db, songs, next) => {
     axios.get(`https://api.spotify.com/v1/audio-features?ids=${idQueries}`,
     {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
     .then(_results => {
+      //console.log('feats')
+      //console.log(_results);
+      _results['data']['audio_features'] = _results['data']['audio_features'].filter(x => x !== null)
+      console.log('null-filtered')
+      //console.log(_results['data']['audio_features'])
       var results = [];
-      if(_results['data']['audio_features'].length !== 1 || _results['data']['audio_features'][0]){
+      if(_results['data']['audio_features'].length >= 1){
         for (let track of _results['data']['audio_features']){
           track['popularity'] = popularityObj[track.id];
         }
         results = _results['data']['audio_features'];
+        queryUtils.insertSongFeatsIntoCache(results);
       }
-      queryUtils.insertSongFeatsIntoCache(idsArray, _results['data']['audio_features']);
       results = results.concat(cache_results);
-      // console.log(cache_results);
       for (let song of results){
         for (let feature of features){
           data['avgFeatures'][feature] += song[feature]
@@ -193,6 +201,7 @@ const getAvgFeats = (user, db, songs, next) => {
       })
     })
     .catch(err => {
+      console.log(err);
       next(err,data);
     })
   });
@@ -205,47 +214,54 @@ const getSimilairity = (data1, data2, next) => {
   }
   delete data1.duration_ms;
   delete data2.duration_ms;
-  data1.popularity /= 90;
-  data2.popularity /= 90;
-  data1.key /= 11;
-  data2.key /= 11;
-  data1.loudness /= -60;
-  data2.loudness /= -60;
-  data1.tempo /= 200;
-  data2.tempo /= 200;
-  /*data1.valence *= 2;
-  data2.valence *= 2;
-  data1.energy *= 2;
-  data2.energy *= 2;
-  data1.mode *= 2;
-  data2.mode *= 2;
-  data1.danceability *= 2;
-  data2.danceability *= 2;*/
+
+  let times10 = ['key', 'time_signature'];
+  let times100 = ['mode','acousticness','danceability','energy','instrumentalness','liveness','speechiness','valence']
+  for (let feat10 of times10){
+    data1[feat10] = Math.floor(data1[feat10] * 10)
+    data2[feat10] = Math.floor(data2[feat10] * 10)
+  }
+  for (let feat100 of times100){
+    data1[feat100] = Math.floor(data1[feat100] * 100)
+    data2[feat100] = Math.floor(data2[feat100] * 100)
+  }
+  data1.loudness = Math.floor(data1.loudness * -1.5);
+  data2.loudness = Math.floor(data2.loudness * -1.5);
+  data1.tempo = Math.floor(data1.tempo * .1);
+  data2.tempo = Math.floor(data2.tempo * .1);
   let dataKeys = Object.keys(data1);
   let data1Vals = []//Object.values(data1);
   let data2Vals = []//Object.values(data2);
   for (let key of dataKeys){
-    console.log(key)
     data1Vals.push(data1[key]);
     data2Vals.push(data2[key]);
   }
   //console.log(data1Vals.length)
   //console.log(data2Vals.length)
-  //console.log(data1Vals)
-  //console.log(data2Vals)
-  let squareReducer = (accumulator, currentValue) => accumulator + Math.pow(currentValue,2);
-  let sqrtd1 = Math.sqrt(data1Vals.reduce(squareReducer));
-  let sqrtd2 = Math.sqrt(data2Vals.reduce(squareReducer));
-  let denom = sqrtd1*sqrtd2;
+  console.log(data1Vals)
+  console.log(data2Vals)
+  let sqd1 = 0;
+  let sqd2 = 0;
+  for (let i = 0; i < data1Vals.length; i++){
+    sqd1 += (data1Vals[i]*data1Vals[i]);
+    //console.log(sqd1);
+    sqd2 += (data2Vals[i]*data2Vals[i]);
+    //console.log(sqd2);
+  }
+  //let squareReducer = (accumulator, currentValue) => accumulator + Math.pow(currentValue,2);
+  let sqrtd1 = Math.sqrt(sqd1);
+  let sqrtd2 = Math.sqrt(sqd2);
+  let denom = Math.floor(sqrtd1*sqrtd2);
   let num = 0;
   for (let i = 0; i < data1Vals.length; i++){
     num += data1Vals[i]*data2Vals[i];
   }
-  //console.log(num)
-  //console.log(denom)
-  //console.log(num/denom)
-  console.log(100 - ((1 - num/denom) * 750))
-  next(100 - ((1 - num/denom) * 750));
+  console.log(num)
+  console.log(denom)
+  console.log(num/denom)
+  let result = num/denom;
+  if (denom === 0 || num === 0) next(0);
+  next(result*100);
   return;
 }
 
