@@ -22,22 +22,27 @@ class Home extends Component {
       this.setState({
         data: res.data.slice(0,20) //limited to latest 20 queries
       })
-      console.log(res.data)
     })
   }
 
- //       const id = item.queryType === 'Recommendation' ? (item.reqBody.seedTracks.join(',')) : (item.reqBody.selectedTracks[0])
-  display= () => (
+  display = () => (
     this.state.data.map((item => {
-      const id = item.queryType === 'Recommendation' ? ((item.reqBody.tracks)) : ((item.reqBody.tracks).slice(0,3))
-      console.log(item)
+    let trackImg = this.getUrl(item)
+    let songNames = [], artistNames = [];
+    if(item.reqBody.tracks != undefined){
+      songNames = item.reqBody.tracks.map((item => item.name + " - " + item.artists[0].name))
+    }
+    if(item.reqBody.artists != undefined){
+      artistNames = item.reqBody.artists.map((item => item.name))
+    }
       return (
         <Card 
-          song={item.reqBody.tracks}
+          artists={artistNames}
+          song={songNames}
           user={item.username}
           userAvatar={''}
           queryType={item.queryType}
-          trackImg={id}
+          trackImg={trackImg}
           time={this.thyme(item)}
           date={
             item.timeOfQuery.substring(6,7) + '/' +
@@ -45,11 +50,22 @@ class Home extends Component {
             item.timeOfQuery.substring(2,4)
           }
         >
-          <div>{id}</div>
         </Card>
       )
     }))
   );
+
+  // gets both artists and track url arrays and combine.
+  getUrl = (item) => {
+    let trackUrl = [], artistUrl = [];
+    if(item.reqBody.tracks != undefined){
+      trackUrl = item.reqBody.tracks.map((item => item.album.images[1].url))
+    }
+    if(item.reqBody.artists != undefined){
+      artistUrl = item.reqBody.artists.map(item => item.images[1].url)
+    }
+    return trackUrl.concat(artistUrl).slice(0,3)
+  }
 
   thyme = (item) => {
     let catchHalf = item.timeOfQuery.substring(11,13) > 12 ? // figures out AM or PM 

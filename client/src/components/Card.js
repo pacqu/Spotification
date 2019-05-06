@@ -3,19 +3,79 @@ import '../styles/Card.css';
 import classNames from 'classnames';
 import { Link } from 'react-router-dom';
 
-function Card({ user, queryType, userAvatar, trackImg, time, date, children, className, song}) {
+function Card({ user, queryType, userAvatar, trackImg, time, date, artists, className, song}) {
   const cardStyles = classNames('Card', className);
   let images = trackImg.map((item =>{
     return(
-      <img className="trackImg" src={item.album.images[1].url}/>
+      <img className="trackImg" src={item}/>
     )
   }))
-  let allSongs = song.map((item =>{
-    return(
-      <h4>{item.name + " - " + item.artists[0].name}</h4>
+
+  let allSongs = [], allArtists = [];
+  if(song.length > 0){
+    allSongs = song.map((item =>{
+      return(
+        <h4>{item}</h4>
+      )
+    }))
+  }
+  if(artists.length > 0){
+    allArtists = artists.map((item =>{
+      return(
+        <h4>{item}</h4>
+      )
+    }))
+  }
+
+  let display;
+  if (song.length > 0 && artists.length === 0){
+    display = (
+      <div className="query">
+      {user + " looked Up " + song.length + " "}
+      <div className="dropdown" >
+        {song.length < 2 ? "song": "songs "}
+          <div className="dropdown-content a">
+              {allSongs}
+          </div>
+      </div>
+      { queryType === 'Recommendation' ? " for Recommendations" : " for Visual Data" }
+    </div>
     )
-  }))
-  console.log(song)
+  }else if(song.length > 0 && artists.length > 0){
+    display = (
+      <div className="query">
+        {user + " looked Up " + song.length + " "}
+        <div className="dropdown" >
+          {song.length < 2 ? "song": "songs "}
+            <div className="dropdown-content a">
+                {allSongs}
+            </div>
+        </div>
+        {" and " + artists.length + " "}
+        <div className="dropdown" >
+          {artists.length < 2 ? "artist": "artists "}
+            <div className="dropdown-content a">
+              {allArtists}
+            </div>
+        </div>
+        { queryType === 'Recommendation' ? " for Recommendations" : " for Visual Data" }
+      </div>
+    )
+  }else{
+    display = (
+      <div className="query">
+      {user + " looked Up " + artists.length + " "}
+      <div className="dropdown" >
+        {artists.length < 2 ? "artist": "artists "}
+          <div className="dropdown-content a">
+              {allArtists}
+          </div>
+      </div>
+      { queryType === 'Recommendation' ? " for Recommendations" : " for Visual Data" }
+    </div>
+    )
+  }
+
   return (
     <div className={cardStyles}>
       <div className="CardTop">
@@ -25,15 +85,7 @@ function Card({ user, queryType, userAvatar, trackImg, time, date, children, cla
             { user }
           </div>
         </Link>
-        <div className="query">
-          {user + " Looked Up " + allSongs.length}{allSongs.length === 1 ? " song for " : " songs for "}
-          <div className="dropdown" >
-            { queryType === 'Recommendation' ? 'Recommendations' : "Visual Data" }
-              <div className="dropdown-content a">
-                  {allSongs}
-              </div>
-          </div>
-        </div>
+      {display}
       </div>
       <div className="CardBody">
         { images }
