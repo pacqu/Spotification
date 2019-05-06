@@ -64,8 +64,8 @@ class Home extends Component {
       trackUrl = item.reqBody.tracks.map((item => item.album.images[1].url)).filter(item => item !=undefined)
     }
     if(item.reqBody.artists != undefined){
-      let temp = item.reqBody.artists.map(item => item.images[0]).filter(item => item != undefined)
-      artistUrl = temp.map(item => item.url)
+      let temp = item.reqBody.artists.map(item => item.images[0]).map(item => item ? item.url :'https://upload.wikimedia.org/wikipedia/en/c/c5/No_album_cover.jpg')      
+      artistUrl = temp.map(item => item)
     }
     return trackUrl.concat(artistUrl).slice(0,3)
   }
