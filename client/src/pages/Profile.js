@@ -8,7 +8,7 @@ import '../styles/Profile.css';
 
 import { Bar } from 'react-chartjs-2';
 import DarkCard from '../components/DarkCard'
-import HorizontalBarGraph from '../components/HorizontalBarGraph'
+import ProfileBarGraph from '../components/ProfileBarGraph'
 import CircularProgressbar from 'react-circular-progressbar';
 import Chart from '../components/Chart';
 import axios from "axios";
@@ -135,7 +135,7 @@ class Profile extends Component {
               </DarkCard>
               <DarkCard>
                 <h1> Favorite Genres</h1>
-                { listeningData && <HorizontalBarGraph label={"Count"} barData={barData} />}
+                { listeningData && <ProfileBarGraph label={"Count"} barData={barData} />}
               </DarkCard>
             </div>
           </div>
