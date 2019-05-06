@@ -22,11 +22,13 @@ class Home extends Component {
       this.setState({
         data: res.data.slice(0,20) //limited to latest 20 queries
       })
+      console.log(res.data)
     })
   }
 
   display = () => (
     this.state.data.map((item => {
+      console.log(item)
     let trackImg = this.getUrl(item)
     let songNames = [], artistNames = [];
     if(item.reqBody.tracks != undefined){
@@ -59,10 +61,11 @@ class Home extends Component {
   getUrl = (item) => {
     let trackUrl = [], artistUrl = [];
     if(item.reqBody.tracks != undefined){
-      trackUrl = item.reqBody.tracks.map((item => item.album.images[1].url))
+      trackUrl = item.reqBody.tracks.map((item => item.album.images[1].url)).filter(item => item !=undefined)
     }
     if(item.reqBody.artists != undefined){
-      artistUrl = item.reqBody.artists.map(item => item.images[1].url)
+      let temp = item.reqBody.artists.map(item => item.images[0]).filter(item => item != undefined)
+      artistUrl = temp.map(item => item.url)
     }
     return trackUrl.concat(artistUrl).slice(0,3)
   }
