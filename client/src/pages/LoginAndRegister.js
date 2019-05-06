@@ -15,7 +15,8 @@ class Register extends Component {
     password: "",
     LnR: true,
     notice: "",
-    spotifyAuthUrl: ""
+    spotifyAuthUrl: "",
+    error: ""
   };
 
   makeState = name => ({ target }) => {
@@ -24,52 +25,101 @@ class Register extends Component {
 
   handleChange = () => {
     this.setState({
-      isSignup: !this.state.isSignup
+      isSignup: !this.state.isSignup,
+      passError: "",
+      userError: ""
     });
   };
 
   handleSignup = (e) => {
     e.preventDefault();
-    if (!this.state.isSignup) {
-      const { username, password } = this.state;
-      axios
-        .post("/user/login", { username, password })
-        .then(res => {
-          Cookies.set("cookie", res.data.token);
-          this.setState({
-            LnR: false,
-            spotifyAuthUrl: res.data.user.spotifyAuthUrl,
-            spotifyAuth:res.data.user.spotifyAuth,
-            notice: ""
+    if(this.validFields()){
+      if (!this.state.isSignup) {
+        const { username, password } = this.state;
+        axios
+          .post("/user/login", { username, password })
+          .then(res => {
+            Cookies.set("cookie", res.data.token);
+            this.setState({
+              LnR: false,
+              spotifyAuthUrl: res.data.user.spotifyAuthUrl,
+              spotifyAuth:res.data.user.spotifyAuth,
+              notice: ""
+            });
+          })
+          .catch(err => {
+            console.log(err);
+            this.setState({
+              notice: "User Does Not Exist"
+            });
           });
-        })
-        .catch(err => {
-          console.log(err);
-          this.setState({
-            notice: "User Does Not Exist"
+      }  else {
+        const { username, password } = this.state;
+        axios
+          .post("/user/", { username, password })
+          .then(res => {
+            console.log(res);
+            const { token } = res.data;
+            Cookies.set("cookie", token);
+            this.setState({
+              LnR: false,
+              spotifyAuthUrl: res.data.user.spotifyAuthUrl,
+              notice: ""
+            });
+          })
+          .catch(err => {
+            this.setState({
+              notice: "User Exists! Try Again"
+            });
           });
-        });
-    } else {
-      const { username, password } = this.state;
-      axios
-        .post("/user/", { username, password })
-        .then(res => {
-          console.log(res);
-          const { token } = res.data;
-          Cookies.set("cookie", token);
-          this.setState({
-            LnR: false,
-            spotifyAuthUrl: res.data.user.spotifyAuthUrl,
-            notice: ""
-          });
-        })
-        .catch(err => {
-          this.setState({
-            notice: "User Exists! Try Again"
-          });
-        });
+      }
     }
   };
+  
+  validFields = () =>{
+    this.setState({
+      passError: "",
+      userError: ""
+    })
+    let sendReq = true;
+    if(this.state.password == "" || Object.keys(this.state.password).length < 8){
+      if(!this.state.isSignup && Object.keys(this.state.password).length < 8){
+        this.setState({
+          passError: "Password has to be greater than length 8"
+          
+        })
+        sendReq = false;
+      }
+      else if(!this.state.isSignup){
+        this.setState({
+          passError: "Please enter your password"
+        })
+        sendReq = false;
+      }
+      else{
+        this.setState({
+          passError: "Please enter a password greater than length 8"
+        })
+        sendReq = false;
+      }
+    }
+
+    if (this.state.username == "") {
+      if(!this.state.isSignup){ //signed up but empty field
+        this.setState({
+          userError: "Please Enter Your Username"
+        })
+        sendReq = false;
+      }
+      else { // not singed up
+        this.setState({
+          userError: "Please Enter a Valid Username"
+        })
+        sendReq = false;
+      }
+    }
+    return sendReq;
+  }
 
   componentDidMount() {
     if (window.location.href.indexOf("code=") != -1){
@@ -152,19 +202,24 @@ class Register extends Component {
                 <h2 className="black"> Welcome to Spotification!</h2>
                 <form onSubmit={this.handleSignup} className="information">
                   <h1 className="black">{text}</h1>
-                  <h1 className="black">{this.state.notice}</h1>
                   <Input
                     type="text"
                     placeholder="Username"
                     onChange={this.makeState("username")}
                     fullWidth
                   />
+                  <div className="userMsg">
+                    {this.state.userError}
+                  </div>
                   <Input
                     type="password"
                     placeholder="Password"
                     onChange={this.makeState("password")}
                     fullWidth
                   />
+                  <div className="passMsg">
+                    {this.state.passError}
+                  </div>
                   <a className="subText" href="#">
                     Forgot your password?
                   </a>
