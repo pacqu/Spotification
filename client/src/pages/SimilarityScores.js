@@ -156,7 +156,7 @@ class SimilarityScores extends Component {
                   <Tab onClick={() => this.setState({ currentTab: 'Songs' })} className={songTabStyles}> Songs </Tab>
                   <Tab onClick={() => this.setState({ currentTab: 'Artists' })} className={artistTabStyles}> Artists </Tab>
                   <Tab onClick={() => this.setState({ currentTab: 'Albums' })} className={albumTabStyles}> Albums </Tab>
-                  <Tab onClick={() => this.setState({ currentTab: 'Playlists' })} className={albumTabStyles}> Playlists </Tab>
+                  <Tab onClick={() => this.setState({ currentTab: 'Playlists' })} className={playlistTabStyles}> Playlists </Tab>
                 </TabList>
                 <TabPanel>
                   <Search
