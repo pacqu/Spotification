@@ -28,15 +28,14 @@ class Home extends Component {
 
   display = () => (
     this.state.data.map((item => {
-      console.log(item)
-    let trackImg = this.getUrl(item)
-    let songNames = [], artistNames = [];
-    if(item.reqBody.tracks != undefined){
-      songNames = item.reqBody.tracks.map((item => item.name + " - " + item.artists[0].name))
-    }
-    if(item.reqBody.artists != undefined){
-      artistNames = item.reqBody.artists.map((item => item.name))
-    }
+      let trackImg = this.getUrl(item)
+      let songNames = [], artistNames = [];
+      if(item.reqBody.tracks != undefined){
+        songNames = item.reqBody.tracks.map((item => item.artists[0].name + " - " + item.name))
+      }
+      if(item.reqBody.artists != undefined){
+        artistNames = item.reqBody.artists.map((item => item.name))
+      }
       return (
         <Card 
           artists={artistNames}
@@ -64,8 +63,7 @@ class Home extends Component {
       trackUrl = item.reqBody.tracks.map((item => item.album.images[1].url)).filter(item => item !=undefined)
     }
     if(item.reqBody.artists != undefined){
-      let temp = item.reqBody.artists.map(item => item.images[0]).map(item => item ? item.url :'https://upload.wikimedia.org/wikipedia/en/c/c5/No_album_cover.jpg')      
-      artistUrl = temp.map(item => item)
+      artistUrl = item.reqBody.artists.map(item => item.images[0]).map(item => item ? item.url :'https://upload.wikimedia.org/wikipedia/en/c/c5/No_album_cover.jpg')
     }
     return trackUrl.concat(artistUrl).slice(0,3)
   }
@@ -79,13 +77,6 @@ class Home extends Component {
     let catchZero = catchMidnight[0] == 0 ?(catchMidnight.substring(1)) : catchMidnight // takes out 0 -> 03:21 -> 3:21
     return catchZero;
   }
-  
-  handleImage = (e) =>{
-    axios.get(`/search/song/${e}`, { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
-    .then(res => {
-      console.log(res)
-    })
-  }
 
   render() {
     const { data, location } = this.props;
@@ -95,10 +86,10 @@ class Home extends Component {
         <Header name={username} location={location} />
         <div className="home-container">
           <div className="sidebar">
-            <h3>{username}</h3>
             <MediaQuery query="(min-width: 768px)">
               <img className="avatar" src="https://i.kym-cdn.com/entries/icons/mobile/000/028/861/cover3.jpg" />
             </MediaQuery>
+            <h1>{username}</h1>
           </div>
           <div className="content">
             {this.display()}
