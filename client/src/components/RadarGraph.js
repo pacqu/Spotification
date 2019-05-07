@@ -30,12 +30,12 @@ export default function HorizontalBarGraph({ labels, barData1, label1, barData2,
           return data['labels'][tooltipItem[0]['index']];
         },
         afterBody: function(tooltipItem, data) {
-          let { x } = tooltipItem[0];
-          if ( x > 217 && x < 241) return definitions['acousticness']
-          else if ( x >= 242 && x < 260) return definitions['danceability']
-          else if ( x >= 242 && x < 285) return definitions['energy']
-          else if ( x >= 290 && x < 324) return definitions['liveness']
-          else if ( x >= 290 && x < 324) return definitions['valence']
+          let { index } = tooltipItem[0];
+          if ( index === 0) return definitions['acousticness']
+          else if ( index === 1 ) return definitions['danceability']
+          else if ( index === 2 ) return definitions['energy']
+          else if ( index === 3 ) return definitions['liveness']
+          else if ( index === 4) return definitions['valence']
           else return ('error')
         }
       },

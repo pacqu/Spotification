@@ -11,10 +11,9 @@ export default function DoubleBarGraph({ labels, barData1, label1, barData2, lab
     loudness: `The overall loudness of a track in decibels (dB). Loudness values are averaged across
     the entire track and are useful for comparing relative loudness of tracks. Loudness is the quality
     of a sound that is the primary psychological correlate of physical strength (amplitude).
-    Values typical range between -60 and 0 db. The distribution of values for this feature look like this:`,
+    Values typical range between -60 and 0 db. `,
     tempo: `The overall estimated tempo of a track in beats per minute (BPM). In musical terminology,
-    tempo is the speed or pace of a given piece and derives directly from the average beat duration.
-    The distribution of values for this feature look like this:`
+    tempo is the speed or pace of a given piece and derives directly from the average beat duration.`
   }
   const options = {
     tooltips: {

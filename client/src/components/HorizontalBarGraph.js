@@ -7,13 +7,13 @@ export default function HorizontalBarGraph({ labels, barData1, label1, barData2,
     treated as instrumental in this context. Rap or spoken word tracks are clearly “vocal”. The
     closer the instrumentalness value is to 1.0, the greater likelihood the track contains no
     vocal content. Values above 0.5 are intended to represent instrumental tracks, but confidence
-    is higher as the value approaches 1.0. The distribution of values for this feature look like this`,
+    is higher as the value approaches 1.0.`,
     speechiness: `Speechiness detects the presence of spoken words in a track. The more exclusively
     speech-like the recording (e.g. talk show, audio book, poetry), the closer to 1.0 the attribute
     value. Values above 0.66 describe tracks that are probably made entirely of spoken words. Values
     between 0.33 and 0.66 describe tracks that may contain both music and speech, either in sections
     or layered, including such cases as rap music. Values below 0.33 most likely represent music and
-    other non-speech-like tracks. The distribution of values for this feature look like this`
+    other non-speech-like tracks.`
   }
   const options = {
     tooltips: {
