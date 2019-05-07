@@ -180,7 +180,7 @@ class Recommendation extends Component {
         <Header name={username} location={location} />
         <div className="home-container">
           <div className="sidebar">
-            <p>Currently Selected ({seedItemsDisplay.length > 0})</p>
+            <p>Currently Selected ({seedItemsDisplay.length > 0 ? seedItemsDisplay.length : 0 })</p>
             { seedItems.length > 0 && (<>
               { seedItemsDisplay }
             </>)}
@@ -237,7 +237,6 @@ class Recommendation extends Component {
                 </TabPanel>
                 <TabPanel>
                   <h2> Genres </h2>
-                  <Search />
                   <BrowseView handleClick={this.handleSeedClick} />
                 </TabPanel>
                 <TabPanel>
