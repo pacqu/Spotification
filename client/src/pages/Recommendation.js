@@ -206,6 +206,7 @@ class Recommendation extends Component {
                   <Tab onClick={() => this.setState({ currentTab: 'Albums' })} className={albumTabStyles}> Albums </Tab>
                 </TabList>
                 <TabPanel>
+                  <h2> Songs </h2>
                   <Search
                     handleChange={this.handleQueryChange}
                     handleQuery={this.handleQuery}
@@ -221,6 +222,7 @@ class Recommendation extends Component {
                   )}
                 </TabPanel>
                 <TabPanel>
+                  <h2> Artists </h2>
                   <Search
                     handleChange={this.handleQueryChange}
                     handleQuery={this.handleQuery}
