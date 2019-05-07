@@ -71,64 +71,27 @@ const getQueriesForUser = (res, username) => {
  * Stores a given query in the query cache
  * @function
  */
-const insertIntoCache = (queryType, user, reqBody, resObj) => {
+const insertIntoCache = async (queryType, user, reqBody, resObj) => {
   const queryCache = db.collection('queries');
-   if (queryType === 'Recommendation'){
-     if (reqBody.seedTracks){
-       axios.get(`https://api.spotify.com/v1/tracks?ids=${reqBody.seedTracks}`,
-       {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
-       .then(results => {
-         songs = songParser(results);
-         reqBody['tracks'] = songs;
-         if (reqBody.seedArtists){
-           axios.get(`https://api.spotify.com/v1/artists?ids=${reqBody.seedArtists}`,
-           {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
-           .then(results => {
-             //console.log(results)
-             reqBody['artists'] = results.data.artists;
-             queryCache.insert({
-               'queryType': queryType,
-               'timeOfQuery': moment().format(),
-               'username': user['username'],
-               'reqBody': reqBody,
-               'resObj': resObj
-             });
-           })
-           .catch(err => {
-             console.log(err);
-           })
-         }
-         else{
-           queryCache.insert({
-             'queryType': queryType,
-             'timeOfQuery': moment().format(),
-             'username': user['username'],
-             'reqBody': reqBody,
-             'resObj': resObj
-           });
-         }
-       })
-       .catch(err => {
-         console.log(err);
-       })
-     }
-     else if (reqBody.seedArtists){
-       axios.get(`https://api.spotify.com/v1/artists?ids=${reqBody.seedArtists}`,
-       {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
-       .then(results => {
-         reqBody['artists'] = results.data.artists;
-         queryCache.insert({
-           'queryType': queryType,
-           'timeOfQuery': moment().format(),
-           'username': user['username'],
-           'reqBody': reqBody,
-           'resObj': resObj
-         });
-       })
-       .catch(err => {
-         console.log(err);
-       })
-     }
+  //queryCache.drop()
+  if (queryType === 'Recommendation'){
+    let trackRes, artistRes, songs;
+    if (reqBody.seedTracks.length > 0 ){
+      trackRes = await axios.get(`https://api.spotify.com/v1/tracks?ids=${reqBody.seedTracks}`, {headers: { Authorization: `Bearer ${spotifyAccessToken}`}});
+      songs = songParser(trackRes);
+      reqBody['tracks'] = songs;
+    }
+    if (reqBody.seedArtists.length > 0) {
+      artistRes = await axios.get(`https://api.spotify.com/v1/artists?ids=${reqBody.seedArtists}`, {headers: { Authorization: `Bearer ${spotifyAccessToken}`}});
+      reqBody['artists'] = artistRes.data.artists;
+    }
+    queryCache.insert({
+      'queryType': queryType,
+      'timeOfQuery': moment().format(),
+      'username': user['username'],
+      'reqBody': reqBody,
+      'resObj': resObj
+    });
   }
   else{
     queryCache.insert({

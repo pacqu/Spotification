@@ -1,16 +1,91 @@
 import React, { Component } from 'react';
 import Header from '../components/Header';
-import Search from '../components/Search';
-import MediaQuery from 'react-responsive';
-import '../styles/Layout.css';
+import Card from '../components/Card';
 import '../styles/Home.css';
+import '../styles/Layout.css';
+import axios from 'axios';
+import Cookies from "js-cookie";
+import MediaQuery from 'react-responsive';
+import GenreImg from '../components/GenreImg'
+import { generateKeyPair } from 'crypto';
 
 class Home extends Component {
   constructor(props){
     super(props);
+    this.state = {
+      data: [],
+      time: '',
+      stuff: []
+    }
   }
-  componentDidMount() {
-    console.log(this.props.data)
+
+  componentDidMount(){
+    axios.get('/queries',  { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
+    .then(res =>{
+      this.setState({
+        data: res.data.slice(0,20), //limited to latest 20 queries
+      })
+      console.log(res.data)
+    })
+  }
+
+  display = () => (
+    this.state.data.map((item => {
+      let trackImg = this.getUrl(item)
+      let songNames = [], artistNames = [], genreNames =[];
+      if(item.reqBody.tracks != undefined){
+        songNames = item.reqBody.tracks.map((item => item.artists[0].name + " - " + item.name))
+      }
+      if(item.reqBody.artists != undefined){
+        artistNames = item.reqBody.artists.map((item => item.name))
+      }
+      if(item.reqBody.seedGenres != undefined){
+        genreNames =  item.reqBody.seedGenres.map(item => item)
+      }
+      return (
+        <Card 
+          genre={genreNames}
+          artists={artistNames}
+          song={songNames}
+          user={item.username}
+          userAvatar={''}
+          queryType={item.queryType}
+          trackImg={trackImg}
+          time={this.thyme(item)}
+          date={
+            item.timeOfQuery.substring(6,7) + '/' +
+            item.timeOfQuery.substring(8,10) + '/' +
+            item.timeOfQuery.substring(2,4)
+          }
+        >
+        </Card>
+      )
+    }))
+  );
+
+  // gets both artists and track url arrays and combine.
+  getUrl = (item) => {
+    let trackUrl = [], artistUrl = [], genreUrl =[];
+    if(item.reqBody.tracks != undefined){
+      trackUrl = item.reqBody.tracks.map((item => item.album.images[1].url)).filter(item => item !=undefined)
+    }
+    if(item.reqBody.artists != undefined){
+      artistUrl = item.reqBody.artists.map(item => item.images[0]).map(item => item ? item.url :'http://chittagongit.com/images/no-picture-available-icon/no-picture-available-icon-6.jpg')
+    }
+    if(item.reqBody.seedGenres != undefined){
+      genreUrl = item.reqBody.seedGenres.map(item => item)
+    }
+    return trackUrl.concat(artistUrl).concat(GenreImg(genreUrl)).slice(0,3)
+  }
+
+  thyme = (item) => {
+    let catchHalf = item.timeOfQuery.substring(11,13) > 12 ? // figures out AM or PM 
+      ((item.timeOfQuery.substring(11,13))-12 + item.timeOfQuery.substring(13,16)+ ' ' +'PM') :
+      (item.timeOfQuery.substring(11,16) + ' ' +'AM') 
+    let catchNoon = catchHalf.substring(0,2) == 12 ? (catchHalf.substring(0,5) + ' ' + 'PM') : (catchHalf)
+    let catchMidnight = catchNoon.substring(0,2) == 0 ? ('12' + catchNoon.substring(2,5) + ' ' + 'AM') : (catchNoon)
+    let catchZero = catchMidnight[0] == 0 ?(catchMidnight.substring(1)) : catchMidnight // takes out 0 -> 03:21 -> 3:21
+    return catchZero;
   }
 
   render() {
@@ -21,13 +96,13 @@ class Home extends Component {
         <Header name={username} location={location} />
         <div className="home-container">
           <div className="sidebar">
-            <p> Profile </p>
             <MediaQuery query="(min-width: 768px)">
               <img className="avatar" src="https://i.kym-cdn.com/entries/icons/mobile/000/028/861/cover3.jpg" />
             </MediaQuery>
+            <h1>{username}</h1>
           </div>
           <div className="content">
-            <Search />
+            {this.display()}
           </div>
         </div>
       </main>
