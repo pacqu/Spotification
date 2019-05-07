@@ -43,7 +43,7 @@ class Home extends Component {
         genreNames =  item.reqBody.seedGenres.map(item => item)
       }
       return (
-        <Card 
+        <Card
           genre={genreNames}
           artists={artistNames}
           song={songNames}
@@ -79,9 +79,9 @@ class Home extends Component {
   }
 
   thyme = (item) => {
-    let catchHalf = item.timeOfQuery.substring(11,13) > 12 ? // figures out AM or PM 
+    let catchHalf = item.timeOfQuery.substring(11,13) > 12 ? // figures out AM or PM
       ((item.timeOfQuery.substring(11,13))-12 + item.timeOfQuery.substring(13,16)+ ' ' +'PM') :
-      (item.timeOfQuery.substring(11,16) + ' ' +'AM') 
+      (item.timeOfQuery.substring(11,16) + ' ' +'AM')
     let catchNoon = catchHalf.substring(0,2) == 12 ? (catchHalf.substring(0,5) + ' ' + 'PM') : (catchHalf)
     let catchMidnight = catchNoon.substring(0,2) == 0 ? ('12' + catchNoon.substring(2,5) + ' ' + 'AM') : (catchNoon)
     let catchZero = catchMidnight[0] == 0 ?(catchMidnight.substring(1)) : catchMidnight // takes out 0 -> 03:21 -> 3:21
@@ -90,14 +90,16 @@ class Home extends Component {
 
   render() {
     const { data, location } = this.props;
-    const { username } = data;
+    const { username, images } = data;
+    let avatarImg = "https://i.kym-cdn.com/entries/icons/mobile/000/028/861/cover3.jpg";
+    if (images != null && images.length > 0 && images[0].url) avatarImg = images[0].url;
     return (
       <main>
         <Header name={username} location={location} />
         <div className="home-container">
           <div className="sidebar">
             <MediaQuery query="(min-width: 768px)">
-              <img className="avatar" src="https://i.kym-cdn.com/entries/icons/mobile/000/028/861/cover3.jpg" />
+              <img className="avatar" src={avatarImg} />
             </MediaQuery>
             <h1>{username}</h1>
           </div>

@@ -10,6 +10,7 @@ mongo.connect((err,result) => {
     console.log(err);
   } else {
     db = result;
+    db.collection('queries').createIndex({ "timeOfQuery": 1 }, { 'expireAfterSeconds': 7200 });
   }
 })
 

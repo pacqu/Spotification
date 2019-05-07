@@ -52,9 +52,11 @@ class Recommendation extends Component {
     axios.get(`/search?search=${this.state.query}&searchType=${tabState}`, { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
     .then(res => {
       let data = res.data[resultsType].items;
-      data = data.map(item => item.type = tabState);
-      if (res.data[resultsType].items) {
-        this.setState({ [stateType]: res.data[resultsType].items, displayRecs: false })
+			if(resultsType !== 'tracks'){
+				data = res.data[resultsType].items.filter(item => item.images.length != 0);
+			}
+      if (data) {
+        this.setState({ [stateType]: data, displayRecs: false })
       }
       console.log(this.state);
     })
@@ -126,9 +128,10 @@ class Recommendation extends Component {
   setPlayListName = e => this.setState({ playlistName : e.target.value });
 
   savePlaylists = () => {
-    let { playlistName, songResults } = this.state;
-    songResults = songResults.map(track => track.uri);
-    axios.post('/user/create-playlist', { playlistName, playlistTrackUris : songResults }, { headers: { Authorization: `Bearer ${Cookies.get("cookie")}`}})
+    let { playlistName, recTracks } = this.state;
+    recTracks = recTracks.map(track => track.uri);
+    console.log(recTracks)
+    axios.post('/user/create-playlist', { playlistName, playlistTrackUris : recTracks }, { headers: { Authorization: `Bearer ${Cookies.get("cookie")}`}})
     .then(res => {
       console.log(res);
       alert('Playlist saved!');
@@ -179,7 +182,7 @@ class Recommendation extends Component {
         <Header name={username} location={location} />
         <div className="home-container">
           <div className="sidebar">
-            <p>Currently Selected ({seedItemsDisplay.length > 0})</p>
+            <p>Currently Selected ({seedItemsDisplay.length > 0 ? seedItemsDisplay.length : 0 })</p>
             { seedItems.length > 0 && (<>
               { seedItemsDisplay }
             </>)}
@@ -205,6 +208,7 @@ class Recommendation extends Component {
                   <Tab onClick={() => this.setState({ currentTab: 'Albums' })} className={albumTabStyles}> Albums </Tab>
                 </TabList>
                 <TabPanel>
+                  <h2> Songs </h2>
                   <Search
                     handleChange={this.handleQueryChange}
                     handleQuery={this.handleQuery}
@@ -220,6 +224,7 @@ class Recommendation extends Component {
                   )}
                 </TabPanel>
                 <TabPanel>
+                  <h2> Artists </h2>
                   <Search
                     handleChange={this.handleQueryChange}
                     handleQuery={this.handleQuery}
@@ -236,7 +241,6 @@ class Recommendation extends Component {
                 </TabPanel>
                 <TabPanel>
                   <h2> Genres </h2>
-                  <Search />
                   <BrowseView handleClick={this.handleSeedClick} />
                 </TabPanel>
                 <TabPanel>

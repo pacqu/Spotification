@@ -43,10 +43,23 @@ function Card({ user, queryType, userAvatar, trackImg, time, date, artists, genr
 // artist (check)
 // genre (check)
   let display;
-  if (song.length > 0 && artists.length === 0 && genre.length === 0){ //songs
+  if (song.length === 50 && artists.length === 0 && genre.length === 0){ //songs
     display = (
       <div className="query">
-        {user + " looked Up " + song.length + " "}
+        {user + " Looked up "}
+        <div className="dropdown" >
+          {"Spotify Top 50"}
+            <div className="dropdown-content a">
+                {allSongs}
+            </div>
+        </div>
+        { queryType === 'Recommendation' ? " for Recommendations" : " for Visual Data" }
+      </div>
+    )
+  }else if (song.length > 0 && artists.length === 0 && genre.length === 0){ //songs
+    display = (
+      <div className="query">
+        {user + " Looked up " + song.length + " "}
         <div className="dropdown" >
           {song.length < 2 ? "song": "songs "}
             <div className="dropdown-content a">
@@ -59,7 +72,7 @@ function Card({ user, queryType, userAvatar, trackImg, time, date, artists, genr
   }else if(song.length > 0 && artists.length > 0 && genre.length === 0){  // songs | artists
     display = (
       <div className="query">
-        {user + " looked Up " + song.length + " "}
+        {user + " Looked up " + song.length + " "}
         <div className="dropdown" >
           {song.length < 2 ? "song": "songs "}
             <div className="dropdown-content a">
@@ -79,7 +92,7 @@ function Card({ user, queryType, userAvatar, trackImg, time, date, artists, genr
   }else if(song.length === 0 && artists.length > 0 && genre.length === 0){ // artists
     display = (
       <div className="query">
-        {user + " looked Up " + artists.length + " "}
+        {user + " Looked up " + artists.length + " "}
         <div className="dropdown" >
           {artists.length < 2 ? "artist": "artists "}
             <div className="dropdown-content a">
@@ -93,7 +106,7 @@ function Card({ user, queryType, userAvatar, trackImg, time, date, artists, genr
   else if(song.length === 0 && artists.length === 0 && genre.length > 0){ // genres
     display = (
       <div className="query">
-        {user + " looked Up " + genre.length + " "}
+        {user + " Looked up " + genre.length + " "}
         <div className="dropdown" >
           {genre.length < 2 ? "genre": "genres "}
             <div className="dropdown-content a">
@@ -106,7 +119,7 @@ function Card({ user, queryType, userAvatar, trackImg, time, date, artists, genr
   }else if(song.length === 0 && artists.length > 0 && genre.length > 0){  //artists || genre
     display = (
       <div className="query">
-        {user + " looked Up " + artists.length + " "}
+        {user + " Looked up " + artists.length + " "}
         <div className="dropdown" >
           {artists.length < 2 ? "artist": "artists "}
             <div className="dropdown-content a">
@@ -126,7 +139,7 @@ function Card({ user, queryType, userAvatar, trackImg, time, date, artists, genr
   }else if(song.length > 0 && artists.length === 0 && genre.length > 0){  // songs | genre
     display = (
       <div className="query">
-        {user + " looked Up " + song.length + " "}
+        {user + " Looked up " + song.length + " "}
         <div className="dropdown" >
           {song.length < 2 ? "song": "songs "}
             <div className="dropdown-content a">
@@ -146,7 +159,7 @@ function Card({ user, queryType, userAvatar, trackImg, time, date, artists, genr
   }else if(song.length > 0 && artists.length > 0 && genre.length > 0){  // songs | artists | genre
     display = (
       <div className="query">
-        {user + " looked Up " + song.length + " "}
+        {user + " Looked up " + song.length + " "}
         <div className="dropdown" >
           {song.length < 2 ? "song": "songs "}
             <div className="dropdown-content a">
@@ -165,6 +178,19 @@ function Card({ user, queryType, userAvatar, trackImg, time, date, artists, genr
           {genre.length < 2 ? "genre": "genres "}
             <div className="dropdown-content a">
                 {allGenres}
+            </div>
+        </div>
+        { queryType === 'Recommendation' ? " for Recommendations" : " for Visual Data" }
+      </div>
+    )
+  }else if (song.length === 50 && artists.length === 0 && genre.length === 0){ //songs
+    display = (
+      <div className="query">
+        {user + " Looked up spotify" + song.length + " "}
+        <div className="dropdown" >
+          {song.length < 2 ? "song": "songs "}
+            <div className="dropdown-content a">
+                {allSongs}
             </div>
         </div>
         { queryType === 'Recommendation' ? " for Recommendations" : " for Visual Data" }

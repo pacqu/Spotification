@@ -159,6 +159,7 @@ class SimilarityScores extends Component {
                   <Tab onClick={() => this.setState({ currentTab: 'Playlists' })} className={playlistTabStyles}> Playlists </Tab>
                 </TabList>
                 <TabPanel>
+									<h2> Songs </h2>
                   <Search
                     handleChange={this.handleQueryChange}
                     handleQuery={this.handleQuery}
@@ -171,6 +172,7 @@ class SimilarityScores extends Component {
                   )}
                 </TabPanel>
                 <TabPanel>
+									<h2> Artists </h2>
                   <Search
                     handleChange={this.handleQueryChange}
                     handleQuery={this.handleQuery}
