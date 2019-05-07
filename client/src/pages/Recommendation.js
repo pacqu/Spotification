@@ -52,9 +52,11 @@ class Recommendation extends Component {
     axios.get(`/search?search=${this.state.query}&searchType=${tabState}`, { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
     .then(res => {
       let data = res.data[resultsType].items;
-      data = data.map(item => item.type = tabState);
-      if (res.data[resultsType].items) {
-        this.setState({ [stateType]: res.data[resultsType].items, displayRecs: false })
+			if(resultsType !== 'tracks'){
+				data = res.data[resultsType].items.filter(item => item.images.length != 0);
+			}
+      if (data) {
+        this.setState({ [stateType]: data, displayRecs: false })
       }
       console.log(this.state);
     })
