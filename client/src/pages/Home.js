@@ -6,13 +6,16 @@ import '../styles/Layout.css';
 import axios from 'axios';
 import Cookies from "js-cookie";
 import MediaQuery from 'react-responsive';
+import GenreImg from '../components/GenreImg'
+import { generateKeyPair } from 'crypto';
 
 class Home extends Component {
   constructor(props){
     super(props);
     this.state = {
       data: [],
-      time: ''
+      time: '',
+      stuff: []
     }
   }
 
@@ -20,7 +23,7 @@ class Home extends Component {
     axios.get('/queries',  { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} })
     .then(res =>{
       this.setState({
-        data: res.data.slice(0,20) //limited to latest 20 queries
+        data: res.data.slice(0,20), //limited to latest 20 queries
       })
       console.log(res.data)
     })
@@ -29,15 +32,19 @@ class Home extends Component {
   display = () => (
     this.state.data.map((item => {
       let trackImg = this.getUrl(item)
-      let songNames = [], artistNames = [];
+      let songNames = [], artistNames = [], genreNames =[];
       if(item.reqBody.tracks != undefined){
         songNames = item.reqBody.tracks.map((item => item.artists[0].name + " - " + item.name))
       }
       if(item.reqBody.artists != undefined){
         artistNames = item.reqBody.artists.map((item => item.name))
       }
+      if(item.reqBody.seedGenres != undefined){
+        genreNames =  item.reqBody.seedGenres.map(item => item)
+      }
       return (
         <Card 
+          genre={genreNames}
           artists={artistNames}
           song={songNames}
           user={item.username}
@@ -58,14 +65,17 @@ class Home extends Component {
 
   // gets both artists and track url arrays and combine.
   getUrl = (item) => {
-    let trackUrl = [], artistUrl = [];
+    let trackUrl = [], artistUrl = [], genreUrl =[];
     if(item.reqBody.tracks != undefined){
       trackUrl = item.reqBody.tracks.map((item => item.album.images[1].url)).filter(item => item !=undefined)
     }
     if(item.reqBody.artists != undefined){
-      artistUrl = item.reqBody.artists.map(item => item.images[0]).map(item => item ? item.url :'https://upload.wikimedia.org/wikipedia/en/c/c5/No_album_cover.jpg')
+      artistUrl = item.reqBody.artists.map(item => item.images[0]).map(item => item ? item.url :'http://chittagongit.com/images/no-picture-available-icon/no-picture-available-icon-6.jpg')
     }
-    return trackUrl.concat(artistUrl).slice(0,3)
+    if(item.reqBody.seedGenres != undefined){
+      genreUrl = item.reqBody.seedGenres.map(item => item)
+    }
+    return trackUrl.concat(artistUrl).concat(GenreImg(genreUrl)).slice(0,3)
   }
 
   thyme = (item) => {

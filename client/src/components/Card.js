@@ -3,7 +3,7 @@ import '../styles/Card.css';
 import classNames from 'classnames';
 import { Link } from 'react-router-dom';
 
-function Card({ user, queryType, userAvatar, trackImg, time, date, artists, className, song}) {
+function Card({ user, queryType, userAvatar, trackImg, time, date, artists, genre, className, song}) {
   const cardStyles = classNames('Card', className);
   let images = trackImg.map((item =>{
     return(
@@ -11,7 +11,7 @@ function Card({ user, queryType, userAvatar, trackImg, time, date, artists, clas
     )
   }))
 
-  let allSongs = [], allArtists = [];
+  let allSongs = [], allArtists = [], allGenres = [];
   if(song.length > 0){
     allSongs = song.map((item =>{
       return(
@@ -26,22 +26,37 @@ function Card({ user, queryType, userAvatar, trackImg, time, date, artists, clas
       )
     }))
   }
+  if(genre.length > 0){
+    allGenres = genre.map((item =>{
+      return(
+        <h4>{item}</h4>
+      )
+    }))
+  }
 
+// todo: hard coded ty
+// song + artist + genre 
+// song + genre (check)
+// song + artist (check)
+// artist + genre (check)
+// song (check)
+// artist (check)
+// genre (check)
   let display;
-  if (song.length > 0 && artists.length === 0){
+  if (song.length > 0 && artists.length === 0 && genre.length === 0){ //songs
     display = (
       <div className="query">
-      {user + " looked Up " + song.length + " "}
-      <div className="dropdown" >
-        {song.length < 2 ? "song": "songs "}
-          <div className="dropdown-content a">
-              {allSongs}
-          </div>
+        {user + " looked Up " + song.length + " "}
+        <div className="dropdown" >
+          {song.length < 2 ? "song": "songs "}
+            <div className="dropdown-content a">
+                {allSongs}
+            </div>
+        </div>
+        { queryType === 'Recommendation' ? " for Recommendations" : " for Visual Data" }
       </div>
-      { queryType === 'Recommendation' ? " for Recommendations" : " for Visual Data" }
-    </div>
     )
-  }else if(song.length > 0 && artists.length > 0){
+  }else if(song.length > 0 && artists.length > 0 && genre.length === 0){  // songs | artists
     display = (
       <div className="query">
         {user + " looked Up " + song.length + " "}
@@ -61,18 +76,99 @@ function Card({ user, queryType, userAvatar, trackImg, time, date, artists, clas
         { queryType === 'Recommendation' ? " for Recommendations" : " for Visual Data" }
       </div>
     )
-  }else{
+  }else if(song.length === 0 && artists.length > 0 && genre.length === 0){ // artists
     display = (
       <div className="query">
-      {user + " looked Up " + artists.length + " "}
-      <div className="dropdown" >
-        {artists.length < 2 ? "artist": "artists "}
-          <div className="dropdown-content a">
-              {allArtists}
-          </div>
+        {user + " looked Up " + artists.length + " "}
+        <div className="dropdown" >
+          {artists.length < 2 ? "artist": "artists "}
+            <div className="dropdown-content a">
+                {allArtists}
+            </div>
+        </div>
+        { queryType === 'Recommendation' ? " for Recommendations" : " for Visual Data" }
       </div>
-      { queryType === 'Recommendation' ? " for Recommendations" : " for Visual Data" }
-    </div>
+    )
+  }
+  else if(song.length === 0 && artists.length === 0 && genre.length > 0){ // genres
+    display = (
+      <div className="query">
+        {user + " looked Up " + genre.length + " "}
+        <div className="dropdown" >
+          {genre.length < 2 ? "genre": "genres "}
+            <div className="dropdown-content a">
+                {allGenres}
+            </div>
+        </div>
+        { queryType === 'Recommendation' ? " for Recommendations" : " for Visual Data" }
+      </div>
+    )
+  }else if(song.length === 0 && artists.length > 0 && genre.length > 0){  //artists || genre
+    display = (
+      <div className="query">
+        {user + " looked Up " + artists.length + " "}
+        <div className="dropdown" >
+          {artists.length < 2 ? "artist": "artists "}
+            <div className="dropdown-content a">
+                {allArtists}
+            </div>
+        </div>
+        {" and " + genre.length + " "}
+        <div className="dropdown" >
+          {genre.length < 2 ? "genre": "genres "}
+            <div className="dropdown-content a">
+                {allGenres}
+            </div>
+        </div>
+        { queryType === 'Recommendation' ? " for Recommendations" : " for Visual Data" }
+      </div>
+    )
+  }else if(song.length > 0 && artists.length === 0 && genre.length > 0){  // songs | genre
+    display = (
+      <div className="query">
+        {user + " looked Up " + song.length + " "}
+        <div className="dropdown" >
+          {song.length < 2 ? "song": "songs "}
+            <div className="dropdown-content a">
+                {allSongs}
+            </div>
+        </div>
+        {" and " + genre.length + " "}
+        <div className="dropdown" >
+          {genre.length < 2 ? "genre": "genres "}
+            <div className="dropdown-content a">
+                {allGenres}
+            </div>
+        </div>
+        { queryType === 'Recommendation' ? " for Recommendations" : " for Visual Data" }
+      </div>
+    )
+  }else if(song.length > 0 && artists.length > 0 && genre.length > 0){  // songs | artists | genre
+    display = (
+      <div className="query">
+        {user + " looked Up " + song.length + " "}
+        <div className="dropdown" >
+          {song.length < 2 ? "song": "songs "}
+            <div className="dropdown-content a">
+                {allSongs}
+            </div>
+        </div>
+        {" and " + artists.length + " "}
+        <div className="dropdown" >
+          {artists.length < 2 ? "artist": "artists "}
+            <div className="dropdown-content a">
+              {allArtists}
+            </div>
+        </div>
+        {" and " + genre.length + " "}
+        <div className="dropdown" >
+          {genre.length < 2 ? "genre": "genres "}
+            <div className="dropdown-content a">
+                {allGenres}
+            </div>
+        </div>
+        { queryType === 'Recommendation' ? " for Recommendations" : " for Visual Data" }
+      </div>
     )
   }
 
