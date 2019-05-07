@@ -126,9 +126,10 @@ class Recommendation extends Component {
   setPlayListName = e => this.setState({ playlistName : e.target.value });
 
   savePlaylists = () => {
-    let { playlistName, songResults } = this.state;
-    songResults = songResults.map(track => track.uri);
-    axios.post('/user/create-playlist', { playlistName, playlistTrackUris : songResults }, { headers: { Authorization: `Bearer ${Cookies.get("cookie")}`}})
+    let { playlistName, recTracks } = this.state;
+    recTracks = recTracks.map(track => track.uri);
+    console.log(recTracks)
+    axios.post('/user/create-playlist', { playlistName, playlistTrackUris : recTracks }, { headers: { Authorization: `Bearer ${Cookies.get("cookie")}`}})
     .then(res => {
       console.log(res);
       alert('Playlist saved!');
