@@ -8,7 +8,7 @@ import '../styles/Profile.css';
 
 import { Bar } from 'react-chartjs-2';
 import DarkCard from '../components/DarkCard'
-import HorizontalBarGraph from '../components/HorizontalBarGraph'
+import ProfileBarGraph from '../components/ProfileBarGraph'
 import CircularProgressbar from 'react-circular-progressbar';
 import Chart from '../components/Chart';
 import axios from "axios";
@@ -70,16 +70,22 @@ class Profile extends Component {
 
   render() {
     const { profileData, err } = this.state;
-    const { listeningData } = profileData;
+    const { listeningData, images } = profileData;
     const { data, location, profileName } = this.props;
     const { username } = data;
 
     let topSongs, sortedGenres, barData, similarity;
     if (listeningData) {
       similarity = profileData.similarity;
-      topSongs = Object.entries(listeningData.songs).map(item => [item[1].artists[0].name, item[1].name])
+      topSongs = Object.entries(listeningData.songs).map(item => `${item[1].name} by ${item[1].artists[0].name}`)
       sortedGenres = listeningData.sortedGenres;
       barData = sortedGenres.map(g => [g.genre, g.count]).slice(0, 7);
+    }
+
+    let avatar = "https://i.kym-cdn.com/entries/icons/mobile/000/028/861/cover3.jpg";
+    if (images && images[0] && images[0]['url']){
+      console.log(avatar)
+      avatar = images[0]['url'];
     }
 
     return (
@@ -88,10 +94,10 @@ class Profile extends Component {
         <div className="home-container">
           <div className="sidebar">
             <MediaQuery query="(min-width: 768px)">
-              <img className="avatar" src="https://i.kym-cdn.com/entries/icons/mobile/000/028/861/cover3.jpg" />
+              <img className="avatar" src={avatar} />
             </MediaQuery>
             <h1>{profileName}</h1>
-            <div className="similarity-container">
+            { username !== profileName && (<div className="similarity-container">
               <h2>Similarity Score</h2>
               { similarity && (
                 <CircularProgressbar
@@ -118,7 +124,7 @@ class Profile extends Component {
                   }}
                 />
               )}
-            </div>
+            </div>)}
           </div>
           <div className="content">
             <h1>{!!err.length && err }</h1>
@@ -129,7 +135,7 @@ class Profile extends Component {
               </DarkCard>
               <DarkCard>
                 <h1> Favorite Genres</h1>
-                { listeningData && <HorizontalBarGraph label={"Count"} barData={barData} />}
+                { listeningData && <ProfileBarGraph label={"Count"} barData={barData} />}
               </DarkCard>
             </div>
           </div>
