@@ -77,7 +77,7 @@ class Profile extends Component {
     let topSongs, sortedGenres, barData, similarity;
     if (listeningData) {
       similarity = profileData.similarity;
-      topSongs = Object.entries(listeningData.songs).map(item => `${item[1].name} by ${item[1].artists[0].name}`)
+      topSongs = Object.entries(listeningData.songs).map(item => `${item[1].artists[0].name} - ${item[1].name}`)
       sortedGenres = listeningData.sortedGenres;
       barData = sortedGenres.map(g => [g.genre, g.count]).slice(0, 7);
     }
