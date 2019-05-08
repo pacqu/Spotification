@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import Header from '../components/Header';
 import MediaQuery from 'react-responsive';
+import { Redirect } from 'react-router-dom';
 
 import 'react-circular-progressbar/dist/styles.css';
 import '../styles/Layout.css';
@@ -39,6 +40,16 @@ class Profile extends Component {
       console.log(this.state);
     })
     .catch(err => {
+			axios.get(`/user/username/${this.props.data.username}`, { headers : { 'Authorization' : 'Bearer ' + Cookies.get('cookie') }})
+	    .then(res => {
+	      let { data } = res;
+	      this.setState({ err: err, profileData: data });
+	      console.log(this.state);
+	    })
+	    .catch(err => {
+        console.log(err)
+	      this.setState({ redirectHome: true });
+	    })
       console.log(err)
     })
 	}
@@ -77,11 +88,11 @@ class Profile extends Component {
   }
 
   render() {
-    const { profileData, err } = this.state;
+    const { profileData, err, redirectHome } = this.state;
     const { listeningData, images } = profileData;
-    console.log(listeningData);
     const { data, location, profileName } = this.props;
     const { username } = data;
+    const profileName = profileData.username;
 
     let topSongs, sortedGenres, barData=[], similarity, chartExample2, chart1_2_options, avatar, artist, song1='', song2='', song3='', song4='';
     if (listeningData) {
@@ -171,22 +182,12 @@ class Profile extends Component {
         },
         options: chart1_2_options
       };
+		if (redirectHome) return (<Redirect to="/home" />);
 
     return (
       <main>
         <Header name={username} location={location} />
             <h1>{!!err.length && err}</h1>
-            {/* <Chart title="aaaaa"> */}
-            {/* <DarkChart /> */}
-            {/* </Chart> */}
-            {/* <DarkCard>
-                <h1> Top Songs </h1>
-                { listeningData && this.SongList(topSongs)}
-              </DarkCard>
-              <DarkCard>
-                <h1> Favorite Genres</h1>
-                { listeningData && <ProfileBarGraph label={"Count"} barData={barData} />}
-              </DarkCard> */}
             <div class="grid-container">
               <div class="menu-icon">
                 <i class="fas fa-bars header__menu" />
