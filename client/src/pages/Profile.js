@@ -95,6 +95,10 @@ class Profile extends Component {
     const profileName = profileData.username;
 
     let topSongs, sortedGenres, barData=[], similarity, chartExample2, chart1_2_options, avatar, artist, song1='', song2='', song3='', song4='';
+    avatar = defaultAvatar;
+    if (images && images[0] && images[0]['url']){
+      avatar = images[0]['url'];
+    }
     if (listeningData && Object.keys(listeningData).length > 0) {
       similarity = profileData.similarity;
       topSongs = Object.entries(listeningData.songs).map(item => `${item[1].name} by ${item[1].artists[0].name}`)
@@ -106,10 +110,6 @@ class Profile extends Component {
       sortedGenres = listeningData.sortedGenres;
       barData = sortedGenres.map(g => [g.genre, g.count]).slice(0, 7);
 
-      avatar = defaultAvatar;
-      if (images && images[0] && images[0]['url']){
-        avatar = images[0]['url'];
-      }
       console.log('barData')
       console.log(barData)
 
