@@ -69,6 +69,7 @@ router.post('/', function(req, res, next) {
         if(err) {
           console.log(err);
           res.json(err);
+          return;
         } else {
           console.log("Inserted the following document");
           console.log(results);
@@ -77,6 +78,7 @@ router.post('/', function(req, res, next) {
               console.log(err);
               res.status(500);
               res.json(err);
+              return;
             }
             user = results['ops'][0];
             delete user.password;
@@ -115,6 +117,7 @@ router.get('/', middlewares.checkToken, (req, res) => {
           console.log(err);
           res.status(500);
           res.json(err);
+          return;
         }
         if ( results.length == 0  || !(results) ) {
           console.log('ERROR: User could not be found');
@@ -129,6 +132,7 @@ router.get('/', middlewares.checkToken, (req, res) => {
                 console.log(err.data);
                 res.status(500);
                 res.json(err.data);
+                return;
               }
               spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
               axios.get(`https://api.spotify.com/v1/me`,
@@ -143,12 +147,14 @@ router.get('/', middlewares.checkToken, (req, res) => {
                     console.log(err);
                     res.status(500);
                     res.json(err);
+                    return;
                   }
                   users.find({'username': checkedUser['username']}, {'projection': {'password': 0, 'salt': 0, 'spotifyAuthTokens': 0}}).toArray( (err, results) => {
                     if(err) {
                       console.log(err);
                       res.status(500);
                       res.json(err);
+                      return;
                     }
                     console.log(results)
                     res.json(results);
@@ -159,6 +165,7 @@ router.get('/', middlewares.checkToken, (req, res) => {
                 console.log(err['response'].data);
                 res.status(500);
                 res.json(err['response'].data);
+                return;
               })
             })
           }
@@ -194,11 +201,13 @@ router.get('/username/:username', middlewares.checkToken, (req, res) => {
           console.log(err);
           res.status(500);
           res.json(err);
+          return;
         }
         if ( results.length == 0  || !(results) ) {
           console.log('ERROR: User could not be found');
           res.status(404);
           res.send("Given user does not exist");
+          return;
         }
         var givenUser = results[0]
         if (givenUser.spotifyAuth && givenUser.listeningData){
@@ -207,6 +216,7 @@ router.get('/username/:username', middlewares.checkToken, (req, res) => {
               console.log(err);
               res.status(500);
               res.json(err);
+              return;
             }
             if ( results.length == 0  || !(results) ) {
               console.log('ERROR: User could not be found');
@@ -264,6 +274,7 @@ router.post('/login', function(req, res, next) {
           console.log(err);
           res.status(500);
           res.json(err);
+          return;
         }
         console.log('what up bitch');
         var hashedPass = results[0]['password'];
@@ -322,6 +333,7 @@ router.post('/spotifyauth', middlewares.checkToken, (req, res) => {
               console.log(err);
               res.status(500);
               res.json(err);
+              return;
             }
             spotifyApi.setAccessToken(data.body['access_token']);
             spotifyApi.setRefreshToken(data.body['refresh_token']);
@@ -330,6 +342,7 @@ router.post('/spotifyauth', middlewares.checkToken, (req, res) => {
                 console.log(err);
                 res.status(500);
                 res.json(err);
+                return;
               }
               console.log(results)
               res.json(results);
@@ -346,6 +359,7 @@ router.post('/spotifyauth', middlewares.checkToken, (req, res) => {
               console.log(err);
               res.status(500);
               res.json(err);
+              return;
             }
             spotifyApi.setAccessToken(data.body['access_token']);
             spotifyApi.setRefreshToken(data.body['refresh_token']);
@@ -354,6 +368,7 @@ router.post('/spotifyauth', middlewares.checkToken, (req, res) => {
                 console.log(err);
                 res.status(500);
                 res.json(err);
+                return;
               }
               console.log(results)
               res.json(results);
@@ -365,6 +380,7 @@ router.post('/spotifyauth', middlewares.checkToken, (req, res) => {
         console.log(err);
         res.status(500);
         res.json(err);
+        return;
       })
     }
   })
@@ -387,6 +403,7 @@ router.get('/listening-data', middlewares.checkToken, (req, res) => {
         if(err) {
           console.log(err);
           res.json(err);
+          return;
         }
         user = results[0];
         spotifyData.checkRefresh(user, db, spotifyApi, (err, checkedUser) => {
@@ -394,6 +411,7 @@ router.get('/listening-data', middlewares.checkToken, (req, res) => {
             console.log(err);
             res.status(500);
             res.json(err);
+            return;
           }
           spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
           axios.get('https://api.spotify.com/v1/me/top/tracks?limit=50&time_range=short_term',
@@ -405,6 +423,7 @@ router.get('/listening-data', middlewares.checkToken, (req, res) => {
                 console.log(err);
                 res.status(500);
                 res.json(err);
+                return;
               }
               else {
                 const users = db.collection('users');
@@ -415,12 +434,14 @@ router.get('/listening-data', middlewares.checkToken, (req, res) => {
                     console.log(err);
                     res.status(500);
                     res.json(err);
+                    return;
                   }
                   users.find({'username': user['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
                     if(err) {
                       console.log(err);
                       res.status(500);
                       res.json(err);
+                      return;
                     }
                     user = results[0]
                     res.json(results);
@@ -434,6 +455,7 @@ router.get('/listening-data', middlewares.checkToken, (req, res) => {
               console.log(err);
               res.status(500);
               res.json(err);
+              return;
             }
           })
         })
@@ -463,6 +485,7 @@ router.post('/create-playlist', middlewares.checkToken, (req, res) => {
         if(err) {
           console.log(err);
           res.json(err);
+          return;
         }
         user = results[0];
         spotifyData.checkRefresh(user, db, spotifyApi, (err, checkedUser) => {
@@ -470,6 +493,7 @@ router.post('/create-playlist', middlewares.checkToken, (req, res) => {
             console.log(err);
             res.status(500);
             res.json(err);
+            return;
           }
           spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
           axios.get('https://api.spotify.com/v1/me/',
@@ -493,6 +517,7 @@ router.post('/create-playlist', middlewares.checkToken, (req, res) => {
                   console.log(err);
                   res.status(500);
                   res.json(err);
+                  return;
                 }
               })
             })
@@ -501,6 +526,7 @@ router.post('/create-playlist', middlewares.checkToken, (req, res) => {
                 console.log(err);
                 res.status(500);
                 res.json(err);
+                return;
               }
             })
           })
@@ -509,6 +535,7 @@ router.post('/create-playlist', middlewares.checkToken, (req, res) => {
               console.log(err);
               res.status(500);
               res.json(err);
+              return;
             }
           })
         })
@@ -536,6 +563,7 @@ router.get('/playlists', middlewares.checkToken, (req, res) => {
           console.log(err);
           res.status(500);
           res.json(err);
+          return;
         }
         if ( results.length == 0  || !(results) ) {
           console.log('ERROR: User could not be found');
@@ -548,6 +576,7 @@ router.get('/playlists', middlewares.checkToken, (req, res) => {
             console.log(err);
             res.status(500);
             res.json(err);
+            return;
           }
           spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
           axios.get('https://api.spotify.com/v1/me/playlists?limit=50',
@@ -560,6 +589,7 @@ router.get('/playlists', middlewares.checkToken, (req, res) => {
             console.log(err);
             res.status(500);
             res.json(err);
+            return;
           })
 
         })
@@ -583,6 +613,7 @@ router.get('/refresh-tokens', middlewares.checkToken, (req, res) => {
           console.log(err);
           res.status(500);
           res.json(err);
+          return;
         }
         if ( results.length == 0  || !(results) ) {
           console.log('ERROR: User could not be found');
@@ -595,6 +626,7 @@ router.get('/refresh-tokens', middlewares.checkToken, (req, res) => {
             console.log(err);
             res.status(500);
             res.json(err);
+            return;
           }
           res.json(checkedUser);
         })
