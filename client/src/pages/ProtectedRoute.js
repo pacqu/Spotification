@@ -16,7 +16,7 @@ function ProtectedRoute({ component: Component, path, match }) {
         const result = await axios.get('/user/', { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} });
         if (result.status === 200) {
           if (result.data[0].spotifyAuth){
-            if (!(result.data[0].listeningData)){
+            if (!(result.data[0].listeningData) || (result.data[0].listeningData)){
               try {
                 const result = await axios.get('/user/listening-data', { headers: {'Authorization' : 'Bearer ' + Cookies.get('cookie')} });
                 if (result.status === 200) {

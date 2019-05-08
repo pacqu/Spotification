@@ -95,7 +95,7 @@ class Profile extends Component {
     const profileName = profileData.username;
 
     let topSongs, sortedGenres, barData=[], similarity, chartExample2, chart1_2_options, avatar, artist, song1='', song2='', song3='', song4='';
-    if (listeningData) {
+    if (listeningData && Object.keys(listeningData).length > 0) {
       similarity = profileData.similarity;
       topSongs = Object.entries(listeningData.songs).map(item => `${item[1].name} by ${item[1].artists[0].name}`)
       artist = listeningData.songs[0].artists[0].name;
@@ -150,13 +150,13 @@ class Profile extends Component {
       chartExample2 = {
         data: canvas => {
           let ctx = canvas.getContext("2d");
-      
+
           let gradientStroke = ctx.createLinearGradient(0, 230, 0, 50);
-      
+
           gradientStroke.addColorStop(1, "rgba(29,140,248,0.2)");
           gradientStroke.addColorStop(0.4, "rgba(29,140,248,0.0)");
           gradientStroke.addColorStop(0, "rgba(29,140,248,0)"); //blue colors
-      
+
           return {
             labels: barData.map(m => m[0]),
             datasets: [
@@ -229,10 +229,10 @@ class Profile extends Component {
               </aside>
 
               <main class="main">
-                <div class="main-header">
+                {listeningData && Object.keys(listeningData).length > 0 ? ( <div><div class="main-header">
                 <section class="track-info">
                   <h6 class="track-info--intro">Welcome to Spotification Profile!</h6>
-                  { listeningData && (
+                  { listeningData && Object.keys(listeningData).length > 0 && (
                     <h1 class="track-info--title">{profileName} likes {barData[0][0]} and {artist}!</h1>
                   )}
                   {/* <h2 class="track-info--artist">aaa</h2> */}
@@ -257,10 +257,10 @@ class Profile extends Component {
                       />
                     </Chart>
                     <Chart className="chartchart" title="Top 10 songs">
-                      { listeningData && this.SongList(topSongs)}
+                      { listeningData && Object.keys(listeningData).length > 0 && this.SongList(topSongs)}
                     </Chart>
                   </>)}
-                </div>
+                </div> </div>) : <h2>{"You don't have any listening data yet! Get to some tunes, stat!"}</h2>}
               </main>
             </div>
       </main>

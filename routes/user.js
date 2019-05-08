@@ -417,38 +417,64 @@ router.get('/listening-data', middlewares.checkToken, (req, res) => {
           axios.get('https://api.spotify.com/v1/me/top/tracks?limit=50&time_range=short_term',
           {headers: { Authorization: `Bearer ${spotifyAccessToken}`}})
           .then(results => {
-            //console.log(results['data']);
-            spotifyData.getAvgFeats(checkedUser, db, results['data']['items'], (err, data) => {
-              if(err){
-                console.log(err);
-                res.status(500);
-                res.json(err);
-                return;
-              }
-              else {
-                const users = db.collection('users');
-                users.updateOne({'username': user['username']},
-                {$set : {'listeningData': data} },
-                {}, (err, results) => {
-                  if(err) {
-                    console.log(err);
-                    res.status(500);
-                    res.json(err);
-                    return;
-                  }
-                  users.find({'username': user['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
+            console.log(results['data']);
+            if (results['data'].items && results['data'].items.length > 0){
+              spotifyData.getAvgFeats(checkedUser, db, results['data']['items'], (err, data) => {
+                if(err){
+                  console.log(err);
+                  res.status(500);
+                  res.json(err);
+                  return;
+                }
+                else {
+                  const users = db.collection('users');
+                  users.updateOne({'username': user['username']},
+                  {$set : {'listeningData': data} },
+                  {}, (err, results) => {
                     if(err) {
                       console.log(err);
                       res.status(500);
                       res.json(err);
                       return;
                     }
-                    user = results[0]
-                    res.json(results);
+                    users.find({'username': user['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
+                      if(err) {
+                        console.log(err);
+                        res.status(500);
+                        res.json(err);
+                        return;
+                      }
+                      user = results[0]
+                      res.json(results);
+                    });
                   });
+                }
+              });
+            }
+            else {
+              console.log("here")
+              const users = db.collection('users');
+              users.updateOne({'username': user['username']},
+              {$set : {'listeningData': {}} },
+              {}, (err, results) => {
+                if(err) {
+                  console.log(err);
+                  res.status(500);
+                  res.json(err);
+                  return;
+                }
+                users.find({'username': user['username']}, {'projection': {'password': 0, 'salt': 0}}).toArray( (err, results) => {
+                  if(err) {
+                    console.log(err);
+                    res.status(500);
+                    res.json(err);
+                    return;
+                  }
+                  user = results[0]
+                  res.json(results);
                 });
-              }
-            });
+              });
+            }
           })
           .catch(err => {
             if(err) {
