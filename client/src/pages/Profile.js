@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import Header from '../components/Header';
 import MediaQuery from 'react-responsive';
+import { Redirect } from 'react-router-dom';
 
 import 'react-circular-progressbar/dist/styles.css';
 import '../styles/Layout.css';
@@ -31,6 +32,16 @@ class Profile extends Component {
       console.log(this.state);
     })
     .catch(err => {
+			axios.get(`/user/username/${this.props.data.username}`, { headers : { 'Authorization' : 'Bearer ' + Cookies.get('cookie') }})
+	    .then(res => {
+	      let { data } = res;
+	      this.setState({ err: err, profileData: data });
+	      console.log(this.state);
+	    })
+	    .catch(err => {
+        console.log(err)
+	      this.setState({ redirectHome: true });
+	    })
       console.log(err)
     })
 	}
@@ -69,10 +80,11 @@ class Profile extends Component {
   }
 
   render() {
-    const { profileData, err } = this.state;
+    const { profileData, err, redirectHome } = this.state;
     const { listeningData, images } = profileData;
-    const { data, location, profileName } = this.props;
+    const { data, location } = this.props;
     const { username } = data;
+    const profileName = profileData.username;
 
     let topSongs, sortedGenres, barData, similarity;
     if (listeningData) {
@@ -87,6 +99,8 @@ class Profile extends Component {
       console.log(avatar)
       avatar = images[0]['url'];
     }
+
+		if (redirectHome) return (<Redirect to="/home" />);
 
     return (
       <main>
@@ -127,7 +141,7 @@ class Profile extends Component {
             </div>)}
           </div>
           <div className="content">
-            <h1>{!!err.length && err }</h1>
+            <h1>{  err && err.response.data }</h1>
             <div className="top-row">
               <DarkCard>
                 <h1> Top Songs </h1>
