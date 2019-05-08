@@ -25,6 +25,7 @@ class App extends Component {
             <Route path="/Data" render={props => <ProtectedRoute component={DataVisualizations} path="Data" {...props} />} />
             <Route path="/Recommendation" render={props => <ProtectedRoute component={Recommendation} path="Recommendation" path="/Recommendation" {...props} />} />
             <Route path="/Similar" render={props => <ProtectedRoute component={SimilarityScores} path="Similar" {...props} />} />
+            <Route component={LnR} />
           </Switch>
         </Router>
       </main>

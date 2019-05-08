@@ -14,6 +14,7 @@ import CircularProgressbar from 'react-circular-progressbar';
 import Chart from '../components/Chart';
 import axios from "axios";
 import Cookies from 'js-cookie';
+import defaultAvatar from '../static/default.png';
 
 import {
   chartExample1,
@@ -66,10 +67,10 @@ class Profile extends Component {
 
   SongList = (topSongs) => {
     let songs = topSongs.slice(0,10).map((item =>
-      <li>{item}</li>
+      <li className="list-item">{item}</li>
     ))
     return (
-      <ul>
+      <ul className="list-list">
         <li>{songs}</li>
       </ul>
     )
@@ -78,20 +79,24 @@ class Profile extends Component {
   render() {
     const { profileData, err } = this.state;
     const { listeningData, images } = profileData;
+    console.log(listeningData);
     const { data, location, profileName } = this.props;
     const { username } = data;
 
-    let topSongs, sortedGenres, barData=[], similarity, chartExample2, chart1_2_options, avatar, artist;
+    let topSongs, sortedGenres, barData=[], similarity, chartExample2, chart1_2_options, avatar, artist, song1='', song2='', song3='', song4='';
     if (listeningData) {
       similarity = profileData.similarity;
       topSongs = Object.entries(listeningData.songs).map(item => `${item[1].name} by ${item[1].artists[0].name}`)
       artist = listeningData.songs[0].artists[0].name;
+      song1 = listeningData.songs[0].album.images[0].url;
+      song2 = listeningData.songs[1].album.images[0].url;
+      song3 = listeningData.songs[2].album.images[0].url;
+      song4 = listeningData.songs[3].album.images[0].url;
       sortedGenres = listeningData.sortedGenres;
       barData = sortedGenres.map(g => [g.genre, g.count]).slice(0, 7);
 
-      avatar = "https://i.kym-cdn.com/entries/icons/mobile/000/028/861/cover3.jpg";
+      avatar = defaultAvatar;
       if (images && images[0] && images[0]['url']){
-        console.log(avatar)
         avatar = images[0]['url'];
       }
       console.log('barData')
@@ -225,32 +230,22 @@ class Profile extends Component {
               <main class="main">
                 <div class="main-header">
                 <section class="track-info">
-                  <h6 class="track-info--intro">Hey {profileName}!</h6>
+                  <h6 class="track-info--intro">Welcome to Spotification Profile!</h6>
                   { listeningData && (
-                    <h1 class="track-info--title">You like {barData[0][0]} and {artist}!</h1>
+                    <h1 class="track-info--title">{profileName} likes {barData[0][0]} and {artist}!</h1>
                   )}
                   {/* <h2 class="track-info--artist">aaa</h2> */}
                 </section>
                 </div>
 
-                <div class="main-overview">
-                  <div class="overviewcard">
-                    <div class="overviewcard__icon">Overview</div>
-                    <div class="overviewcard__info">Card</div>
+                {song1 && (
+                  <div class="main-overview">
+                    <div style={{'background': `url("${song1}")`, 'background-size': 'cover'}} class="overviewcard" />
+                    <div style={{'background': `url("${song2}")`, 'background-size': 'cover'}} class="overviewcard" />
+                    <div style={{'background': `url("${song3}")`, 'background-size': 'cover'}} class="overviewcard" />
+                    <div style={{'background': `url("${song4}")`, 'background-size': 'cover'}} class="overviewcard" />
                   </div>
-                  <div class="overviewcard">
-                    <div class="overviewcard__icon">Overview</div>
-                    <div class="overviewcard__info">Card</div>
-                  </div>
-                  <div class="overviewcard">
-                    <div class="overviewcard__icon">Overview</div>
-                    <div class="overviewcard__info">Card</div>
-                  </div>
-                  <div class="overviewcard">
-                    <div class="overviewcard__icon">Overview</div>
-                    <div class="overviewcard__info">Card</div>
-                  </div>
-                </div>
+                )}
 
                 <div class="main-cards">
                   {listeningData && (<>
