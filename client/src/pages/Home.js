@@ -8,6 +8,7 @@ import Cookies from "js-cookie";
 import MediaQuery from 'react-responsive';
 import GenreImg from '../components/GenreImg'
 import { generateKeyPair } from 'crypto';
+import defaultAvatar from '../static/default.png';
 
 class Home extends Component {
   constructor(props){
@@ -33,7 +34,7 @@ class Home extends Component {
     this.state.data.map((item => {
       let trackImg = this.getUrl(item)
       let songNames = [], artistNames = [], genreNames =[];
-      let userAvatar = "https://i.kym-cdn.com/entries/icons/mobile/000/028/861/cover3.jpg"
+      let userAvatar = defaultAvatar;
       if (item.userImages != null && item.userImages.length > 0 && item.userImages[0].url ) userAvatar = item.userImages[0].url
       if(item.reqBody.tracks != undefined){
         songNames = item.reqBody.tracks.map((item => item.artists[0].name + " - " + item.name))

@@ -2,6 +2,7 @@ import React from 'react'
 import '../styles/Card.css';
 import classNames from 'classnames';
 import { Link } from 'react-router-dom';
+import defaultAvatar from '../static/default.png';
 
 function Card({ user, queryType, userAvatar, trackImg, time, date, artists, genre, className, song}) {
   const cardStyles = classNames('Card', className);
@@ -33,7 +34,7 @@ function Card({ user, queryType, userAvatar, trackImg, time, date, artists, genr
       )
     }))
   }
-  let avatar = "https://i.kym-cdn.com/entries/icons/mobile/000/028/861/cover3.jpg";
+  let avatar = defaultAvatar;
   if (userAvatar) avatar = userAvatar;
 
 // todo: hard coded ty
