@@ -111,6 +111,7 @@ router.post('/recommend', middlewares.checkToken, (req, res) => {
         if(err) {
           console.log(err);
           res.json(err);
+          return;
         }
         user = results[0];
         spotifyData.checkRefresh(user, db, spotifyApi, (err, checkedUser) => {
@@ -118,6 +119,7 @@ router.post('/recommend', middlewares.checkToken, (req, res) => {
             console.log(err);
             res.status(500);
             res.json(err);
+            return;
           }
           spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
           axios.get(`https://api.spotify.com/v1/recommendations?${seedTracks ? 'seed_tracks=' + seedTracks.join(',') + '&' : ""}` +
@@ -133,6 +135,7 @@ router.post('/recommend', middlewares.checkToken, (req, res) => {
               console.log(err);
               res.status(500);
               res.json(err);
+              return;
             });
         })
       })
@@ -166,6 +169,7 @@ router.post('/visual', middlewares.checkToken, (req, res) => {
         if(err) {
           console.log(err);
           res.json(err);
+          return;
         }
         user = results[0];
         spotifyData.checkRefresh(user, db, spotifyApi, (err, checkedUser) => {
@@ -173,6 +177,7 @@ router.post('/visual', middlewares.checkToken, (req, res) => {
             console.log(err);
             res.status(500);
             res.json(err);
+            return;
           }
           spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
           if (req.body.visualType === "top"){
@@ -190,6 +195,7 @@ router.post('/visual', middlewares.checkToken, (req, res) => {
                   console.log(err);
                   res.status(500);
                   res.json(err);
+                  return;
                 }
                 console.log(data);
                 queryUtils.insertIntoCache('Visualization', user, req.body, data);
@@ -200,6 +206,7 @@ router.post('/visual', middlewares.checkToken, (req, res) => {
               console.log(err);
               res.status(500);
               res.json(err);
+              return;
               return;
             })
           }
@@ -214,6 +221,7 @@ router.post('/visual', middlewares.checkToken, (req, res) => {
                   console.log(err);
                   res.status(500);
                   res.json(err);
+                  return;
                 }
                 queryUtils.insertIntoCache('Visualization', user, req.body, data);
                 res.json(data);
@@ -223,6 +231,7 @@ router.post('/visual', middlewares.checkToken, (req, res) => {
               console.log(err);
               res.status(500);
               res.json(err);
+              return;
               return;
             })
           }
@@ -258,6 +267,7 @@ router.delete('/', (req, res) => {
   const queryCache = db.collection('queries');
   const queryDel = queryCache.drop((err, delOK) => {
     if (err) res.json(err);
+    return;
     if (delOK) res.json({delted: delOK});
   })
 });
