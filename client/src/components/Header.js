@@ -25,7 +25,7 @@ class Header extends Component {
   }
   render() {
     const { className, name, location, logout } = this.props;
-    const locations = ['Logout', 'Profile', 'Home', 'Data', 'Recommendation', 'Similar'];
+    const locations = ['Logout', 'Profile', 'Data', 'Recommendation', 'Similar', 'Home'];
     const navItems = locations.map(item => {
       let href = `/${item}`
       if (item === 'Profile') {

@@ -33,6 +33,8 @@ class Home extends Component {
     this.state.data.map((item => {
       let trackImg = this.getUrl(item)
       let songNames = [], artistNames = [], genreNames =[];
+      let userAvatar = "https://i.kym-cdn.com/entries/icons/mobile/000/028/861/cover3.jpg"
+      if (item.userImages != null && item.userImages.length > 0 && item.userImages[0].url ) userAvatar = item.userImages[0].url
       if(item.reqBody.tracks != undefined){
         songNames = item.reqBody.tracks.map((item => item.artists[0].name + " - " + item.name))
       }
@@ -48,7 +50,7 @@ class Home extends Component {
           artists={artistNames}
           song={songNames}
           user={item.username}
-          userAvatar={''}
+          userAvatar={userAvatar}
           queryType={item.queryType}
           trackImg={trackImg}
           time={this.thyme(item)}

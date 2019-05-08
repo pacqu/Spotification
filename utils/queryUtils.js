@@ -88,8 +88,9 @@ const insertIntoCache = async (queryType, user, reqBody, resObj) => {
     }
     queryCache.insert({
       'queryType': queryType,
-      'timeOfQuery': moment().format(),
+      'timeOfQuery': moment().utc().format(),
       'username': user['username'],
+      'userImages': user['images'],
       'reqBody': reqBody,
       'resObj': resObj
     });
@@ -97,8 +98,9 @@ const insertIntoCache = async (queryType, user, reqBody, resObj) => {
   else{
     queryCache.insert({
       'queryType': queryType,
-      'timeOfQuery': moment().format(),
+      'timeOfQuery': moment().utc().format(),
       'username': user['username'],
+      'userImages': user['images'],
       'reqBody': reqBody,
       'resObj': resObj
     });

@@ -503,7 +503,7 @@ router.get('/similarity', middlewares.checkToken, (req, res) => {
 
 /* DELETE search/delete - Drops All Users
 FOR DEVELOPMENT ONLY - COMMENT THIS OUT FOR PRODUCTION
-*/
+
 router.get('/delete', (req, res) => {
   const songFeats = db.collection('song_feats');
   const featsDel = songFeats.drop((err, delOK) => {
@@ -512,4 +512,5 @@ router.get('/delete', (req, res) => {
     if (delOK) res.json({delted: delOK});
   })
 });
+*/
 module.exports = router;
