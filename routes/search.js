@@ -62,6 +62,7 @@ router.get('/', middlewares.checkToken, (req, res) => {
           console.log(err);
           res.status(500);
           res.json(err);
+          return;
         }
         user = results[0];
         spotifyData.checkRefresh(user, db, spotifyApi, (err, checkedUser) => {
@@ -69,6 +70,7 @@ router.get('/', middlewares.checkToken, (req, res) => {
             console.log(err.data);
             res.status(500);
             res.json(err.data);
+            return;
           }
           spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
           axios.get(`https://api.spotify.com/v1/search?q=${searchString}&type=${searchType}${limit ? '&limit='+limit : ''}`,
@@ -81,6 +83,7 @@ router.get('/', middlewares.checkToken, (req, res) => {
             console.log(err['response'].data);
             res.status(500);
             res.json(err['response'].data);
+            return;
           })
         })
       })
@@ -160,6 +163,7 @@ router.get('/album/:albumId', middlewares.checkToken, (req, res) => {
         if(err) {
           console.log(err);
           res.json(err);
+          return;
         }
         user = results[0];
         spotifyData.checkRefresh(user, db, spotifyApi, (err, checkedUser) => {
@@ -167,6 +171,7 @@ router.get('/album/:albumId', middlewares.checkToken, (req, res) => {
             console.log(err);
             res.status(500);
             res.json(err);
+            return;
           }
           spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
           axios.get(`https://api.spotify.com/v1/albums/${albumId}/tracks`,
@@ -179,6 +184,7 @@ router.get('/album/:albumId', middlewares.checkToken, (req, res) => {
             console.log(err['response'].data);
             res.status(500);
             res.json(err['response'].data);
+            return;
           })
         })
       })
@@ -229,6 +235,7 @@ router.get('/artist/:artistId', middlewares.checkToken, (req, res) => {
         if(err) {
           console.log(err);
           res.json(err);
+          return;
         }
         user = results[0];
         spotifyData.checkRefresh(user, db, spotifyApi, (err, checkedUser) => {
@@ -236,6 +243,7 @@ router.get('/artist/:artistId', middlewares.checkToken, (req, res) => {
             console.log(err);
             res.status(500);
             res.json(err);
+            return;
           }
           spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
           axios.get(`https://api.spotify.com/v1/artists/${artistId}/top-tracks?country=US`,
@@ -248,6 +256,7 @@ router.get('/artist/:artistId', middlewares.checkToken, (req, res) => {
             console.log(err['response'].data);
             res.status(500);
             res.json(err['response'].data);
+            return;
           })
         })
       })
@@ -298,6 +307,7 @@ router.get('/playlist/:playlistId', middlewares.checkToken, (req, res) => {
         if(err) {
           console.log(err);
           res.json(err);
+          return;
         }
         user = results[0];
         spotifyData.checkRefresh(user, db, spotifyApi, (err, checkedUser) => {
@@ -305,6 +315,7 @@ router.get('/playlist/:playlistId', middlewares.checkToken, (req, res) => {
             console.log(err);
             res.status(500);
             res.json(err);
+            return;
           }
           spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
           axios.get(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
@@ -317,6 +328,7 @@ router.get('/playlist/:playlistId', middlewares.checkToken, (req, res) => {
             console.log(err);
             res.status(500);
             res.json(err);
+            return;
           })
         })
       })
@@ -354,6 +366,7 @@ router.get('/similarity', middlewares.checkToken, (req, res) => {
           console.log(err);
           res.status(500);
           res.json(err);
+          return;
         }
         user = results[0];
         spotifyData.checkRefresh(user, db, spotifyApi, (err, checkedUser) => {
@@ -361,6 +374,7 @@ router.get('/similarity', middlewares.checkToken, (req, res) => {
             console.log(err.data);
             res.status(500);
             res.json(err.data);
+            return;
           }
           spotifyAccessToken = checkedUser['spotifyAuthTokens']['access'];
           //song
@@ -374,6 +388,7 @@ router.get('/similarity', middlewares.checkToken, (req, res) => {
                     console.log(err);
                     res.status(500);
                     res.json(err);
+                    return;
                   }
                   console.log(data)
                   spotifyData.getSimilairity(data.avgFeatures, user.listeningData.avgFeatures, (data) => {
@@ -387,6 +402,7 @@ router.get('/similarity', middlewares.checkToken, (req, res) => {
                 console.log(err['response'].data);
                 res.status(500);
                 res.json(err['response'].data);
+                return;
               })
             }
           //artist
@@ -399,6 +415,7 @@ router.get('/similarity', middlewares.checkToken, (req, res) => {
                     console.log(err);
                     res.status(500);
                     res.json(err);
+                    return;
                   }
                   spotifyData.getSimilairity(data.avgFeatures, user.listeningData.avgFeatures, (data) => {
                     var similarity = null;
@@ -411,6 +428,7 @@ router.get('/similarity', middlewares.checkToken, (req, res) => {
                 console.log(err['response'].data);
                 res.status(500);
                 res.json(err['response'].data);
+                return;
               })
             }
           //album
@@ -428,6 +446,7 @@ router.get('/similarity', middlewares.checkToken, (req, res) => {
                         console.log(err);
                         res.status(500);
                         res.json(err);
+                        return;
                       }
                       console.log(data)
                       spotifyData.getSimilairity(data.avgFeatures, user.listeningData.avgFeatures, (data) => {
@@ -442,6 +461,7 @@ router.get('/similarity', middlewares.checkToken, (req, res) => {
                 console.log(err);
                 res.status(500);
                 res.json(err['response']);
+                return;
               })
             }
           //playlist
@@ -459,6 +479,7 @@ router.get('/similarity', middlewares.checkToken, (req, res) => {
                     console.log(err);
                     res.status(500);
                     res.json(err);
+                    return;
                   }
                   spotifyData.getSimilairity(data.avgFeatures, user.listeningData.avgFeatures, (data) => {
                     var similarity = null;
@@ -471,6 +492,7 @@ router.get('/similarity', middlewares.checkToken, (req, res) => {
                 console.log(err);
                 res.status(500);
                 res.json(err['response']);
+                return;
               })
             }
         })
@@ -486,6 +508,7 @@ router.get('/delete', (req, res) => {
   const songFeats = db.collection('song_feats');
   const featsDel = songFeats.drop((err, delOK) => {
     if (err) res.json(err);
+    return;
     if (delOK) res.json({delted: delOK});
   })
 });
