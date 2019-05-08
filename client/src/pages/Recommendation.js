@@ -94,6 +94,10 @@ class Recommendation extends Component {
     }
   }
 
+  handleRecClick = (song) => {
+    console.log(song);
+  }
+
   removeGenreFromSeeds(name) {
     let { seedItems } = this.state;
     seedItems = seedItems.filter(seedItem  => seedItem.name != name);
@@ -114,11 +118,22 @@ class Recommendation extends Component {
     let seedGenres = seedItems.filter(item => item.type === 'genre').map(genre => genre.name.toLowerCase());
     axios.post('/queries/recommend', { seedTracks, seedArtists, seedGenres }, { headers: { Authorization: `Bearer ${Cookies.get("cookie")}`}})
     .then(res => {
-      this.setState({
-        displayRecs: true,
-        currentTab: 'Songs',
-        recTracks: res.data
-      })
+      if (res.data && res.data.length > 0){
+        this.setState({
+          displayRecs: true,
+          currentTab: 'Songs',
+          recTracks: res.data,
+          err: null
+        })
+      }
+      else {
+        this.setState({
+          currentTab: 'Songs',
+          err: 'No Recommendations Available for Given Seeds',
+          seedItems: [],
+          recTracks: []
+        })
+      }
     })
     .catch(err => {
       this.setState({ err : err.toString() });
@@ -189,17 +204,18 @@ class Recommendation extends Component {
             { seedItems.length > 0 && (<>
               <Button className="rec-button" onClick={(e) => this.handleSubmitRec(e)}>Get Recs</Button>
             </>)}
-            { !!seedItems.length && (
-              <div className="playlist-container">
-                <Input onChange={this.setPlayListName} placeholder="my playlist..."></Input>
-                <Button onClick={() => this.savePlaylists()}> Save Playlists </Button>
-              </div>
+            { showRecs && (
+                <div className="playlist-container">
+                  <h4> Want to save these recommendations to your Spotify Account? </h4>
+                  <Input onChange={this.setPlayListName} placeholder="my playlist..."></Input>
+                  <Button onClick={() => this.savePlaylists()}> Save Playlists </Button>
+                </div>
             )}
           </div>
 
           <div className="content">
             <div className="tabs">
-              <h1> { !!err.length ? err: '' } </h1>
+              <h1> { err ? err: '' } </h1>
               <Tabs selectedIndex={tabs.indexOf(currentTab)}>
                 <TabList className="browse-headers">
                   <Tab onClick={() => this.setState({ currentTab: 'Songs' })} className={songTabStyles}> Songs </Tab>
@@ -215,7 +231,8 @@ class Recommendation extends Component {
                   />
                   { showRecs ? (<>
                     <h2> Recommendations </h2>
-                    <SongList songs={recTracks} />
+                    <Button onClick={() => this.setState({ showRecs : !showRecs, recTracks: [], seedItems: [], songResults: [], albumResults: [], artistResults: [], err: null   })}> Clear Recommendations </Button>
+                    <SongList songs={recTracks} handleClick={this.handleRecClick}  />
                   </>) : songResults.length > 0 ? (<>
                     <h2> {currentAlbum} </h2>
                     <SongList handleClick={this.handleSeedClick} songs={songResults} />
@@ -231,8 +248,8 @@ class Recommendation extends Component {
                   />
                   { showRecs ? (<>
                     <h2> Recommendations </h2>
-                    <Button onClick={() => this.setState({ showRecs : !showRecs })}> Go Back </Button>
-                    <SongList songs={recTracks} />
+                    <Button onClick={() => this.setState({ showRecs : !showRecs, recTracks: [], seedItems: [], songResults: [], albumResults: [], artistResults: [], err: null   })}> Clear Recommendations </Button>
+                    <SongList songs={recTracks} handleClick={this.handleRecClick}  />
                   </>) : artistResults.length > 0 ? (
                     <ArtistView handleClick={this.handleSeedClick} artists={artistResults}/>
                   ) : (
@@ -251,7 +268,8 @@ class Recommendation extends Component {
                   />
                   { showRecs ? (<>
                     <h2> Recommendations </h2>
-                    <SongList songs={recTracks} />
+                    <Button onClick={() => this.setState({ showRecs : !showRecs, recTracks: [], seedItems: [], songResults: [], albumResults: [], artistResults: [], err: null  })}> Clear Recommendations </Button>
+                    <SongList songs={recTracks} handleClick={this.handleRecClick} />
                   </>) : albumResults.length > 0 ? (
                     <AlbumView handleClick={this.handleAlbumClick} albums={albumResults} />
                   ) : (

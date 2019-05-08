@@ -8,6 +8,7 @@ import Cookies from "js-cookie";
 import MediaQuery from 'react-responsive';
 import GenreImg from '../components/GenreImg'
 import { generateKeyPair } from 'crypto';
+import defaultAvatar from '../static/default.png';
 
 class Home extends Component {
   constructor(props){
@@ -33,6 +34,8 @@ class Home extends Component {
     this.state.data.map((item => {
       let trackImg = this.getUrl(item)
       let songNames = [], artistNames = [], genreNames =[];
+      let userAvatar = defaultAvatar;
+      if (item.userImages != null && item.userImages.length > 0 && item.userImages[0].url ) userAvatar = item.userImages[0].url
       if(item.reqBody.tracks != undefined){
         songNames = item.reqBody.tracks.map((item => item.artists[0].name + " - " + item.name))
       }
@@ -48,7 +51,7 @@ class Home extends Component {
           artists={artistNames}
           song={songNames}
           user={item.username}
-          userAvatar={''}
+          userAvatar={userAvatar}
           queryType={item.queryType}
           trackImg={trackImg}
           time={this.thyme(item)}
@@ -79,13 +82,26 @@ class Home extends Component {
   }
 
   thyme = (item) => {
+    let date = item.timeOfQuery;
+    //if (date[date.length - 1] == 'Z') date = date.substring(0,date.length - 1)
+    var d = new Date(date);
+    console.log(d);
+    let pm = false
+    let minutes = d.getMinutes();
+    let hour = d.getHours();
+    if (hour >= 12) pm = true;
+    if (hour > 12) hour = hour % 12;
+    if (hour == 0) hour = 12;
+    if (minutes < 10) minutes = '0' + minutes;
+    return `${hour}:${minutes} ${pm ? 'PM' : 'AM'}`
+    /*
     let catchHalf = item.timeOfQuery.substring(11,13) > 12 ? // figures out AM or PM
       ((item.timeOfQuery.substring(11,13))-12 + item.timeOfQuery.substring(13,16)+ ' ' +'PM') :
       (item.timeOfQuery.substring(11,16) + ' ' +'AM')
     let catchNoon = catchHalf.substring(0,2) == 12 ? (catchHalf.substring(0,5) + ' ' + 'PM') : (catchHalf)
     let catchMidnight = catchNoon.substring(0,2) == 0 ? ('12' + catchNoon.substring(2,5) + ' ' + 'AM') : (catchNoon)
     let catchZero = catchMidnight[0] == 0 ?(catchMidnight.substring(1)) : catchMidnight // takes out 0 -> 03:21 -> 3:21
-    return catchZero;
+    return catchZero;*/
   }
 
   render() {
