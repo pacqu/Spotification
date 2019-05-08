@@ -55,60 +55,74 @@ class DataVisualizations extends Component {
 		const { data }  = this.props;
 		if (!(data.listeningData)) this.spotifyData();
     else {
-      let array = Object.entries(
-        data.listeningData.avgFeatures
-      ).filter(item => item[0] !== "duration_ms");
-			//Filtering for first bar graph
-			let bar1array = Object.entries(
-	       data.listeningData.avgFeatures
-	     ).filter(item =>
-				item[0] !== "duration_ms"
-				&& item[0] !== "mode"
-				&& item[0] !== "acousticness"
-				&& item[0] !== "danceability"
-				&& item[0] !== "energy"
-				&& item[0] !== "liveness"
-				&& item[0] !== "valence"
-				&& item[0] !== "instrumentalness"
-				&& item[0] !== "speechiness");
-				//Filtering for radar
-			let radarArray = Object.entries(
-				data.listeningData.avgFeatures
-			).filter(item =>
-				item[0] !== "duration_ms"
-				&& item[0] !== "key"
-				&& item[0] !== "mode"
-				&& item[0] !== "time_signature"
-				&& item[0] !== "instrumentalness"
-				&& item[0] !== "loudness"
-				&& item[0] !== "speechiness"
-				&& item[0] !== "popularity"
-				&& item[0] !== "tempo");
-				//Filtering for second bar graph (horizontal bar graph)
-			let bar2array = Object.entries(
-	       data.listeningData.avgFeatures
-	     ).filter(item =>
-				item[0] !== "duration_ms"
-				&& item[0] !== "key"
-				&& item[0] !== "mode"
-				&& item[0] !== "time_signature"
-				&& item[0] !== "acousticness"
-				&& item[0] !== "danceability"
-				&& item[0] !== "energy"
-				&& item[0] !== "liveness"
-				&& item[0] !== "valence"
-				&& item[0] !== "loudness"
-				&& item[0] !== "popularity"
-				&& item[0] !== "tempo");
-      this.setState({
-				bar1FeaturesName: bar1array.map(item => item[0]),
-        bar1FeaturesValue: bar1array.map(item => item[1]),
-				bar2FeaturesName: bar2array.map(item => item[0]),
-        bar2FeaturesValue: bar2array.map(item => item[1]),
-				radarFeaturesName: radarArray.map(item => item[0]),
-				radarFeaturesValue: radarArray.map(item => item[1]),
-        loadingDone: true
-      });
+			if (Object.keys(data.listeningData).length > 0) {
+				let array = Object.entries(
+	        data.listeningData.avgFeatures
+	      ).filter(item => item[0] !== "duration_ms");
+				//Filtering for first bar graph
+				let bar1array = Object.entries(
+		       data.listeningData.avgFeatures
+		     ).filter(item =>
+					item[0] !== "duration_ms"
+					&& item[0] !== "mode"
+					&& item[0] !== "acousticness"
+					&& item[0] !== "danceability"
+					&& item[0] !== "energy"
+					&& item[0] !== "liveness"
+					&& item[0] !== "valence"
+					&& item[0] !== "instrumentalness"
+					&& item[0] !== "speechiness");
+					//Filtering for radar
+				let radarArray = Object.entries(
+					data.listeningData.avgFeatures
+				).filter(item =>
+					item[0] !== "duration_ms"
+					&& item[0] !== "key"
+					&& item[0] !== "mode"
+					&& item[0] !== "time_signature"
+					&& item[0] !== "instrumentalness"
+					&& item[0] !== "loudness"
+					&& item[0] !== "speechiness"
+					&& item[0] !== "popularity"
+					&& item[0] !== "tempo");
+					//Filtering for second bar graph (horizontal bar graph)
+				let bar2array = Object.entries(
+		       data.listeningData.avgFeatures
+		     ).filter(item =>
+					item[0] !== "duration_ms"
+					&& item[0] !== "key"
+					&& item[0] !== "mode"
+					&& item[0] !== "time_signature"
+					&& item[0] !== "acousticness"
+					&& item[0] !== "danceability"
+					&& item[0] !== "energy"
+					&& item[0] !== "liveness"
+					&& item[0] !== "valence"
+					&& item[0] !== "loudness"
+					&& item[0] !== "popularity"
+					&& item[0] !== "tempo");
+	      this.setState({
+					bar1FeaturesName: bar1array.map(item => item[0]),
+	        bar1FeaturesValue: bar1array.map(item => item[1]),
+					bar2FeaturesName: bar2array.map(item => item[0]),
+	        bar2FeaturesValue: bar2array.map(item => item[1]),
+					radarFeaturesName: radarArray.map(item => item[0]),
+					radarFeaturesValue: radarArray.map(item => item[1]),
+	        loadingDone: true
+	      });
+			}
+      else {
+				this.setState({
+					bar1FeaturesName: [],
+	        bar1FeaturesValue: [],
+					bar2FeaturesName: [],
+	        bar2FeaturesValue: [],
+					radarFeaturesName: [],
+					radarFeaturesValue: [],
+	        loadingDone: true,
+					err: "You don't have any listening data, so Visualizations won't work as expected! Get to some tunes, stat!"
+	      });
+			}
       //console.log(Object.entries(data));
     }
 	}
@@ -311,17 +325,27 @@ class DataVisualizations extends Component {
       headers: { Authorization: "Bearer " + Cookies.get("cookie") }
     })
     .then(res => {
-      let array = Object.entries(
-        res.data[0].listeningData.avgFeatures
-      ).filter(item => item[0] !== "duration_ms");
-      this.setState({
-        userFeaturesName: array.map(item => item[0]),
-        userFeaturesValue: array.map(item => item[1]),
-        topSongs: Object.entries(res.data[0].listeningData.songs).map(
-          item => item[1].name
-        ),
-        loadingDone: true
-      });
+			if (res.data[0].listeningData && Object.keys(res.data[0].listeningData).length > 0){
+				let array = Object.entries(
+	        res.data[0].listeningData.avgFeatures
+	      ).filter(item => item[0] !== "duration_ms");
+	      this.setState({
+	        userFeaturesName: array.map(item => item[0]),
+	        userFeaturesValue: array.map(item => item[1]),
+	        topSongs: Object.entries(res.data[0].listeningData.songs).map(
+	          item => item[1].name
+	        ),
+	        loadingDone: true
+	      });
+			}
+			else {
+				this.setState({
+	        userFeaturesName: [],
+	        userFeaturesValue: [],
+	        topSongs: [],
+	        loadingDone: true
+	      });
+			}
     });
   };
 
@@ -329,7 +353,7 @@ class DataVisualizations extends Component {
     const { data, location } = this.props;
 		const { currentTab, results, displayRecs, recTracks, seedTracks,currentAlbum,
 		albumResults,
-		artistResults, } = this.state;
+		artistResults, err } = this.state;
     const { username } = data;
 
 		const songTabStyles = classNames('tab', { 'active': currentTab === 'Songs' })
@@ -356,6 +380,7 @@ class DataVisualizations extends Component {
 					</>)}
           </div>
           <div className="content">
+						<h3> { err ? err: '' } </h3>
 					<div className="tabs">
 						<Tabs selectedIndex={tabs.indexOf(currentTab)}>
 						<TabList className="browse-headers">
