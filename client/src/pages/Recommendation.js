@@ -122,13 +122,16 @@ class Recommendation extends Component {
         this.setState({
           displayRecs: true,
           currentTab: 'Songs',
-          recTracks: res.data
+          recTracks: res.data,
+          err: null
         })
       }
       else {
         this.setState({
           currentTab: 'Songs',
-          err: 'No Recommendations Available for Given Seeds'
+          err: 'No Recommendations Available for Given Seeds',
+          seedItems: [],
+          recTracks: []
         })
       }
     })
@@ -201,17 +204,18 @@ class Recommendation extends Component {
             { seedItems.length > 0 && (<>
               <Button className="rec-button" onClick={(e) => this.handleSubmitRec(e)}>Get Recs</Button>
             </>)}
-            { !!seedItems.length && (
-              <div className="playlist-container">
-                <Input onChange={this.setPlayListName} placeholder="my playlist..."></Input>
-                <Button onClick={() => this.savePlaylists()}> Save Playlists </Button>
-              </div>
+            { showRecs && (
+                <div className="playlist-container">
+                  <h4> Want to save these recommendations to your Spotify Account? </h4>
+                  <Input onChange={this.setPlayListName} placeholder="my playlist..."></Input>
+                  <Button onClick={() => this.savePlaylists()}> Save Playlists </Button>
+                </div>
             )}
           </div>
 
           <div className="content">
             <div className="tabs">
-              <h1> { !!err.length ? err: '' } </h1>
+              <h1> { err ? err: '' } </h1>
               <Tabs selectedIndex={tabs.indexOf(currentTab)}>
                 <TabList className="browse-headers">
                   <Tab onClick={() => this.setState({ currentTab: 'Songs' })} className={songTabStyles}> Songs </Tab>
@@ -227,7 +231,7 @@ class Recommendation extends Component {
                   />
                   { showRecs ? (<>
                     <h2> Recommendations </h2>
-                    <Button onClick={() => this.setState({ showRecs : !showRecs, recTracks: [], seedItems: []  })}> Clear Recommendations </Button>
+                    <Button onClick={() => this.setState({ showRecs : !showRecs, recTracks: [], seedItems: [], songResults: [], albumResults: [], artistResults: [], err: null   })}> Clear Recommendations </Button>
                     <SongList songs={recTracks} handleClick={this.handleRecClick}  />
                   </>) : songResults.length > 0 ? (<>
                     <h2> {currentAlbum} </h2>
@@ -244,7 +248,7 @@ class Recommendation extends Component {
                   />
                   { showRecs ? (<>
                     <h2> Recommendations </h2>
-                    <Button onClick={() => this.setState({ showRecs : !showRecs, recTracks: [], seedItems: []  })}> Clear Recommendations </Button>
+                    <Button onClick={() => this.setState({ showRecs : !showRecs, recTracks: [], seedItems: [], songResults: [], albumResults: [], artistResults: [], err: null   })}> Clear Recommendations </Button>
                     <SongList songs={recTracks} handleClick={this.handleRecClick}  />
                   </>) : artistResults.length > 0 ? (
                     <ArtistView handleClick={this.handleSeedClick} artists={artistResults}/>
@@ -264,7 +268,7 @@ class Recommendation extends Component {
                   />
                   { showRecs ? (<>
                     <h2> Recommendations </h2>
-                    <Button onClick={() => this.setState({ showRecs : !showRecs, recTracks: [], seedItems: []  })}> Clear Recommendations </Button>
+                    <Button onClick={() => this.setState({ showRecs : !showRecs, recTracks: [], seedItems: [], songResults: [], albumResults: [], artistResults: [], err: null  })}> Clear Recommendations </Button>
                     <SongList songs={recTracks} handleClick={this.handleRecClick} />
                   </>) : albumResults.length > 0 ? (
                     <AlbumView handleClick={this.handleAlbumClick} albums={albumResults} />
