@@ -5,8 +5,8 @@ const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
 // Configurations
-const url = 'mongodb://localhost:27017';
-const dbName = 'spotification';
+const url = process.env.PORT ? 'mongodb://heroku_gc3b483w:ns4reliqr5p6ae2ti3mv4bdihv@ds149806.mlab.com:49806/':'mongodb://localhost:27017';
+const dbName = process.env.PORT ? 'heroku_gc3b483w':'spotification';
 
 // Create a new MongoClient
 const client = new MongoClient(url);

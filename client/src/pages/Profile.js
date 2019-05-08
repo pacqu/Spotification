@@ -90,7 +90,7 @@ class Profile extends Component {
   render() {
     const { profileData, err, redirectHome } = this.state;
     const { listeningData, images } = profileData;
-    const { data, location, profileName } = this.props;
+    const { data, location } = this.props;
     const { username } = data;
     const profileName = profileData.username;
 
