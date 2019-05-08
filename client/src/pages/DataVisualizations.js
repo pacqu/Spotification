@@ -442,7 +442,7 @@ class DataVisualizations extends Component {
 							)}
 						</TabPanel>
 						<TabPanel>
-							<p>Compare your listening patterns to Spotify-wide users</p>
+							<p>Compare your Listening Patterns to The Most Popular Songs on Spotify</p>
 							<Chart title="Musical Elements">
 								<div className="content">
 									<DoubleBarGraph
